@@ -19,8 +19,8 @@ class MyApp extends StatelessWidget {
         ),
         body: ReorderableStaggeredGridView(
           crossAxisCount: Constants.crossAxisCount,
-          mainAxisSpacing: Constants.spacing,
-          crossAxisSpacing: Constants.spacing,
+          // mainAxisSpacing: Constants.spacing,
+          // crossAxisSpacing: Constants.spacing,
           isLongPressDraggable: false,
           items: Constants.staggeredGridViewItems,
         ),

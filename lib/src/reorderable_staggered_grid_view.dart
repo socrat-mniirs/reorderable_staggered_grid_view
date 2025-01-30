@@ -47,14 +47,40 @@ class _ReorderableStaggeredGridViewState
 
       // ITEMS
       itemCount: widget.items.length,
-      itemBuilder: (context, index) => DraggableGridItem(
-        onAcceptWithDetails: (details) {},
-        onWillAcceptWithDetails: (details) {
-          return true;
-        },
-        isLongPressDraggable: widget.isLongPressDraggable,
-        item: widget.items[index],
-      ),
+      itemBuilder: (context, index) {
+        final item = widget.items[index];
+        final itemKey = GlobalKey();
+
+        final dragChild = DraggableGridItem(
+          key: itemKey,
+          item: item,
+        );
+
+        return widget.isLongPressDraggable
+
+            // Long press
+            ? LongPressDraggable(
+                data: item.data,
+                feedback: FeedbackWidget(
+                  parentKey: itemKey,
+                  child: item.child,
+                ),
+                dragAnchorStrategy: pointerDragAnchorStrategy,
+                childWhenDragging: const SizedBox.shrink(),
+                child: dragChild,
+              )
+
+            // Default
+            : Draggable(
+                data: item.data,
+                feedback: FeedbackWidget(
+                  parentKey: itemKey,
+                  child: item.child,
+                ),
+                childWhenDragging: const SizedBox.shrink(),
+                child: dragChild,
+              );
+      },
     );
   }
 }
