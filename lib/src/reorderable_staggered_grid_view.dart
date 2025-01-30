@@ -7,6 +7,10 @@ class ReorderableStaggeredGridView extends StatefulWidget {
   final int crossAxisCount;
   final double mainAxisSpacing;
   final double crossAxisSpacing;
+
+  /// The scroll controller for the scroll view
+  final ScrollController? controller;
+  
   final List<StaggeredGridViewItem> items;
   final bool isLongPressDraggable;
 
@@ -17,6 +21,7 @@ class ReorderableStaggeredGridView extends StatefulWidget {
     required this.isLongPressDraggable,
     this.mainAxisSpacing = 0,
     this.crossAxisSpacing = 0,
+    this.controller,
   });
 
   @override
@@ -26,9 +31,80 @@ class ReorderableStaggeredGridView extends StatefulWidget {
 
 class _ReorderableStaggeredGridViewState
     extends State<ReorderableStaggeredGridView> {
+  late final ScrollController _scrollController;
+
+  double _dragY = 0;
+  bool _isAutoScrolling = false;
+
+  @override
+  void initState() {
+    _scrollController = widget.controller ?? ScrollController();
+    super.initState();
+  }
+
+  // ========== AUTO-SCROLL METHODS ==========
+
+  /// Refresh the Y-position relative to scroll
+
+  void _onDragUpdate(DragUpdateDetails details) {
+    _dragY = details.globalPosition.dy;
+    _checkAutoScroll();
+  }
+
+  /// Start/stop auto-scroll and selecting the auth-scroll direction
+
+  void _checkAutoScroll() {
+    final gridHeight = (context.findRenderObject() as RenderBox).size.height;
+    const scrollThreshold = 25.0;
+
+    // Up
+    if (_dragY < scrollThreshold) {
+      _startAutoScroll(up: true);
+    }
+    // Down
+    else if (_dragY > gridHeight - scrollThreshold) {
+      _startAutoScroll(up: false);
+    }
+    // Stop
+    else {
+      _stopAutoScroll();
+    }
+  }
+
+  /// Start auto-scroll
+
+  void _startAutoScroll({required bool up}) {
+    if (_isAutoScrolling) return;
+    _isAutoScrolling = true;
+
+    Future.doWhile(
+      () async {
+        if (!_isAutoScrolling) return false;
+        if (_scrollController.position.outOfRange) return false;
+
+        await _scrollController.animateTo(
+          _scrollController.offset + (up ? -50 : 50),
+          duration: const Duration(milliseconds: 100),
+          curve: Curves.linear,
+        );
+
+        return _isAutoScrolling;
+      },
+    );
+  }
+
+  /// Stop auto-scroll
+
+  void _stopAutoScroll() => _isAutoScrolling = false;
+
+  /// ====================
+
   @override
   Widget build(BuildContext context) {
     return StaggeredGridView.countBuilder(
+      // Scroll
+      controller: _scrollController,
+
       // UI PARAMS
       padding: EdgeInsets.all(20),
       crossAxisCount: widget.crossAxisCount,
@@ -60,6 +136,8 @@ class _ReorderableStaggeredGridViewState
 
             // Long press
             ? LongPressDraggable(
+                onDragUpdate: _onDragUpdate,
+                onDragEnd: (_) => _stopAutoScroll(),
                 data: item.data,
                 feedback: FeedbackWidget(
                   parentKey: itemKey,
@@ -72,6 +150,8 @@ class _ReorderableStaggeredGridViewState
 
             // Default
             : Draggable(
+                onDragUpdate: _onDragUpdate,
+                onDragEnd: (_) => _stopAutoScroll(),
                 data: item.data,
                 feedback: FeedbackWidget(
                   parentKey: itemKey,
