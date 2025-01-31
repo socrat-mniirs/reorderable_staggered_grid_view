@@ -37,12 +37,14 @@ class ReorderableStaggeredGridView extends StatefulWidget {
 class _ReorderableStaggeredGridViewState
     extends State<ReorderableStaggeredGridView> {
   late final ScrollController _scrollController;
+  late List<StaggeredGridViewItem> items;
 
   double _dragY = 0;
   bool _isAutoScrolling = false;
 
   @override
   void initState() {
+    items = widget.items;
     _scrollController = widget.controller ?? ScrollController();
     super.initState();
   }
@@ -118,7 +120,7 @@ class _ReorderableStaggeredGridViewState
 
       // CELL SIZE
       staggeredTileBuilder: (index) {
-        final item = widget.items[index];
+        final item = items[index];
 
         return StaggeredTile.count(
           item.crossAxisCellCount,
@@ -127,35 +129,40 @@ class _ReorderableStaggeredGridViewState
       },
 
       // ITEMS
-      itemCount: widget.items.length,
+      itemCount: items.length,
       itemBuilder: (context, index) {
+        final item = items[index];
+
         return AnimatedSwitcher(
           duration: Duration(seconds: 1),
+          reverseDuration: Duration.zero,
           transitionBuilder: (child, animation) {
             return SlideTransition(
               position: Tween<Offset>(
-                begin: Offset(0, 1), 
-                end: Offset.zero, 
+                begin: Offset(0, 1),
+                end: Offset.zero,
               ).animate(animation),
               child: child,
             );
           },
           child: DraggableGridItem(
-            key: widget.items[index].key,
-            item: widget.items[index],
+            key: ObjectKey(item),
+            item: item,
             isLongPressDraggable: widget.isLongPressDraggable,
             onDragUpdate: _onDragUpdate,
             onDragEnd: (_) => _stopAutoScroll(),
             onWillAcceptWithDetails: (details) {
-              return details.data != widget.items[index].data;
+              return details.data != item.data;
             },
             onAcceptWithDetails: (details) {
               final draggedItem = widget.items.firstWhere(
                 (el) => el.data == details.data,
               );
 
-              widget.items.remove(draggedItem);
-              widget.items.insert(index, draggedItem);
+              items.remove(draggedItem);
+              items.insert(index, draggedItem);
+
+              items = List.of(items);
 
               setState(() {});
             },
