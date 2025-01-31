@@ -117,28 +117,28 @@ class _ReorderableStaggeredGridViewState
     return StaggeredGridView.countBuilder(
       // Scroll
       controller: _scrollController,
-
+    
       // UI PARAMS
       padding: widget.padding,
       crossAxisCount: widget.crossAxisCount,
       mainAxisSpacing: widget.mainAxisSpacing,
       crossAxisSpacing: widget.crossAxisSpacing,
-
+    
       // CELL SIZE
       staggeredTileBuilder: (index) {
         final item = items[index];
-
+    
         return StaggeredTile.count(
           item.crossAxisCellCount,
           item.mainAxisCellCount.toDouble(),
         );
       },
-
+    
       // ITEMS
       itemCount: items.length,
       itemBuilder: (context, index) {
         final item = items[index];
-
+    
         return AnimatedSwitcher(
           duration: Duration(milliseconds: 150),
           reverseDuration: Duration.zero,
@@ -156,10 +156,10 @@ class _ReorderableStaggeredGridViewState
                     animation.status != AnimationStatus.completed) {
               return draggingItem != null ? const SizedBox.shrink() : child;
             }
-
+    
             final mainAxisOffsetCoef = 1 / item.mainAxisCellCount;
             final crossAxisOffsetCoef = 1 / item.crossAxisCellCount;
-
+    
             return SlideTransition(
               position: Tween<Offset>(
                 begin: Offset(
@@ -182,20 +182,24 @@ class _ReorderableStaggeredGridViewState
                 (el) => el.data == details.data,
               );
               beingDraggedItem = draggingItem;
-
+    
+              if (_isAutoScrolling) return false;
+    
+              if (details.data == item.data) return false;
+    
               // items.remove(draggingItem);
               // items.insert(index, draggingItem!);
-
+    
               // setState(() {});
-
-              return details.data != item.data;
+    
+              return true;
             },
             onAcceptWithDetails: (details) {
               assert(draggingItem != null);
-
+    
               items.remove(draggingItem);
               items.insert(index, draggingItem!);
-
+    
               setState(() {
                 draggingItem = null;
               });

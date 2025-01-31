@@ -47,6 +47,10 @@ class _DraggableGridItemState extends State<DraggableGridItem> {
         widget.onAcceptWithDetails?.call(details);
       },
       onLeave: (data) {
+        if (data == widget.item.data) {
+          return;
+        }
+
         setState(() {
           offset -= Offset(50, 50);
         });
