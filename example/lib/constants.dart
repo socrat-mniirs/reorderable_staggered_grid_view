@@ -9,10 +9,11 @@ abstract class Constants {
 
   static const spacing = 10.0;
 
-  static List<StaggeredGridViewItem> get staggeredGridViewItems =>
+  static final List<StaggeredGridViewItem> staggeredGridViewItems =
       List.generate(
         100,
         (index) => StaggeredGridViewItem(
+          key: ValueKey(index),
           data: index.toString(),
           mainAxisCellCount: Random().nextInt(2) + 1,
           crossAxisCellCount: Random().nextInt(2) + 1,

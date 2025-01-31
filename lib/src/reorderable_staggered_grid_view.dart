@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:staggered_grid_view/flutter_staggered_grid_view.dart';
 
 import '../reorderable_staggered_grid_view.dart';
+import 'widgets/draggable_grid_item.dart';
 
 class ReorderableStaggeredGridView extends StatefulWidget {
   final int crossAxisCount;
@@ -10,9 +11,12 @@ class ReorderableStaggeredGridView extends StatefulWidget {
 
   /// The scroll controller for the scroll view
   final ScrollController? controller;
-  
+
   final List<StaggeredGridViewItem> items;
   final bool isLongPressDraggable;
+
+  /// A callback when an item is accepted during a drag operation with drag target details.
+  final void Function(DragTargetDetails details)? onAcceptWithDetails;
 
   const ReorderableStaggeredGridView({
     super.key,
@@ -22,6 +26,7 @@ class ReorderableStaggeredGridView extends StatefulWidget {
     this.mainAxisSpacing = 0,
     this.crossAxisSpacing = 0,
     this.controller,
+    this.onAcceptWithDetails,
   });
 
   @override
@@ -97,7 +102,7 @@ class _ReorderableStaggeredGridViewState
 
   void _stopAutoScroll() => _isAutoScrolling = false;
 
-  /// ====================
+  /// ========================================
 
   @override
   Widget build(BuildContext context) {
@@ -124,42 +129,38 @@ class _ReorderableStaggeredGridViewState
       // ITEMS
       itemCount: widget.items.length,
       itemBuilder: (context, index) {
-        final item = widget.items[index];
-        final itemKey = GlobalKey();
-
-        final dragChild = DraggableGridItem(
-          key: itemKey,
-          item: item,
-        );
-
-        return widget.isLongPressDraggable
-
-            // Long press
-            ? LongPressDraggable(
-                onDragUpdate: _onDragUpdate,
-                onDragEnd: (_) => _stopAutoScroll(),
-                data: item.data,
-                feedback: FeedbackWidget(
-                  parentKey: itemKey,
-                  child: item.child,
-                ),
-                dragAnchorStrategy: pointerDragAnchorStrategy,
-                childWhenDragging: const SizedBox.shrink(),
-                child: dragChild,
-              )
-
-            // Default
-            : Draggable(
-                onDragUpdate: _onDragUpdate,
-                onDragEnd: (_) => _stopAutoScroll(),
-                data: item.data,
-                feedback: FeedbackWidget(
-                  parentKey: itemKey,
-                  child: item.child,
-                ),
-                childWhenDragging: const SizedBox.shrink(),
-                child: dragChild,
+        return AnimatedSwitcher(
+          duration: Duration(seconds: 1),
+          transitionBuilder: (child, animation) {
+            return SlideTransition(
+              position: Tween<Offset>(
+                begin: Offset(0, 1), 
+                end: Offset.zero, 
+              ).animate(animation),
+              child: child,
+            );
+          },
+          child: DraggableGridItem(
+            key: widget.items[index].key,
+            item: widget.items[index],
+            isLongPressDraggable: widget.isLongPressDraggable,
+            onDragUpdate: _onDragUpdate,
+            onDragEnd: (_) => _stopAutoScroll(),
+            onWillAcceptWithDetails: (details) {
+              return details.data != widget.items[index].data;
+            },
+            onAcceptWithDetails: (details) {
+              final draggedItem = widget.items.firstWhere(
+                (el) => el.data == details.data,
               );
+
+              widget.items.remove(draggedItem);
+              widget.items.insert(index, draggedItem);
+
+              setState(() {});
+            },
+          ),
+        );
       },
     );
   }
