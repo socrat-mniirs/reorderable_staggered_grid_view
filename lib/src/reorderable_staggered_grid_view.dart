@@ -9,6 +9,8 @@ class ReorderableStaggeredGridView extends StatefulWidget {
   final double mainAxisSpacing;
   final double crossAxisSpacing;
 
+  final EdgeInsets? padding;
+
   /// The scroll controller for the scroll view
   final ScrollController? controller;
 
@@ -23,6 +25,7 @@ class ReorderableStaggeredGridView extends StatefulWidget {
     required this.items,
     required this.crossAxisCount,
     required this.isLongPressDraggable,
+    this.padding,
     this.mainAxisSpacing = 0,
     this.crossAxisSpacing = 0,
     this.controller,
@@ -113,7 +116,7 @@ class _ReorderableStaggeredGridViewState
       controller: _scrollController,
 
       // UI PARAMS
-      padding: EdgeInsets.all(20),
+      padding: widget.padding,
       crossAxisCount: widget.crossAxisCount,
       mainAxisSpacing: widget.mainAxisSpacing,
       crossAxisSpacing: widget.crossAxisSpacing,
@@ -137,9 +140,15 @@ class _ReorderableStaggeredGridViewState
           duration: Duration(seconds: 1),
           reverseDuration: Duration.zero,
           transitionBuilder: (child, animation) {
+            final mainAxisOffsetCoef = 1 / item.mainAxisCellCount;
+            final crossAxisOffsetCoef = 1 / item.crossAxisCellCount;
+
             return SlideTransition(
               position: Tween<Offset>(
-                begin: Offset(0, 1),
+                begin: Offset(
+                  1 * crossAxisOffsetCoef,
+                  1 * mainAxisOffsetCoef,
+                ),
                 end: Offset.zero,
               ).animate(animation),
               child: child,
