@@ -45,6 +45,9 @@ class _ReorderableStaggeredGridViewState
   double _dragY = 0;
   bool _isAutoScrolling = false;
 
+  StaggeredGridViewItem? draggingItem;
+  StaggeredGridViewItem? beingDraggedItem;
+
   @override
   void initState() {
     items = widget.items;
@@ -137,16 +140,30 @@ class _ReorderableStaggeredGridViewState
         final item = items[index];
 
         return AnimatedSwitcher(
-          duration: Duration(seconds: 1),
+          duration: Duration(milliseconds: 150),
           reverseDuration: Duration.zero,
           transitionBuilder: (child, animation) {
+            if (
+                // Cancel unnecessary repaints when first
+                beingDraggedItem != null
+                    // Check if objects are equal
+                    &&
+                    ((child.key as ObjectKey).value as StaggeredGridViewItem)
+                            .key ==
+                        beingDraggedItem?.key
+                    // Check animation duplicates
+                    &&
+                    animation.status != AnimationStatus.completed) {
+              return draggingItem != null ? const SizedBox.shrink() : child;
+            }
+
             final mainAxisOffsetCoef = 1 / item.mainAxisCellCount;
             final crossAxisOffsetCoef = 1 / item.crossAxisCellCount;
 
             return SlideTransition(
               position: Tween<Offset>(
                 begin: Offset(
-                  1 * crossAxisOffsetCoef,
+                  0 * crossAxisOffsetCoef,
                   1 * mainAxisOffsetCoef,
                 ),
                 end: Offset.zero,
@@ -161,19 +178,27 @@ class _ReorderableStaggeredGridViewState
             onDragUpdate: _onDragUpdate,
             onDragEnd: (_) => _stopAutoScroll(),
             onWillAcceptWithDetails: (details) {
+              draggingItem = items.firstWhere(
+                (el) => el.data == details.data,
+              );
+              beingDraggedItem = draggingItem;
+
+              // items.remove(draggingItem);
+              // items.insert(index, draggingItem!);
+
+              // setState(() {});
+
               return details.data != item.data;
             },
             onAcceptWithDetails: (details) {
-              final draggedItem = widget.items.firstWhere(
-                (el) => el.data == details.data,
-              );
+              assert(draggingItem != null);
 
-              items.remove(draggedItem);
-              items.insert(index, draggedItem);
+              items.remove(draggingItem);
+              items.insert(index, draggingItem!);
 
-              items = List.of(items);
-
-              setState(() {});
+              setState(() {
+                draggingItem = null;
+              });
             },
           ),
         );
