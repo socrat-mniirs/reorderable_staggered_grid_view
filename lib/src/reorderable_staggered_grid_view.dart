@@ -21,6 +21,13 @@ class ReorderableStaggeredGridView extends StatefulWidget {
   /// Is dragging enabled or not
   final bool enable;
 
+  /// A callback when an item is accepted during a drag operation with drag target details
+  final void Function(DragTargetDetails details)? onAcceptWithDetails;
+
+  /// A callback to custom building a feedback widget
+  final Widget Function(BuildContext context, Widget child)?
+      buildFeedbackWidget;
+
   /// Animation duration
   final Duration duration;
 
@@ -29,9 +36,6 @@ class ReorderableStaggeredGridView extends StatefulWidget {
 
   /// The [animationOffset] animation duration
   final Duration offsetDuration;
-
-  /// A callback when an item is accepted during a drag operation with drag target details
-  final void Function(DragTargetDetails details)? onAcceptWithDetails;
 
   /// The animation offset when dragging widget over another item
   final Offset animationOffset;
@@ -51,6 +55,7 @@ class ReorderableStaggeredGridView extends StatefulWidget {
     this.reverseDuration = Duration.zero,
     this.offsetDuration = const Duration(milliseconds: 200),
     this.animationOffset = const Offset(50, 50),
+    this.buildFeedbackWidget,
   });
 
   @override
@@ -246,6 +251,9 @@ class _ReorderableStaggeredGridViewState
 
               setState(() => draggingItem = null);
             },
+
+            // Feedback widget
+            buildFeedbackWidget: widget.buildFeedbackWidget,
 
             // Child
             item: item,

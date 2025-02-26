@@ -25,6 +25,9 @@ class DraggableGridItem extends StatefulWidget {
   /// The [animationOffset] animation duration
   final Duration offsetDuration;
 
+  final Widget Function(BuildContext context, Widget child)?
+      buildFeedbackWidget;
+
   final parentKey = GlobalKey();
 
   DraggableGridItem({
@@ -37,6 +40,7 @@ class DraggableGridItem extends StatefulWidget {
     this.onWillAcceptWithDetails,
     this.animationOffset = const Offset(50, 50),
     this.offsetDuration = const Duration(milliseconds: 200),
+    this.buildFeedbackWidget,
   });
 
   @override
@@ -80,17 +84,26 @@ class _DraggableGridItemState extends State<DraggableGridItem> {
       offset: offset,
       child: widget.isLongPressDraggable
 
-          // Long press
+          // ===== LONG PRESS =====
+
           ? LongPressDraggable(
               data: widget.item.key,
               onDragUpdate: widget.onDragUpdate,
               onDragEnd: widget.onDragEnd,
               dragAnchorStrategy: pointerDragAnchorStrategy,
               childWhenDragging: const SizedBox.shrink(),
-              feedback: FeedbackWidget(
-                parentKey: widget.parentKey,
-                child: widget.item.child,
-              ),
+              feedback: widget.buildFeedbackWidget == null
+                  ? FeedbackWidget(
+                      parentKey: widget.parentKey,
+                      child: widget.item.child,
+                    )
+                  : widget.buildFeedbackWidget!(
+                      context,
+                      FeedbackWidget(
+                        parentKey: widget.parentKey,
+                        child: widget.item.child,
+                      ),
+                    ),
 
               // Child
               child: DragTargetGridItem(
@@ -102,16 +115,25 @@ class _DraggableGridItemState extends State<DraggableGridItem> {
               ),
             )
 
-          // Default
+          // ===== DEFAULT PRESS =====
+
           : Draggable(
               data: widget.item.key,
               onDragUpdate: widget.onDragUpdate,
               onDragEnd: widget.onDragEnd,
               childWhenDragging: const SizedBox.shrink(),
-              feedback: FeedbackWidget(
-                parentKey: widget.parentKey,
-                child: widget.item.child,
-              ),
+              feedback: widget.buildFeedbackWidget == null
+                  ? FeedbackWidget(
+                      parentKey: widget.parentKey,
+                      child: widget.item.child,
+                    )
+                  : widget.buildFeedbackWidget!(
+                      context,
+                      FeedbackWidget(
+                        parentKey: widget.parentKey,
+                        child: widget.item.child,
+                      ),
+                    ),
 
               // Child
               child: DragTargetGridItem(
