@@ -19,6 +19,12 @@ class DraggableGridItem extends StatefulWidget {
   final bool Function(DragTargetDetails<Object?> details)?
       onWillAcceptWithDetails;
 
+  /// The animation offset on [onWillAcceptWithDetails]
+  final Offset animationOffset;
+
+  /// The [animationOffset] animation duration
+  final Duration offsetDuration;
+
   final parentKey = GlobalKey();
 
   DraggableGridItem({
@@ -29,6 +35,8 @@ class DraggableGridItem extends StatefulWidget {
     this.onDragEnd,
     this.onAcceptWithDetails,
     this.onWillAcceptWithDetails,
+    this.animationOffset = const Offset(50, 50),
+    this.offsetDuration = const Duration(milliseconds: 200),
   });
 
   @override
@@ -45,9 +53,7 @@ class _DraggableGridItemState extends State<DraggableGridItem> {
       return;
     }
 
-    setState(() {
-      offset -= Offset(50, 50);
-    });
+    setState(() => offset -= widget.animationOffset);
   }
 
   /// [_onWillAcceptWithDetails] - shifts the object, indicating that it is ready to replace another grid element
@@ -57,9 +63,7 @@ class _DraggableGridItemState extends State<DraggableGridItem> {
       return false;
     }
 
-    setState(() {
-      offset += Offset(50, 50);
-    });
+    setState(() => offset += widget.animationOffset);
 
     return widget.onWillAcceptWithDetails?.call(details) ?? true;
   }
@@ -72,7 +76,7 @@ class _DraggableGridItemState extends State<DraggableGridItem> {
   @override
   Widget build(BuildContext context) {
     return AnimatedOffset(
-      duration: Duration(milliseconds: 200),
+      duration: widget.offsetDuration,
       offset: offset,
       child: widget.isLongPressDraggable
 

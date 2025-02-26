@@ -8,13 +8,14 @@ class ReorderableStaggeredGridView extends StatefulWidget {
   final int crossAxisCount;
   final double mainAxisSpacing;
   final double crossAxisSpacing;
-
   final EdgeInsets? padding;
 
   /// The scroll controller for the scroll view
   final ScrollController? controller;
 
   final List<StaggeredGridViewItem> items;
+
+  /// Does it take a long press to drag
   final bool isLongPressDraggable;
 
   /// Is dragging enabled or not
@@ -26,8 +27,14 @@ class ReorderableStaggeredGridView extends StatefulWidget {
   /// Animation reverse duration
   final Duration reverseDuration;
 
-  /// A callback when an item is accepted during a drag operation with drag target details.
+  /// The [animationOffset] animation duration
+  final Duration offsetDuration;
+
+  /// A callback when an item is accepted during a drag operation with drag target details
   final void Function(DragTargetDetails details)? onAcceptWithDetails;
+
+  /// The animation offset when dragging widget over another item
+  final Offset animationOffset;
 
   const ReorderableStaggeredGridView({
     super.key,
@@ -42,6 +49,8 @@ class ReorderableStaggeredGridView extends StatefulWidget {
     this.enable = true,
     this.duration = const Duration(milliseconds: 150),
     this.reverseDuration = Duration.zero,
+    this.offsetDuration = const Duration(milliseconds: 200),
+    this.animationOffset = const Offset(50, 50),
   });
 
   @override
@@ -201,6 +210,10 @@ class _ReorderableStaggeredGridViewState
             // Auto-scroll
             onDragUpdate: _onDragUpdate,
             onDragEnd: (_) => _stopAutoScroll(),
+
+            // Offset when dragging over
+            animationOffset: widget.animationOffset,
+            offsetDuration: widget.offsetDuration,
 
             // Will accept
             onWillAcceptWithDetails: (details) {
