@@ -14,7 +14,7 @@ class ReorderableStaggeredGridView extends StatefulWidget {
   /// Spacing between elements in the main-axis
   final double mainAxisSpacing;
 
-  /// Spacing between elements in the cross-axis 
+  /// Spacing between elements in the cross-axis
   final double crossAxisSpacing;
 
   /// The scroll controller for the scroll view
@@ -95,12 +95,19 @@ class _ReorderableStaggeredGridViewState
     super.initState();
   }
 
-  // Update grid if children changed
+  // Update grid if items changed
   @override
   void didUpdateWidget(covariant ReorderableStaggeredGridView oldWidget) {
     if (oldWidget.items.length != widget.items.length ||
         widget.enable != oldWidget.enable) {
-      items = widget.items;
+      for (int i = 0; i < widget.items.length; i++) {
+        if (i >= items.length) {
+          items.add(widget.items[i]);
+        } else if (items[i].key != widget.items[i].key) {
+          items[i] = widget.items[i];
+        }
+      }
+
       return;
     }
 
