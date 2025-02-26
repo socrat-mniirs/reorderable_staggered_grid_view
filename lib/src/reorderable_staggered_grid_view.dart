@@ -25,7 +25,8 @@ class ReorderableStaggeredGridView extends StatefulWidget {
   final void Function(DragTargetDetails details)? onAcceptWithDetails;
 
   /// A callback to custom building a feedback widget
-  final Widget Function(BuildContext context, Widget child, GlobalKey originalWidgetKey)?
+  final Widget Function(
+          BuildContext context, Widget child, GlobalKey originalWidgetKey)?
       buildFeedbackWidget;
 
   /// Animation duration
@@ -72,7 +73,7 @@ class _ReorderableStaggeredGridViewState
   bool _isAutoScrolling = false;
 
   StaggeredGridViewItem? draggingItem;
-  StaggeredGridViewItem? beingDraggedItem;
+  StaggeredGridViewItem? lastDraggedItem;
 
   @override
   void initState() {
@@ -179,13 +180,14 @@ class _ReorderableStaggeredGridViewState
           transitionBuilder: (child, animation) {
             if (
                 // Cancel unnecessary repaints when first
-                beingDraggedItem != null
+                lastDraggedItem != null
                     // Check if objects are equal
                     &&
-                    item.key == beingDraggedItem?.key
+                    item.key == lastDraggedItem?.key
                     // Check animation duplicates
                     &&
                     animation.status != AnimationStatus.completed) {
+              lastDraggedItem = null;
               return draggingItem != null ? const SizedBox.shrink() : child;
             }
 
@@ -226,7 +228,7 @@ class _ReorderableStaggeredGridViewState
               draggingItem = items.firstWhere(
                 (el) => el.key == details.data,
               );
-              beingDraggedItem = draggingItem;
+              lastDraggedItem = draggingItem;
 
               if (_isAutoScrolling || details.data == item.key) return false;
 
