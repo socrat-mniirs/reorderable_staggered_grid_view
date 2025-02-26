@@ -20,6 +20,12 @@ class ReorderableStaggeredGridView extends StatefulWidget {
   /// Is dragging enabled or not
   final bool enable;
 
+  /// Animation duration
+  final Duration duration;
+
+  /// Animation reverse duration
+  final Duration reverseDuration;
+
   /// A callback when an item is accepted during a drag operation with drag target details.
   final void Function(DragTargetDetails details)? onAcceptWithDetails;
 
@@ -34,6 +40,8 @@ class ReorderableStaggeredGridView extends StatefulWidget {
     this.controller,
     this.onAcceptWithDetails,
     this.enable = true,
+    this.duration = const Duration(milliseconds: 150),
+    this.reverseDuration = Duration.zero,
   });
 
   @override
@@ -150,8 +158,8 @@ class _ReorderableStaggeredGridViewState
 
         return AnimatedSwitcher(
           // Duration
-          duration: Duration(milliseconds: 150),
-          reverseDuration: Duration.zero,
+          duration: widget.duration,
+          reverseDuration: widget.reverseDuration,
 
           // Animation
           transitionBuilder: (child, animation) {
@@ -160,9 +168,7 @@ class _ReorderableStaggeredGridViewState
                 beingDraggedItem != null
                     // Check if objects are equal
                     &&
-                    ((child.key as ObjectKey).value as StaggeredGridViewItem)
-                            .key ==
-                        beingDraggedItem?.key
+                    item.key == beingDraggedItem?.key
                     // Check animation duplicates
                     &&
                     animation.status != AnimationStatus.completed) {
@@ -186,19 +192,24 @@ class _ReorderableStaggeredGridViewState
 
           // Child
           child: DraggableGridItem(
+            // Required key to start animation
             key: ObjectKey(item),
+
+            // Is long press need
             isLongPressDraggable: widget.isLongPressDraggable,
+
+            // Auto-scroll
             onDragUpdate: _onDragUpdate,
             onDragEnd: (_) => _stopAutoScroll(),
+
+            // Will accept
             onWillAcceptWithDetails: (details) {
               draggingItem = items.firstWhere(
                 (el) => el.data == details.data,
               );
               beingDraggedItem = draggingItem;
 
-              if (_isAutoScrolling) return false;
-
-              if (details.data == item.data) return false;
+              if (_isAutoScrolling || details.data == item.data) return false;
 
               // TODO still in development
 
@@ -209,15 +220,17 @@ class _ReorderableStaggeredGridViewState
 
               return true;
             },
+
+            // Accept
             onAcceptWithDetails: (details) {
               assert(draggingItem != null);
+
+              widget.onAcceptWithDetails?.call(details);
 
               items.remove(draggingItem);
               items.insert(index, draggingItem!);
 
-              setState(() {
-                draggingItem = null;
-              });
+              setState(() => draggingItem = null);
             },
 
             // Child

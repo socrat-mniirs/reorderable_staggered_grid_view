@@ -18,9 +18,10 @@ class MyApp extends StatelessWidget {
           title: Text('Custom Reorderable Staggered Grid View'),
         ),
         body: ReorderableStaggeredGridView(
+          padding: EdgeInsets.all(20),
           crossAxisCount: Constants.crossAxisCount,
-          // mainAxisSpacing: Constants.spacing,
-          // crossAxisSpacing: Constants.spacing,
+          mainAxisSpacing: Constants.spacing,
+          crossAxisSpacing: Constants.spacing,
           isLongPressDraggable: false,
           items: Constants.staggeredGridViewItems,
         ),
