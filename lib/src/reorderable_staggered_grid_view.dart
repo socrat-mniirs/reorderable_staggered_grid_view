@@ -29,6 +29,9 @@ class ReorderableStaggeredGridView extends StatefulWidget {
           BuildContext context, Widget child, GlobalKey originalWidgetKey)?
       buildFeedbackWidget;
 
+  /// Keys of widgets which cannot be dragged
+  final List<Key> nonDraggableWidgetsKeys;
+
   /// Animation duration
   final Duration duration;
 
@@ -57,6 +60,7 @@ class ReorderableStaggeredGridView extends StatefulWidget {
     this.offsetDuration = const Duration(milliseconds: 200),
     this.animationOffset = const Offset(50, 50),
     this.buildFeedbackWidget,
+    this.nonDraggableWidgetsKeys = const [],
   });
 
   @override
@@ -97,7 +101,6 @@ class _ReorderableStaggeredGridViewState
         break;
       }
     }
-
 
     super.didUpdateWidget(oldWidget);
   }
@@ -186,8 +189,9 @@ class _ReorderableStaggeredGridViewState
       itemBuilder: (context, index) {
         final item = items[index];
 
-        // Check that the grid should not be dragged
-        if (!widget.enable) {
+        // Check that the grid or current item should not be dragged
+        if (!widget.enable ||
+            widget.nonDraggableWidgetsKeys.contains(item.key)) {
           return item.child;
         }
 

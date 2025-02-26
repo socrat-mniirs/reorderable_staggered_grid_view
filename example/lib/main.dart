@@ -24,6 +24,7 @@ class MyApp extends StatelessWidget {
           crossAxisSpacing: Constants.spacing,
           isLongPressDraggable: false,
           items: Constants.staggeredGridViewItems,
+          nonDraggableWidgetsKeys: [ValueKey(0)],
         ),
       ),
     );
