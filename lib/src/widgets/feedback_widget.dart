@@ -16,7 +16,7 @@ class FeedbackWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(parentKey.currentContext != null);
-    
+
     // Get initial sizes of the grid item widget
     final itemWidget =
         parentKey.currentContext?.findRenderObject() as RenderBox;
@@ -25,6 +25,7 @@ class FeedbackWidget extends StatelessWidget {
     return Material(
       elevation: 15,
       shadowColor: Colors.black,
+      color: Colors.transparent,
       child: SizedBox(
         height: size.height,
         width: size.width,
