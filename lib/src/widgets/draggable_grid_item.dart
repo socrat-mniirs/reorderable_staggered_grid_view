@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../data/staggered_grid_view_item.dart';
 import 'animated_offset.dart';
 import 'drag_target_grid_item.dart';
-import 'feedback_widget.dart';
 
 class DraggableGridItem extends StatefulWidget {
   final StaggeredGridViewItem item;
@@ -25,10 +24,10 @@ class DraggableGridItem extends StatefulWidget {
   /// The [animationOffset] animation duration
   final Duration offsetDuration;
 
-  final Widget Function(BuildContext context, Widget child)?
+  final Widget Function(BuildContext context, Widget child, Size size)?
       buildFeedbackWidget;
 
-  final parentKey = GlobalKey();
+  final originalWidgetKey = GlobalKey();
 
   DraggableGridItem({
     super.key,
@@ -77,6 +76,11 @@ class _DraggableGridItemState extends State<DraggableGridItem> {
   void _onAcceptWithDetails(DragTargetDetails<Object?> details) =>
       widget.onAcceptWithDetails?.call(details);
 
+  Size _getOriginalWidgetSize(GlobalKey key) {
+    final itemWidget = key.currentContext?.findRenderObject() as RenderBox;
+    return itemWidget.size;
+  }
+
   @override
   Widget build(BuildContext context) {
     return AnimatedOffset(
@@ -93,21 +97,19 @@ class _DraggableGridItemState extends State<DraggableGridItem> {
               dragAnchorStrategy: pointerDragAnchorStrategy,
               childWhenDragging: const SizedBox.shrink(),
               feedback: widget.buildFeedbackWidget == null
-                  ? FeedbackWidget(
-                      parentKey: widget.parentKey,
+                  ? _DefaultFeedbackWidget(
+                      parentKey: widget.originalWidgetKey,
                       child: widget.item.child,
                     )
                   : widget.buildFeedbackWidget!(
                       context,
-                      FeedbackWidget(
-                        parentKey: widget.parentKey,
-                        child: widget.item.child,
-                      ),
+                      widget.item.child,
+                      _getOriginalWidgetSize(widget.originalWidgetKey)
                     ),
 
               // Child
               child: DragTargetGridItem(
-                key: widget.parentKey,
+                key: widget.originalWidgetKey,
                 item: widget.item,
                 onLeave: _onLeave,
                 onWillAcceptWithDetails: _onWillAcceptWithDetails,
@@ -123,27 +125,59 @@ class _DraggableGridItemState extends State<DraggableGridItem> {
               onDragEnd: widget.onDragEnd,
               childWhenDragging: const SizedBox.shrink(),
               feedback: widget.buildFeedbackWidget == null
-                  ? FeedbackWidget(
-                      parentKey: widget.parentKey,
+                  ? _DefaultFeedbackWidget(
+                      parentKey: widget.originalWidgetKey,
                       child: widget.item.child,
                     )
                   : widget.buildFeedbackWidget!(
                       context,
-                      FeedbackWidget(
-                        parentKey: widget.parentKey,
-                        child: widget.item.child,
-                      ),
+                      widget.item.child,
+                      _getOriginalWidgetSize(widget.originalWidgetKey)
                     ),
 
               // Child
               child: DragTargetGridItem(
-                key: widget.parentKey,
+                key: widget.originalWidgetKey,
                 item: widget.item,
                 onLeave: _onLeave,
                 onWillAcceptWithDetails: _onWillAcceptWithDetails,
                 onAcceptWithDetails: _onAcceptWithDetails,
               ),
             ),
+    );
+  }
+}
+
+class _DefaultFeedbackWidget extends StatelessWidget {
+  /// The [parentKey] is needed to get the initial size of the grid item, which begins to drag.
+  final GlobalKey parentKey;
+
+  /// The [child] is the widget content of the item.
+  final Widget child;
+
+  const _DefaultFeedbackWidget({
+    required this.child,
+    required this.parentKey,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    assert(parentKey.currentContext != null);
+
+    // Get initial sizes of the grid item widget
+    final itemWidget =
+        parentKey.currentContext?.findRenderObject() as RenderBox;
+    final size = itemWidget.size;
+
+    return Material(
+      elevation: 15,
+      shadowColor: Colors.black,
+      color: Colors.transparent,
+      child: SizedBox(
+        height: size.height,
+        width: size.width,
+        child: child,
+      ),
     );
   }
 }

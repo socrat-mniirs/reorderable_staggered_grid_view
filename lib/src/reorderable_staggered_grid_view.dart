@@ -25,7 +25,7 @@ class ReorderableStaggeredGridView extends StatefulWidget {
   final void Function(DragTargetDetails details)? onAcceptWithDetails;
 
   /// A callback to custom building a feedback widget
-  final Widget Function(BuildContext context, Widget child)?
+  final Widget Function(BuildContext context, Widget child, Size size)?
       buildFeedbackWidget;
 
   /// Animation duration
