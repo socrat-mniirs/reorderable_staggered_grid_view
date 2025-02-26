@@ -22,7 +22,8 @@ class ReorderableStaggeredGridView extends StatefulWidget {
   final bool enable;
 
   /// A callback when an item is accepted during a drag operation with drag target details
-  final void Function(DragTargetDetails details, int newIndex)? onAcceptWithDetails;
+  final void Function(DragTargetDetails details, int newIndex)?
+      onAcceptWithDetails;
 
   /// A callback to custom building a feedback widget
   final Widget Function(
@@ -93,13 +94,6 @@ class _ReorderableStaggeredGridViewState
         widget.enable != oldWidget.enable) {
       items = widget.items;
       return;
-    }
-
-    for (int i = 0; i < widget.items.length; i++) {
-      if (widget.items[i].key != oldWidget.items[i].key) {
-        items = widget.items;
-        break;
-      }
     }
 
     super.didUpdateWidget(oldWidget);
