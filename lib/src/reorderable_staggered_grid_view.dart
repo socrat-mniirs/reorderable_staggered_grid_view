@@ -82,6 +82,26 @@ class _ReorderableStaggeredGridViewState
     super.initState();
   }
 
+  // Update grid if children changed
+  @override
+  void didUpdateWidget(covariant ReorderableStaggeredGridView oldWidget) {
+    if (oldWidget.items.length != widget.items.length ||
+        widget.enable != oldWidget.enable) {
+      items = widget.items;
+      return;
+    }
+
+    for (int i = 0; i < widget.items.length; i++) {
+      if (widget.items[i].key != oldWidget.items[i].key) {
+        items = widget.items;
+        break;
+      }
+    }
+
+
+    super.didUpdateWidget(oldWidget);
+  }
+
   // ========== AUTO-SCROLL METHODS ==========
 
   /// Refresh the Y-position relative to scroll
