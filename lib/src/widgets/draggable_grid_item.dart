@@ -92,16 +92,11 @@ class _DraggableGridItemState extends State<DraggableGridItem> {
               onDragEnd: widget.onDragEnd,
               dragAnchorStrategy: pointerDragAnchorStrategy,
               childWhenDragging: const SizedBox.shrink(),
-              feedback: widget.buildFeedbackWidget == null
-                  ? _DefaultFeedbackWidget(
-                      originalWidgetKey: widget.originalWidgetKey,
-                      child: widget.item.child,
-                    )
-                  : widget.buildFeedbackWidget!(
-                      context,
-                      widget.item.child,
-                      widget.originalWidgetKey,
-                    ),
+              feedback: _FeedbackWidget(
+                buildFeedbackWidget: widget.buildFeedbackWidget,
+                originalWidgetKey: widget.originalWidgetKey,
+                child: widget.item.child,
+              ),
 
               // Child
               child: DragTargetGridItem(
@@ -120,16 +115,11 @@ class _DraggableGridItemState extends State<DraggableGridItem> {
               onDragUpdate: widget.onDragUpdate,
               onDragEnd: widget.onDragEnd,
               childWhenDragging: const SizedBox.shrink(),
-              feedback: widget.buildFeedbackWidget == null
-                  ? _DefaultFeedbackWidget(
-                      originalWidgetKey: widget.originalWidgetKey,
-                      child: widget.item.child,
-                    )
-                  : _FeedbackWidget(
-                      buildFeedbackWidget: widget.buildFeedbackWidget!,
-                      originalWidgetKey: widget.originalWidgetKey,
-                      child: widget.item.child,
-                    ),
+              feedback: _FeedbackWidget(
+                buildFeedbackWidget: widget.buildFeedbackWidget,
+                originalWidgetKey: widget.originalWidgetKey,
+                child: widget.item.child,
+              ),
 
               // Child
               child: DragTargetGridItem(
@@ -145,14 +135,15 @@ class _DraggableGridItemState extends State<DraggableGridItem> {
 }
 
 class _FeedbackWidget extends StatelessWidget {
-  final Widget child;
   final GlobalKey originalWidgetKey;
 
   final Widget Function(
     BuildContext context,
     Widget child,
     GlobalKey originalWidgetKey,
-  ) buildFeedbackWidget;
+  )? buildFeedbackWidget;
+
+  final Widget child;
 
   const _FeedbackWidget({
     required this.buildFeedbackWidget,
@@ -162,24 +153,18 @@ class _FeedbackWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return buildFeedbackWidget(context, child, originalWidgetKey);
-  }
-}
+    /// ===== CUSTOM BUILD =====
+    /// 
+    if (buildFeedbackWidget != null) {
+      return buildFeedbackWidget!(
+        context,
+        child,
+        originalWidgetKey,
+      );
+    }
 
-class _DefaultFeedbackWidget extends StatelessWidget {
-  /// The [originalWidgetKey] is needed to get the initial size of the grid item, which begins to drag.
-  final GlobalKey originalWidgetKey;
-
-  /// The [child] is the widget content of the item.
-  final Widget child;
-
-  const _DefaultFeedbackWidget({
-    required this.child,
-    required this.originalWidgetKey,
-  });
-
-  @override
-  Widget build(BuildContext context) {
+    /// ===== DEFAULT BUILD =====
+    /// 
     assert(originalWidgetKey.currentContext != null);
 
     // Get initial sizes of the grid item widget
