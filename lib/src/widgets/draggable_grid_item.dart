@@ -19,6 +19,8 @@ class DraggableGridItem extends StatefulWidget {
   final bool Function(DragTargetDetails<Object?> details)?
       onWillAcceptWithDetails;
 
+  final parentKey = GlobalKey();
+
   DraggableGridItem({
     super.key,
     required this.item,
@@ -29,8 +31,6 @@ class DraggableGridItem extends StatefulWidget {
     this.onWillAcceptWithDetails,
   });
 
-  final parentKey = GlobalKey();
-
   @override
   State<DraggableGridItem> createState() => _DraggableGridItemState();
 }
@@ -38,36 +38,39 @@ class DraggableGridItem extends StatefulWidget {
 class _DraggableGridItemState extends State<DraggableGridItem> {
   Offset offset = Offset.zero;
 
+  /// [_onLeave] - return the target object to its original place
+  ///
+  void _onLeave(Object? data) {
+    if (data == widget.item.key) {
+      return;
+    }
+
+    setState(() {
+      offset -= Offset(50, 50);
+    });
+  }
+
+  /// [_onWillAcceptWithDetails] - shifts the object, indicating that it is ready to replace another grid element
+  ///
+  bool _onWillAcceptWithDetails(DragTargetDetails<Object?> details) {
+    if (details.data == widget.item.key) {
+      return false;
+    }
+
+    setState(() {
+      offset += Offset(50, 50);
+    });
+
+    return widget.onWillAcceptWithDetails?.call(details) ?? true;
+  }
+
+  /// [_onAcceptWithDetails] - calling the passed function
+  ///
+  void _onAcceptWithDetails(DragTargetDetails<Object?> details) =>
+      widget.onAcceptWithDetails?.call(details);
+
   @override
   Widget build(BuildContext context) {
-    final dragTargetWidget = DragTargetGridItem(
-      key: widget.parentKey,
-      item: widget.item,
-      onAcceptWithDetails: (details) {
-        widget.onAcceptWithDetails?.call(details);
-      },
-      onLeave: (data) {
-        if (data == widget.item.key) {
-          return;
-        }
-
-        setState(() {
-          offset -= Offset(50, 50);
-        });
-      },
-      onWillAcceptWithDetails: (details) {
-        if (details.data == widget.item.key) {
-          return false;
-        }
-
-        setState(() {
-          offset += Offset(50, 50);
-        });
-
-        return widget.onWillAcceptWithDetails?.call(details) ?? true;
-      },
-    );
-
     return AnimatedOffset(
       duration: Duration(milliseconds: 200),
       offset: offset,
@@ -75,29 +78,45 @@ class _DraggableGridItemState extends State<DraggableGridItem> {
 
           // Long press
           ? LongPressDraggable(
+              data: widget.item.key,
               onDragUpdate: widget.onDragUpdate,
               onDragEnd: widget.onDragEnd,
-              data: widget.item.key,
+              dragAnchorStrategy: pointerDragAnchorStrategy,
+              childWhenDragging: const SizedBox.shrink(),
               feedback: FeedbackWidget(
                 parentKey: widget.parentKey,
                 child: widget.item.child,
               ),
-              dragAnchorStrategy: pointerDragAnchorStrategy,
-              childWhenDragging: const SizedBox.shrink(),
-              child: dragTargetWidget,
+
+              // Child
+              child: DragTargetGridItem(
+                key: widget.parentKey,
+                item: widget.item,
+                onLeave: _onLeave,
+                onWillAcceptWithDetails: _onWillAcceptWithDetails,
+                onAcceptWithDetails: _onAcceptWithDetails,
+              ),
             )
 
           // Default
           : Draggable(
+              data: widget.item.key,
               onDragUpdate: widget.onDragUpdate,
               onDragEnd: widget.onDragEnd,
-              data: widget.item.key,
+              childWhenDragging: const SizedBox.shrink(),
               feedback: FeedbackWidget(
                 parentKey: widget.parentKey,
                 child: widget.item.child,
               ),
-              childWhenDragging: const SizedBox.shrink(),
-              child: dragTargetWidget,
+
+              // Child
+              child: DragTargetGridItem(
+                key: widget.parentKey,
+                item: widget.item,
+                onLeave: _onLeave,
+                onWillAcceptWithDetails: _onWillAcceptWithDetails,
+                onAcceptWithDetails: _onAcceptWithDetails,
+              ),
             ),
     );
   }
