@@ -24,7 +24,8 @@ class DraggableGridItem extends StatefulWidget {
   /// The [animationOffset] animation duration
   final Duration offsetDuration;
 
-  final Widget Function(BuildContext context, Widget child, GlobalKey originalWidgetKey)?
+  final Widget Function(
+          BuildContext context, Widget child, GlobalKey originalWidgetKey)?
       buildFeedbackWidget;
 
   final originalWidgetKey = GlobalKey();
@@ -124,10 +125,10 @@ class _DraggableGridItemState extends State<DraggableGridItem> {
                       originalWidgetKey: widget.originalWidgetKey,
                       child: widget.item.child,
                     )
-                  : widget.buildFeedbackWidget!(
-                      context,
-                      widget.item.child,
-                      widget.originalWidgetKey,
+                  : _FeedbackWidget(
+                      buildFeedbackWidget: widget.buildFeedbackWidget!,
+                      originalWidgetKey: widget.originalWidgetKey,
+                      child: widget.item.child,
                     ),
 
               // Child
@@ -140,6 +141,28 @@ class _DraggableGridItemState extends State<DraggableGridItem> {
               ),
             ),
     );
+  }
+}
+
+class _FeedbackWidget extends StatelessWidget {
+  final Widget child;
+  final GlobalKey originalWidgetKey;
+
+  final Widget Function(
+    BuildContext context,
+    Widget child,
+    GlobalKey originalWidgetKey,
+  ) buildFeedbackWidget;
+
+  const _FeedbackWidget({
+    required this.buildFeedbackWidget,
+    required this.child,
+    required this.originalWidgetKey,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return buildFeedbackWidget(context, child, originalWidgetKey);
   }
 }
 
