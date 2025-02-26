@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class StaggeredGridViewItem {
+class ReorderableStaggeredGridViewItem {
   /// The [key] is a required unique identifier for the item.
   final Key key;
 
@@ -9,11 +9,11 @@ class StaggeredGridViewItem {
 
   /// The [crossAxisCellCount] is the number of cells occupied by the element along the cross scroll axis.
   final int crossAxisCellCount;
-  
+
   /// The [child] is the widget content of the item.
   final Widget child;
 
-  StaggeredGridViewItem({
+  ReorderableStaggeredGridViewItem({
     required this.key,
     required this.mainAxisCellCount,
     required this.crossAxisCellCount,

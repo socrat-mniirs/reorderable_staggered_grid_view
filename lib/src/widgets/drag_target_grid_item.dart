@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-import '../data/staggered_grid_view_item.dart';
+import '../data/reorderable_staggered_grid_view_item.dart';
 
 class DragTargetGridItem extends StatelessWidget {
   ///
-  final StaggeredGridViewItem item;
+  final ReorderableStaggeredGridViewItem item;
 
   ///
   final void Function(DragTargetDetails<Object?> details)? onAcceptWithDetails;
@@ -13,14 +13,15 @@ class DragTargetGridItem extends StatelessWidget {
   final bool Function(DragTargetDetails<Object?> details)?
       onWillAcceptWithDetails;
 
-  /// 
+  ///
   final void Function(Object? data)? onLeave;
 
   const DragTargetGridItem({
     super.key,
     required this.item,
     this.onAcceptWithDetails,
-    this.onWillAcceptWithDetails, this.onLeave,
+    this.onWillAcceptWithDetails,
+    this.onLeave,
   });
 
   @override

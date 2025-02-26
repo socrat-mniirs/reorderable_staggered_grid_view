@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
           mainAxisSpacing: Constants.spacing,
           crossAxisSpacing: Constants.spacing,
           isLongPressDraggable: false,
-          items: Constants.staggeredGridViewItems,
+          items: Constants.reorderableStaggeredGridViewItems,
           nonDraggableWidgetsKeys: [ValueKey(0)],
         ),
       ),

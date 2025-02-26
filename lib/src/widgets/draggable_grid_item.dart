@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-import '../data/staggered_grid_view_item.dart';
+import '../data/reorderable_staggered_grid_view_item.dart';
 import 'animated_offset.dart';
 import 'drag_target_grid_item.dart';
 
 class DraggableGridItem extends StatefulWidget {
-  final StaggeredGridViewItem item;
+  final ReorderableStaggeredGridViewItem item;
 
   final bool isLongPressDraggable;
 
@@ -154,7 +154,7 @@ class _FeedbackWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     /// ===== CUSTOM BUILD =====
-    /// 
+    ///
     if (buildFeedbackWidget != null) {
       return buildFeedbackWidget!(
         context,
@@ -164,7 +164,7 @@ class _FeedbackWidget extends StatelessWidget {
     }
 
     /// ===== DEFAULT BUILD =====
-    /// 
+    ///
     assert(originalWidgetKey.currentContext != null);
 
     // Get initial sizes of the grid item widget

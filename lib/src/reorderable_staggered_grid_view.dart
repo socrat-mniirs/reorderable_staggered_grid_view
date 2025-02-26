@@ -5,15 +5,20 @@ import '../reorderable_staggered_grid_view.dart';
 import 'widgets/draggable_grid_item.dart';
 
 class ReorderableStaggeredGridView extends StatefulWidget {
-  final int crossAxisCount;
-  final double mainAxisSpacing;
-  final double crossAxisSpacing;
+  /// Padding around the grid view
   final EdgeInsets? padding;
+
+  /// The number of items in the cross-axis of the grid
+  final int crossAxisCount;
+
+  /// Spacing between elements in the main-axis
+  final double mainAxisSpacing;
+
+  /// Spacing between elements in the cross-axis 
+  final double crossAxisSpacing;
 
   /// The scroll controller for the scroll view
   final ScrollController? controller;
-
-  final List<StaggeredGridViewItem> items;
 
   /// Does it take a long press to drag
   final bool isLongPressDraggable;
@@ -45,6 +50,9 @@ class ReorderableStaggeredGridView extends StatefulWidget {
   /// The animation offset when dragging widget over another item
   final Offset animationOffset;
 
+  /// List of items that can be reordered or dragged
+  final List<ReorderableStaggeredGridViewItem> items;
+
   const ReorderableStaggeredGridView({
     super.key,
     required this.items,
@@ -72,13 +80,13 @@ class ReorderableStaggeredGridView extends StatefulWidget {
 class _ReorderableStaggeredGridViewState
     extends State<ReorderableStaggeredGridView> {
   late final ScrollController _scrollController;
-  late List<StaggeredGridViewItem> items;
+  late List<ReorderableStaggeredGridViewItem> items;
 
   double _dragY = 0;
   bool _isAutoScrolling = false;
 
-  StaggeredGridViewItem? draggingItem;
-  StaggeredGridViewItem? lastDraggedItem;
+  ReorderableStaggeredGridViewItem? draggingItem;
+  ReorderableStaggeredGridViewItem? lastDraggedItem;
 
   @override
   void initState() {
