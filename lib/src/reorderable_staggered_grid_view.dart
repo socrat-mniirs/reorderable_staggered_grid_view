@@ -100,14 +100,7 @@ class _ReorderableStaggeredGridViewState
   void didUpdateWidget(covariant ReorderableStaggeredGridView oldWidget) {
     if (oldWidget.items.length != widget.items.length ||
         widget.enable != oldWidget.enable) {
-      for (int i = 0; i < widget.items.length; i++) {
-        if (i >= items.length) {
-          items.add(widget.items[i]);
-        } else if (items[i].key != widget.items[i].key) {
-          items[i] = widget.items[i];
-        }
-      }
-
+      items = widget.items;
       return;
     }
 

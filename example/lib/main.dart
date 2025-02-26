@@ -6,8 +6,16 @@ void main() {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  List<ReorderableStaggeredGridViewItem> items =
+      Constants.reorderableStaggeredGridViewItems;
 
   @override
   Widget build(BuildContext context) {
@@ -15,6 +23,19 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         appBar: AppBar(
+          actions: [
+            // Remove last
+            IconButton(
+              onPressed: () => setState(() => items.removeLast()),
+              icon: Icon(Icons.clear),
+            ),
+
+            // Add new
+            IconButton(
+              onPressed: () => setState(() => items.add(items[1])),
+              icon: Icon(Icons.add),
+            ),
+          ],
           title: Text('Custom Reorderable Staggered Grid View'),
         ),
         body: ReorderableStaggeredGridView(
