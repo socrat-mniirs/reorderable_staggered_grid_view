@@ -47,7 +47,7 @@ class _DraggableGridItemState extends State<DraggableGridItem> {
         widget.onAcceptWithDetails?.call(details);
       },
       onLeave: (data) {
-        if (data == widget.item.data) {
+        if (data == widget.item.key) {
           return;
         }
 
@@ -56,7 +56,7 @@ class _DraggableGridItemState extends State<DraggableGridItem> {
         });
       },
       onWillAcceptWithDetails: (details) {
-        if (details.data == widget.item.data) {
+        if (details.data == widget.item.key) {
           return false;
         }
 
@@ -77,7 +77,7 @@ class _DraggableGridItemState extends State<DraggableGridItem> {
           ? LongPressDraggable(
               onDragUpdate: widget.onDragUpdate,
               onDragEnd: widget.onDragEnd,
-              data: widget.item.data,
+              data: widget.item.key,
               feedback: FeedbackWidget(
                 parentKey: widget.parentKey,
                 child: widget.item.child,
@@ -91,7 +91,7 @@ class _DraggableGridItemState extends State<DraggableGridItem> {
           : Draggable(
               onDragUpdate: widget.onDragUpdate,
               onDragEnd: widget.onDragEnd,
-              data: widget.item.data,
+              data: widget.item.key,
               feedback: FeedbackWidget(
                 parentKey: widget.parentKey,
                 child: widget.item.child,

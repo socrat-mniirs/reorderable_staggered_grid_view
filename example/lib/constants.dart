@@ -14,7 +14,6 @@ abstract class Constants {
         100,
         (index) => StaggeredGridViewItem(
           key: ValueKey(index),
-          data: index.toString(),
           mainAxisCellCount: Random().nextInt(2) + 1,
           crossAxisCellCount: Random().nextInt(2) + 1,
           child: TileWidget(

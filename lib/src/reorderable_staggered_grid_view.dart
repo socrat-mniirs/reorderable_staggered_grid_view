@@ -204,12 +204,13 @@ class _ReorderableStaggeredGridViewState
 
             // Will accept
             onWillAcceptWithDetails: (details) {
+              // Draggable data is an item key
               draggingItem = items.firstWhere(
-                (el) => el.data == details.data,
+                (el) => el.key == details.data,
               );
               beingDraggedItem = draggingItem;
 
-              if (_isAutoScrolling || details.data == item.data) return false;
+              if (_isAutoScrolling || details.data == item.key) return false;
 
               // TODO still in development
 
