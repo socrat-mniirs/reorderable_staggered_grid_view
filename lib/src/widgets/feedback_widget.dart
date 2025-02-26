@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 
 class FeedbackWidget extends StatelessWidget {
-  final Widget child;
+  /// The [parentKey] is needed to get the initial size of the grid item, which begins to drag.
   final GlobalKey parentKey;
+
+  /// The [child] is the widget content of the item.
+  final Widget child;
 
   const FeedbackWidget({
     super.key,
@@ -13,6 +16,8 @@ class FeedbackWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(parentKey.currentContext != null);
+    
+    // Get initial sizes of the grid item widget
     final itemWidget =
         parentKey.currentContext?.findRenderObject() as RenderBox;
     final size = itemWidget.size;

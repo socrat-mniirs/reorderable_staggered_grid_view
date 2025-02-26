@@ -17,6 +17,9 @@ class ReorderableStaggeredGridView extends StatefulWidget {
   final List<StaggeredGridViewItem> items;
   final bool isLongPressDraggable;
 
+  /// Is dragging enabled or not
+  final bool enable;
+
   /// A callback when an item is accepted during a drag operation with drag target details.
   final void Function(DragTargetDetails details)? onAcceptWithDetails;
 
@@ -30,6 +33,7 @@ class ReorderableStaggeredGridView extends StatefulWidget {
     this.crossAxisSpacing = 0,
     this.controller,
     this.onAcceptWithDetails,
+    this.enable = true,
   });
 
   @override
@@ -117,31 +121,39 @@ class _ReorderableStaggeredGridViewState
     return StaggeredGridView.countBuilder(
       // Scroll
       controller: _scrollController,
-    
+
       // UI PARAMS
       padding: widget.padding,
       crossAxisCount: widget.crossAxisCount,
       mainAxisSpacing: widget.mainAxisSpacing,
       crossAxisSpacing: widget.crossAxisSpacing,
-    
+
       // CELL SIZE
       staggeredTileBuilder: (index) {
         final item = items[index];
-    
+
         return StaggeredTile.count(
           item.crossAxisCellCount,
           item.mainAxisCellCount.toDouble(),
         );
       },
-    
+
       // ITEMS
       itemCount: items.length,
       itemBuilder: (context, index) {
         final item = items[index];
-    
+
+        // Check that the grid should not be dragged
+        if (!widget.enable) {
+          return item.child;
+        }
+
         return AnimatedSwitcher(
+          // Duration
           duration: Duration(milliseconds: 150),
           reverseDuration: Duration.zero,
+
+          // Animation
           transitionBuilder: (child, animation) {
             if (
                 // Cancel unnecessary repaints when first
@@ -156,10 +168,10 @@ class _ReorderableStaggeredGridViewState
                     animation.status != AnimationStatus.completed) {
               return draggingItem != null ? const SizedBox.shrink() : child;
             }
-    
+
             final mainAxisOffsetCoef = 1 / item.mainAxisCellCount;
             final crossAxisOffsetCoef = 1 / item.crossAxisCellCount;
-    
+
             return SlideTransition(
               position: Tween<Offset>(
                 begin: Offset(
@@ -171,9 +183,10 @@ class _ReorderableStaggeredGridViewState
               child: child,
             );
           },
+
+          // Child
           child: DraggableGridItem(
             key: ObjectKey(item),
-            item: item,
             isLongPressDraggable: widget.isLongPressDraggable,
             onDragUpdate: _onDragUpdate,
             onDragEnd: (_) => _stopAutoScroll(),
@@ -182,28 +195,33 @@ class _ReorderableStaggeredGridViewState
                 (el) => el.data == details.data,
               );
               beingDraggedItem = draggingItem;
-    
+
               if (_isAutoScrolling) return false;
-    
+
               if (details.data == item.data) return false;
-    
+
+              // TODO still in development
+
               // items.remove(draggingItem);
               // items.insert(index, draggingItem!);
-    
+
               // setState(() {});
-    
+
               return true;
             },
             onAcceptWithDetails: (details) {
               assert(draggingItem != null);
-    
+
               items.remove(draggingItem);
               items.insert(index, draggingItem!);
-    
+
               setState(() {
                 draggingItem = null;
               });
             },
+
+            // Child
+            item: item,
           ),
         );
       },
