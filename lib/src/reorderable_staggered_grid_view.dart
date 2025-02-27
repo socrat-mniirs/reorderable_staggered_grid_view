@@ -5,6 +5,9 @@ import '../reorderable_staggered_grid_view.dart';
 import 'widgets/draggable_grid_item.dart';
 
 class ReorderableStaggeredGridView extends StatefulWidget {
+  /// The scroll controller for the scroll view
+  final ScrollController? controller;
+
   /// Padding around the grid view
   final EdgeInsets? padding;
 
@@ -17,8 +20,20 @@ class ReorderableStaggeredGridView extends StatefulWidget {
   /// Spacing between elements in the cross-axis
   final double crossAxisSpacing;
 
-  /// The scroll controller for the scroll view
-  final ScrollController? controller;
+  /// Physics of the scroll view
+  final ScrollPhysics? physics;
+
+  /// Whether to wrap each child in an AutomaticKeepAlive.
+  /// Defaults to true.
+  final bool addAutomaticKeepAlives;
+
+  /// Whether to wrap each child in a RepaintBoundary.
+  /// Typically, children in a scrolling container are wrapped in repaint boundaries 
+  /// so that they do not need to be repainted as the list scrolls. 
+  /// If the children are easy to repaint (e.g., solid color blocks or a short snippet of text), 
+  /// it might be more efficient to not add a repaint boundary and instead always repaint the children during scrolling.
+  /// Defaults to true. 
+  final bool addRepaintBoundaries;
 
   /// Does it take a long press to drag
   final bool isLongPressDraggable;
@@ -58,6 +73,9 @@ class ReorderableStaggeredGridView extends StatefulWidget {
     required this.items,
     required this.crossAxisCount,
     required this.isLongPressDraggable,
+    this.physics,
+    this.addAutomaticKeepAlives = true,
+    this.addRepaintBoundaries = true,
     this.padding,
     this.mainAxisSpacing = 0,
     this.crossAxisSpacing = 0,
@@ -169,6 +187,9 @@ class _ReorderableStaggeredGridViewState
     return StaggeredGridView.countBuilder(
       // Scroll
       controller: _scrollController,
+      addAutomaticKeepAlives: widget.addAutomaticKeepAlives,
+      addRepaintBoundaries: widget.addRepaintBoundaries,
+      physics: widget.physics,
 
       // UI PARAMS
       padding: widget.padding,
