@@ -15,7 +15,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   List<ReorderableStaggeredGridViewItem> items =
-      Constants.reorderableStaggeredGridViewItems;
+      List.from(Constants.reorderableStaggeredGridViewItems);
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +44,7 @@ class _MyAppState extends State<MyApp> {
           mainAxisSpacing: Constants.spacing,
           crossAxisSpacing: Constants.spacing,
           isLongPressDraggable: false,
-          items: Constants.reorderableStaggeredGridViewItems,
+          items: items,
           nonDraggableWidgetsKeys: [ValueKey(0)],
         ),
       ),
