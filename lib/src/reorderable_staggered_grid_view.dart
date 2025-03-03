@@ -28,11 +28,11 @@ class ReorderableStaggeredGridView extends StatefulWidget {
   final bool addAutomaticKeepAlives;
 
   /// Whether to wrap each child in a RepaintBoundary.
-  /// Typically, children in a scrolling container are wrapped in repaint boundaries 
-  /// so that they do not need to be repainted as the list scrolls. 
-  /// If the children are easy to repaint (e.g., solid color blocks or a short snippet of text), 
+  /// Typically, children in a scrolling container are wrapped in repaint boundaries
+  /// so that they do not need to be repainted as the list scrolls.
+  /// If the children are easy to repaint (e.g., solid color blocks or a short snippet of text),
   /// it might be more efficient to not add a repaint boundary and instead always repaint the children during scrolling.
-  /// Defaults to true. 
+  /// Defaults to true.
   final bool addRepaintBoundaries;
 
   /// Does it take a long press to drag
@@ -263,7 +263,10 @@ class _ReorderableStaggeredGridViewState
 
             // Auto-scroll
             onDragUpdate: _onDragUpdate,
-            onDragEnd: (_) => _stopAutoScroll(),
+            onDragEnd: (_) {
+              _stopAutoScroll();
+              setState(() => draggingItem = null);
+            },
 
             // Offset when dragging over
             animationOffset: widget.animationOffset,
@@ -297,8 +300,6 @@ class _ReorderableStaggeredGridViewState
               items.insert(index, draggingItem!);
 
               widget.onAcceptWithDetails?.call(details, index);
-
-              setState(() => draggingItem = null);
             },
 
             // Feedback widget
