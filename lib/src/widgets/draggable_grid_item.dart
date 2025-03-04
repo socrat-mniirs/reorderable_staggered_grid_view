@@ -9,6 +9,8 @@ class DraggableGridItem extends StatefulWidget {
 
   final bool isLongPressDraggable;
 
+  final void Function()? onDragStarted;
+
   final void Function(DragUpdateDetails details)? onDragUpdate;
 
   final void Function(DraggableDetails details)? onDragEnd;
@@ -34,6 +36,7 @@ class DraggableGridItem extends StatefulWidget {
     super.key,
     required this.item,
     this.isLongPressDraggable = false,
+    this.onDragStarted,
     this.onDragUpdate,
     this.onDragEnd,
     this.onAcceptWithDetails,
@@ -88,6 +91,7 @@ class _DraggableGridItemState extends State<DraggableGridItem> {
 
           ? LongPressDraggable(
               data: widget.item.key,
+              onDragStarted: widget.onDragStarted,
               onDragUpdate: widget.onDragUpdate,
               onDragEnd: widget.onDragEnd,
               dragAnchorStrategy: pointerDragAnchorStrategy,
@@ -112,6 +116,7 @@ class _DraggableGridItemState extends State<DraggableGridItem> {
 
           : Draggable(
               data: widget.item.key,
+              onDragStarted: widget.onDragStarted,
               onDragUpdate: widget.onDragUpdate,
               onDragEnd: widget.onDragEnd,
               childWhenDragging: const SizedBox.shrink(),

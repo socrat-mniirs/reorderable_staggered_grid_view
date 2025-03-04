@@ -129,7 +129,7 @@ class _ReorderableStaggeredGridViewState
 
   /// Refresh the Y-position relative to scroll
 
-  void _onDragUpdate(DragUpdateDetails details) {
+  void _autoScrollOnDragUpdate(DragUpdateDetails details) {
     _dragY = details.globalPosition.dy;
     _checkAutoScroll();
   }
@@ -233,7 +233,7 @@ class _ReorderableStaggeredGridViewState
                     item.key == lastDraggedItem?.key
                     // Check animation duplicates
                     &&
-                    animation.status != AnimationStatus.completed) {
+                    animation.status == AnimationStatus.dismissed) {
               lastDraggedItem = null;
               return draggingItem != null ? const SizedBox.shrink() : child;
             }
@@ -261,8 +261,8 @@ class _ReorderableStaggeredGridViewState
             // Is long press need
             isLongPressDraggable: widget.isLongPressDraggable,
 
-            // Auto-scroll
-            onDragUpdate: _onDragUpdate,
+            // Dragging + Auto-scroll
+            onDragUpdate: _autoScrollOnDragUpdate,
             onDragEnd: (_) {
               _stopAutoScroll();
               setState(() => draggingItem = null);
