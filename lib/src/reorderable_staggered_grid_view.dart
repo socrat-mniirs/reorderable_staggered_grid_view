@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:staggered_grid_view/flutter_staggered_grid_view.dart';
 
 import '../reorderable_staggered_grid_view.dart';
-import 'widgets/draggable_grid_item.dart';
+import 'widgets/animated_reorderable_staggered_grid_item_widget.dart';
 
 class ReorderableStaggeredGridView extends StatefulWidget {
   /// The scroll controller for the scroll view
@@ -218,96 +218,57 @@ class _ReorderableStaggeredGridViewState
           return item.child;
         }
 
-        return AnimatedSwitcher(
-          // Duration
+        return AnimatedReorderableStaggeredGridItemWidget(
+          // Items
+          item: item,
+          lastDraggedItem: lastDraggedItem,
+          draggingItem: draggingItem,
+
+          // UI
+          isLongPressDraggable: widget.isLongPressDraggable,
           duration: widget.duration,
           reverseDuration: widget.reverseDuration,
+          offsetDuration: widget.offsetDuration,
+          animationOffset: widget.animationOffset,
 
-          // Animation
-          transitionBuilder: (child, animation) {
-            if (
-                // Cancel unnecessary repaints when first
-                lastDraggedItem != null
-                    // Check if objects are equal
-                    &&
-                    item.key == lastDraggedItem?.key
-                    // Check animation duplicates
-                    &&
-                    animation.status == AnimationStatus.dismissed) {
-              lastDraggedItem = null;
-              return draggingItem != null ? const SizedBox.shrink() : child;
-            }
+          // Feedback widget
+          buildFeedbackWidget: widget.buildFeedbackWidget,
 
-            final mainAxisOffsetCoef = 1 / item.mainAxisCellCount;
-            final crossAxisOffsetCoef = 1 / item.crossAxisCellCount;
-
-            return SlideTransition(
-              position: Tween<Offset>(
-                begin: Offset(
-                  0 * crossAxisOffsetCoef,
-                  1 * mainAxisOffsetCoef,
-                ),
-                end: Offset.zero,
-              ).animate(animation),
-              child: child,
-            );
+          // Dragging + Scroll
+          onDragUpdate: _autoScrollOnDragUpdate,
+          onDragEnd: (_) {
+            _stopAutoScroll();
+            setState(() => draggingItem = null);
           },
 
-          // Child
-          child: DraggableGridItem(
-            // Required key to start animation
-            key: ObjectKey(item),
+          // Accepting
+          resetLastDraggedItem: () => lastDraggedItem = null,
+          onWillAcceptWithDetails: (details) {
+            // Draggable data is an item key
+            draggingItem = items.firstWhere(
+              (el) => el.key == details.data,
+            );
+            lastDraggedItem = draggingItem;
 
-            // Is long press need
-            isLongPressDraggable: widget.isLongPressDraggable,
+            if (_isAutoScrolling || details.data == item.key) return false;
 
-            // Dragging + Auto-scroll
-            onDragUpdate: _autoScrollOnDragUpdate,
-            onDragEnd: (_) {
-              _stopAutoScroll();
-              setState(() => draggingItem = null);
-            },
+            // TODO still in development
 
-            // Offset when dragging over
-            animationOffset: widget.animationOffset,
-            offsetDuration: widget.offsetDuration,
+            // items.remove(draggingItem);
+            // items.insert(index, draggingItem!);
 
-            // Will accept
-            onWillAcceptWithDetails: (details) {
-              // Draggable data is an item key
-              draggingItem = items.firstWhere(
-                (el) => el.key == details.data,
-              );
-              lastDraggedItem = draggingItem;
+            // setState(() {});
 
-              if (_isAutoScrolling || details.data == item.key) return false;
+            return true;
+          },
+          onAcceptWithDetails: (details) {
+            assert(draggingItem != null);
 
-              // TODO still in development
+            items.remove(draggingItem);
+            items.insert(index, draggingItem!);
 
-              // items.remove(draggingItem);
-              // items.insert(index, draggingItem!);
-
-              // setState(() {});
-
-              return true;
-            },
-
-            // Accept
-            onAcceptWithDetails: (details) {
-              assert(draggingItem != null);
-
-              items.remove(draggingItem);
-              items.insert(index, draggingItem!);
-
-              widget.onAcceptWithDetails?.call(details, index);
-            },
-
-            // Feedback widget
-            buildFeedbackWidget: widget.buildFeedbackWidget,
-
-            // Child
-            item: item,
-          ),
+            widget.onAcceptWithDetails?.call(details, index);
+          },
         );
       },
     );
