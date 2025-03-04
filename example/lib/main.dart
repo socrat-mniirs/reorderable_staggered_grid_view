@@ -17,6 +17,8 @@ class _MyAppState extends State<MyApp> {
   List<ReorderableStaggeredGridViewItem> items =
       List.from(Constants.reorderableStaggeredGridViewItems);
 
+  bool enable = true;
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -24,6 +26,11 @@ class _MyAppState extends State<MyApp> {
       home: Scaffold(
         appBar: AppBar(
           actions: [
+            Switch(
+              value: enable,
+              onChanged: (value) => setState(() => enable = value),
+            ),
+
             // Remove last
             IconButton(
               onPressed: () => setState(() => items.removeLast()),
@@ -40,6 +47,7 @@ class _MyAppState extends State<MyApp> {
         ),
         body: ReorderableStaggeredGridView(
           padding: EdgeInsets.all(20),
+          enable: enable,
           crossAxisCount: Constants.crossAxisCount,
           mainAxisSpacing: Constants.spacing,
           crossAxisSpacing: Constants.spacing,

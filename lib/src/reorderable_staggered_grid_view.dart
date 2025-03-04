@@ -224,7 +224,7 @@ class _ReorderableStaggeredGridViewState
           draggingItem: draggingItem,
 
           // UI
-          isGridEnable: widget.enable,
+          isDraggingEnabled: widget.enable,
           isLongPressDraggable: widget.isLongPressDraggable,
           duration: widget.duration,
           reverseDuration: widget.reverseDuration,

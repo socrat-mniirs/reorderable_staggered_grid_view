@@ -17,7 +17,7 @@ abstract class Constants {
       mainAxisCellCount: Random().nextInt(2) + 1,
       crossAxisCellCount: Random().nextInt(2) + 1,
       child: TileWidget(
-        title: Text(index.toString()),
+        title: Text(index == 0 ? 'Not dragged' : index.toString()),
         color: Color.from(
           alpha: 0.1,
           red: Random().nextInt(255).toDouble(),

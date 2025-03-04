@@ -11,7 +11,7 @@ class AnimatedReorderableStaggeredGridItemWidget extends StatefulWidget {
 
   final bool isLongPressDraggable;
 
-  final bool isGridEnable;
+  final bool isDraggingEnabled;
 
   final Duration duration;
 
@@ -41,7 +41,7 @@ class AnimatedReorderableStaggeredGridItemWidget extends StatefulWidget {
     required this.lastDraggedItem,
     required this.draggingItem,
     required this.resetLastDraggedItem,
-    required this.isGridEnable,
+    required this.isDraggingEnabled,
     required this.isLongPressDraggable,
     required this.duration,
     required this.reverseDuration,
@@ -84,7 +84,7 @@ class _AnimatedReorderableStaggeredGridItemWidgetState
       end: Offset.zero,
     ).animate(_controller);
 
-    _controller.forward(from: widget.isGridEnable ? 0 : 1);
+    _controller.forward(from: widget.isDraggingEnabled ? 0 : 1);
 
     super.initState();
   }
@@ -116,7 +116,7 @@ class _AnimatedReorderableStaggeredGridItemWidgetState
       ),
 
       // Child
-      child: !widget.isGridEnable
+      child: !widget.isDraggingEnabled
 
           // Not enabled dragging, darg target, animations
           ? widget.item.child
