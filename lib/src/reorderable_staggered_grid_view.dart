@@ -213,8 +213,7 @@ class _ReorderableStaggeredGridViewState
         final item = items[index];
 
         // Check that the grid or current item should not be dragged
-        if (!widget.enable ||
-            widget.nonDraggableWidgetsKeys.contains(item.key)) {
+        if (widget.nonDraggableWidgetsKeys.contains(item.key)) {
           return item.child;
         }
 
@@ -225,6 +224,7 @@ class _ReorderableStaggeredGridViewState
           draggingItem: draggingItem,
 
           // UI
+          isGridEnable: widget.enable,
           isLongPressDraggable: widget.isLongPressDraggable,
           duration: widget.duration,
           reverseDuration: widget.reverseDuration,

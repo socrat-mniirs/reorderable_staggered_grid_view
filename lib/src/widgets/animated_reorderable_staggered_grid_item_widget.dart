@@ -11,6 +11,8 @@ class AnimatedReorderableStaggeredGridItemWidget extends StatefulWidget {
 
   final bool isLongPressDraggable;
 
+  final bool isGridEnable;
+
   final Duration duration;
 
   final Duration reverseDuration;
@@ -39,6 +41,7 @@ class AnimatedReorderableStaggeredGridItemWidget extends StatefulWidget {
     required this.lastDraggedItem,
     required this.draggingItem,
     required this.resetLastDraggedItem,
+    required this.isGridEnable,
     required this.isLongPressDraggable,
     required this.duration,
     required this.reverseDuration,
@@ -81,7 +84,7 @@ class _AnimatedReorderableStaggeredGridItemWidgetState
       end: Offset.zero,
     ).animate(_controller);
 
-    _controller.forward(from: 1);
+    _controller.forward(from: widget.isGridEnable ? 0 : 1);
 
     super.initState();
   }
@@ -113,33 +116,39 @@ class _AnimatedReorderableStaggeredGridItemWidgetState
       ),
 
       // Child
-      child: DraggableGridItem(
-        // Required key to start animation
-        key: ObjectKey(widget.item),
+      child: !widget.isGridEnable
 
-        // Is long press need
-        isLongPressDraggable: widget.isLongPressDraggable,
+          // Not enabled dragging, darg target, animations
+          ? widget.item.child
 
-        // Dragging + Auto-scroll
-        onDragUpdate: widget.onDragUpdate,
-        onDragEnd: widget.onDragEnd,
+          // Enabled all
+          : DraggableGridItem(
+              // Required key to start animation
+              key: ObjectKey(widget.item),
 
-        // Offset when dragging over
-        animationOffset: widget.animationOffset,
-        offsetDuration: widget.offsetDuration,
+              // Is long press need
+              isLongPressDraggable: widget.isLongPressDraggable,
 
-        // Will accept
-        onWillAcceptWithDetails: widget.onWillAcceptWithDetails,
+              // Dragging + Auto-scroll
+              onDragUpdate: widget.onDragUpdate,
+              onDragEnd: widget.onDragEnd,
 
-        // Accept
-        onAcceptWithDetails: widget.onAcceptWithDetails,
+              // Offset when dragging over
+              animationOffset: widget.animationOffset,
+              offsetDuration: widget.offsetDuration,
 
-        // Feedback widget
-        buildFeedbackWidget: widget.buildFeedbackWidget,
+              // Will accept
+              onWillAcceptWithDetails: widget.onWillAcceptWithDetails,
 
-        // Child
-        item: widget.item,
-      ),
+              // Accept
+              onAcceptWithDetails: widget.onAcceptWithDetails,
+
+              // Feedback widget
+              buildFeedbackWidget: widget.buildFeedbackWidget,
+
+              // Child
+              item: widget.item,
+            ),
     );
   }
 
