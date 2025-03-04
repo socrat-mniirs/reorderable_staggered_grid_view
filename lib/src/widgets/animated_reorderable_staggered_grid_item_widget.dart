@@ -59,43 +59,58 @@ class AnimatedReorderableStaggeredGridItemWidget extends StatefulWidget {
 class _AnimatedReorderableStaggeredGridItemWidgetState
     extends State<AnimatedReorderableStaggeredGridItemWidget>
     with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<Offset> _animation;
+
   @override
-  Widget build(BuildContext context) {
-    return AnimatedSwitcher(
-      // Duration
+  void initState() {
+    _controller = AnimationController(
+      vsync: this,
       duration: widget.duration,
       reverseDuration: widget.reverseDuration,
+    );
 
-      // Animation
-      transitionBuilder: (child, animation) {
-        if (
-            // Cancel unnecessary repaints when first
-            widget.lastDraggedItem != null
-                // Check if objects are equal
-                &&
-                widget.item.key == widget.lastDraggedItem?.key
-                // Check animation duplicates
-                &&
-                animation.status == AnimationStatus.dismissed) {
-          // lastDraggedItem = null;
-          widget.resetLastDraggedItem();
-          return widget.draggingItem != null ? const SizedBox.shrink() : child;
-        }
+    final crossAxisOffsetCoef = 1 / widget.item.crossAxisCellCount;
+    final mainAxisOffsetCoef = 1 / widget.item.mainAxisCellCount;
 
-        final mainAxisOffsetCoef = 1 / widget.item.mainAxisCellCount;
-        final crossAxisOffsetCoef = 1 / widget.item.crossAxisCellCount;
+    _animation = Tween<Offset>(
+      begin: Offset(
+        0 * crossAxisOffsetCoef,
+        1 * mainAxisOffsetCoef,
+      ),
+      end: Offset.zero,
+    ).animate(_controller);
 
-        return SlideTransition(
-          position: Tween<Offset>(
-            begin: Offset(
-              0 * crossAxisOffsetCoef,
-              1 * mainAxisOffsetCoef,
-            ),
-            end: Offset.zero,
-          ).animate(animation),
-          child: child,
-        );
-      },
+    _controller.forward();
+
+    super.initState();
+  }
+
+  @override
+  void didUpdateWidget(
+    covariant AnimatedReorderableStaggeredGridItemWidget oldWidget,
+  ) {
+    super.didUpdateWidget(oldWidget);
+
+    if (widget.item.key != oldWidget.item.key) {
+      if (widget.item.key != widget.lastDraggedItem?.key) {
+        _controller.forward(from: 0);
+      } else {
+        widget.resetLastDraggedItem();
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _animation,
+
+      // Builder with animated slide
+      builder: (context, child) => SlideTransition(
+        position: _animation,
+        child: child,
+      ),
 
       // Child
       child: DraggableGridItem(
