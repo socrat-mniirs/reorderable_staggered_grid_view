@@ -81,7 +81,7 @@ class _AnimatedReorderableStaggeredGridItemWidgetState
       end: Offset.zero,
     ).animate(_controller);
 
-    _controller.forward();
+    _controller.forward(from: 1);
 
     super.initState();
   }
@@ -141,5 +141,11 @@ class _AnimatedReorderableStaggeredGridItemWidgetState
         item: widget.item,
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 }
