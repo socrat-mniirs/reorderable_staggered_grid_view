@@ -32,6 +32,7 @@ class ReorderableStaggeredGridView extends StatefulWidget {
   /// so that they do not need to be repainted as the list scrolls.
   /// If the children are easy to repaint (e.g., solid color blocks or a short snippet of text),
   /// it might be more efficient to not add a repaint boundary and instead always repaint the children during scrolling.
+  ///
   /// Defaults to true.
   final bool addRepaintBoundaries;
 
@@ -53,17 +54,20 @@ class ReorderableStaggeredGridView extends StatefulWidget {
   /// Keys of widgets which cannot be dragged
   final List<Key> nonDraggableWidgetsKeys;
 
-  /// Animation duration
-  final Duration duration;
+  /// Duration of slidable animation of the items when they are changed
+  final Duration slidableAnimationDuration;
 
-  /// Animation reverse duration
-  final Duration reverseDuration;
+  /// Slidable animation offset of the items when they are changed.
+  /// It is set by relative values, where one unit is the size of 1 cell in the grid.
+  ///
+  /// The default value is [Offset(0, 1)]
+  final Offset slidableAnimationOffset;
 
-  /// The [animationOffset] animation duration
-  final Duration offsetDuration;
+  /// The [willAcceptAnimationOffset] animation duration
+  final Duration willAcceptOffsetDuration;
 
   /// The animation offset when dragging widget over another item
-  final Offset animationOffset;
+  final Offset willAcceptAnimationOffset;
 
   /// List of items that can be reordered or dragged
   final List<ReorderableStaggeredGridViewItem> items;
@@ -81,12 +85,12 @@ class ReorderableStaggeredGridView extends StatefulWidget {
     this.crossAxisSpacing = 0,
     this.controller,
     this.onAcceptWithDetails,
-    this.enable = true,
-    this.duration = const Duration(milliseconds: 150),
-    this.reverseDuration = Duration.zero,
-    this.offsetDuration = const Duration(milliseconds: 200),
-    this.animationOffset = const Offset(50, 50),
     this.buildFeedbackWidget,
+    this.enable = true,
+    this.slidableAnimationDuration = const Duration(milliseconds: 250),
+    this.slidableAnimationOffset = const Offset(0, 1),
+    this.willAcceptOffsetDuration = const Duration(milliseconds: 200),
+    this.willAcceptAnimationOffset = const Offset(50, 50),
     this.nonDraggableWidgetsKeys = const [],
   });
 
@@ -226,10 +230,12 @@ class _ReorderableStaggeredGridViewState
           // UI
           isDraggingEnabled: widget.enable,
           isLongPressDraggable: widget.isLongPressDraggable,
-          duration: widget.duration,
-          reverseDuration: widget.reverseDuration,
-          offsetDuration: widget.offsetDuration,
-          animationOffset: widget.animationOffset,
+
+          // Animation offset
+          slidableAnimationDuration: widget.slidableAnimationDuration,
+          slidableAnimationOffset: widget.slidableAnimationOffset,
+          willAcceptOffsetDuration: widget.willAcceptOffsetDuration,
+          willAcceptAnimationOffset: widget.willAcceptAnimationOffset,
 
           // Feedback widget
           buildFeedbackWidget: widget.buildFeedbackWidget,

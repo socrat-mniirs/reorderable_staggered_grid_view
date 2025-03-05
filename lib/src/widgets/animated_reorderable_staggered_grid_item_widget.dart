@@ -13,13 +13,13 @@ class AnimatedReorderableStaggeredGridItemWidget extends StatefulWidget {
 
   final bool isDraggingEnabled;
 
-  final Duration duration;
+  final Duration slidableAnimationDuration;
 
-  final Duration reverseDuration;
+  final Offset slidableAnimationOffset;
 
-  final Duration offsetDuration;
+  final Duration willAcceptOffsetDuration;
 
-  final Offset animationOffset;
+  final Offset willAcceptAnimationOffset;
 
   final void Function() resetLastDraggedItem;
 
@@ -43,10 +43,10 @@ class AnimatedReorderableStaggeredGridItemWidget extends StatefulWidget {
     required this.resetLastDraggedItem,
     required this.isDraggingEnabled,
     required this.isLongPressDraggable,
-    required this.duration,
-    required this.reverseDuration,
-    required this.offsetDuration,
-    required this.animationOffset,
+    required this.slidableAnimationDuration,
+    required this.slidableAnimationOffset,
+    required this.willAcceptOffsetDuration,
+    required this.willAcceptAnimationOffset,
     required this.onDragUpdate,
     required this.onDragEnd,
     required this.onWillAcceptWithDetails,
@@ -69,8 +69,7 @@ class _AnimatedReorderableStaggeredGridItemWidgetState
   void initState() {
     _controller = AnimationController(
       vsync: this,
-      duration: widget.duration,
-      reverseDuration: widget.reverseDuration,
+      duration: widget.slidableAnimationDuration,
     );
 
     final crossAxisOffsetCoef = 1 / widget.item.crossAxisCellCount;
@@ -78,8 +77,8 @@ class _AnimatedReorderableStaggeredGridItemWidgetState
 
     _animation = Tween<Offset>(
       begin: Offset(
-        0 * crossAxisOffsetCoef,
-        1 * mainAxisOffsetCoef,
+        widget.slidableAnimationOffset.dx * crossAxisOffsetCoef,
+        widget.slidableAnimationOffset.dy * mainAxisOffsetCoef,
       ),
       end: Offset.zero,
     ).animate(_controller);
@@ -134,8 +133,8 @@ class _AnimatedReorderableStaggeredGridItemWidgetState
               onDragEnd: widget.onDragEnd,
 
               // Offset when dragging over
-              animationOffset: widget.animationOffset,
-              offsetDuration: widget.offsetDuration,
+              animationOffset: widget.willAcceptAnimationOffset,
+              offsetDuration: widget.willAcceptOffsetDuration,
 
               // Will accept
               onWillAcceptWithDetails: widget.onWillAcceptWithDetails,

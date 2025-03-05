@@ -139,6 +139,7 @@ class _DraggableGridItemState extends State<DraggableGridItem> {
   }
 }
 
+/// Feedback widget
 class _FeedbackWidget extends StatelessWidget {
   final GlobalKey originalWidgetKey;
 
