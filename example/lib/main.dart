@@ -17,7 +17,8 @@ class _MyAppState extends State<MyApp> {
   List<ReorderableStaggeredGridViewItem> items =
       List.from(Constants.reorderableStaggeredGridViewItems);
 
-  bool enable = true;
+  bool enableLongPress = false;
+  bool enableDragging = true;
 
   @override
   Widget build(BuildContext context) {
@@ -26,10 +27,31 @@ class _MyAppState extends State<MyApp> {
       home: Scaffold(
         appBar: AppBar(
           actions: [
-            Switch(
-              value: enable,
-              onChanged: (value) => setState(() => enable = value),
+            // Switch enable
+            Row(
+              children: [
+                Text('Long press ${enableLongPress ? 'enabled' : 'disabled'}'),
+                Switch(
+                  value: enableLongPress,
+                  onChanged: (value) => setState(() => enableLongPress = value),
+                ),
+              ],
             ),
+
+            const SizedBox(width: 20),
+
+            // Switch enable
+            Row(
+              children: [
+                Text('Dragging ${enableDragging ? 'enabled' : 'disabled'}'),
+                Switch(
+                  value: enableDragging,
+                  onChanged: (value) => setState(() => enableDragging = value),
+                ),
+              ],
+            ),
+
+            const SizedBox(width: 20),
 
             // Remove last
             IconButton(
@@ -47,11 +69,11 @@ class _MyAppState extends State<MyApp> {
         ),
         body: ReorderableStaggeredGridView(
           padding: EdgeInsets.all(20),
-          enable: enable,
+          enable: enableDragging,
           crossAxisCount: Constants.crossAxisCount,
           mainAxisSpacing: Constants.spacing,
           crossAxisSpacing: Constants.spacing,
-          isLongPressDraggable: false,
+          isLongPressDraggable: enableLongPress,
           items: items,
           nonDraggableWidgetsKeys: [ValueKey(0)],
         ),
