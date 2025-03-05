@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../data/reorderable_staggered_grid_view_item.dart';
 import 'animated_offset.dart';
-import 'drag_target_grid_item.dart';
 
 class DraggableGridItem extends StatefulWidget {
   final ReorderableStaggeredGridViewItem item;
@@ -82,59 +81,67 @@ class _DraggableGridItemState extends State<DraggableGridItem> {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedOffset(
-      duration: widget.offsetDuration,
-      offset: offset,
-      child: widget.isLongPressDraggable
+    return Stack(
+      children: [
+        // Animated draggable widget (above drag target)
+        AnimatedOffset(
+          duration: widget.offsetDuration,
+          offset: offset,
+          child: widget.isLongPressDraggable
 
-          // ===== LONG PRESS =====
+              // ===== LONG PRESS =====
 
-          ? LongPressDraggable(
-              data: widget.item.key,
-              onDragStarted: widget.onDragStarted,
-              onDragUpdate: widget.onDragUpdate,
-              onDragEnd: widget.onDragEnd,
-              dragAnchorStrategy: pointerDragAnchorStrategy,
-              childWhenDragging: const SizedBox.shrink(),
-              feedback: _FeedbackWidget(
-                buildFeedbackWidget: widget.buildFeedbackWidget,
-                originalWidgetKey: widget.originalWidgetKey,
-                child: widget.item.child,
-              ),
+              ? LongPressDraggable(
+                  data: widget.item.key,
+                  onDragStarted: widget.onDragStarted,
+                  onDragUpdate: widget.onDragUpdate,
+                  onDragEnd: widget.onDragEnd,
+                  childWhenDragging: const SizedBox.shrink(),
+                  feedback: _FeedbackWidget(
+                    buildFeedbackWidget: widget.buildFeedbackWidget,
+                    originalWidgetKey: widget.originalWidgetKey,
+                    child: widget.item.child,
+                  ),
 
-              // Child
-              child: DragTargetGridItem(
-                key: widget.originalWidgetKey,
-                item: widget.item,
-                onLeave: _onLeave,
-                onWillAcceptWithDetails: _onWillAcceptWithDetails,
-                onAcceptWithDetails: _onAcceptWithDetails,
-              ),
-            )
+                  // Child
+                  child: SizedBox(
+                    key: widget.originalWidgetKey,
+                    child: widget.item.child,
+                  ),
+                )
 
-          // ===== DEFAULT PRESS =====
+              // ===== DEFAULT PRESS =====
 
-          : Draggable(
-              data: widget.item.key,
-              onDragStarted: widget.onDragStarted,
-              onDragUpdate: widget.onDragUpdate,
-              onDragEnd: widget.onDragEnd,
-              childWhenDragging: const SizedBox.shrink(),
-              feedback: _FeedbackWidget(
-                buildFeedbackWidget: widget.buildFeedbackWidget,
-                originalWidgetKey: widget.originalWidgetKey,
-                child: widget.item.child,
-              ),
+              : Draggable(
+                  data: widget.item.key,
+                  onDragStarted: widget.onDragStarted,
+                  onDragUpdate: widget.onDragUpdate,
+                  onDragEnd: widget.onDragEnd,
+                  childWhenDragging: const SizedBox.shrink(),
+                  feedback: _FeedbackWidget(
+                    buildFeedbackWidget: widget.buildFeedbackWidget,
+                    originalWidgetKey: widget.originalWidgetKey,
+                    child: widget.item.child,
+                  ),
 
-              // Child
-              child: DragTargetGridItem(
-                key: widget.originalWidgetKey,
-                item: widget.item,
-                onLeave: _onLeave,
-                onWillAcceptWithDetails: _onWillAcceptWithDetails,
-                onAcceptWithDetails: _onAcceptWithDetails,
-              ),
-            ),
+                  // Child
+                  child: SizedBox(
+                    key: widget.originalWidgetKey,
+                    child: widget.item.child,
+                  ),
+                ),
+        ),
+
+        // Drag target (under the draggable widget)
+        Positioned.fill(
+          child: DragTarget(
+            onLeave: _onLeave,
+            onWillAcceptWithDetails: _onWillAcceptWithDetails,
+            onAcceptWithDetails: _onAcceptWithDetails,
+            builder: (context, _, __) => const SizedBox.shrink(),
+          ),
+        ),
+      ],
     );
   }
 }
