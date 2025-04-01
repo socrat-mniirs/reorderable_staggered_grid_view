@@ -75,7 +75,7 @@ class _MyAppState extends State<MyApp> {
           crossAxisSpacing: Constants.spacing,
           isLongPressDraggable: enableLongPress,
           items: items,
-          nonDraggableWidgetsKeys: [ValueKey(0)],
+          nonDraggableWidgetsKeys: [Constants.keys[0]!],
         ),
       ),
     );

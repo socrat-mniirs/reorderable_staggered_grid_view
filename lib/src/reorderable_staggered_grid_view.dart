@@ -217,7 +217,7 @@ class _ReorderableStaggeredGridViewState
         final item = items[index];
 
         // Check that the grid or current item should not be dragged
-        if (widget.nonDraggableWidgetsKeys.contains(item.key)) {
+        if (widget.nonDraggableWidgetsKeys.contains(item.child.key)) {
           return item.child;
         }
 
@@ -252,11 +252,11 @@ class _ReorderableStaggeredGridViewState
           onWillAcceptWithDetails: (details) {
             // Draggable data is an item key
             draggingItem = items.firstWhere(
-              (el) => el.key == details.data,
+              (el) => el.data == details.data,
             );
             lastDraggedItem = draggingItem;
 
-            if (_isAutoScrolling || details.data == item.key) return false;
+            if (_isAutoScrolling || details.data == item.data) return false;
 
             // TODO still in development
 

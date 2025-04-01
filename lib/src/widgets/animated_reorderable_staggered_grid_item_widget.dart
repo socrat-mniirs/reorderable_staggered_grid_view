@@ -94,8 +94,8 @@ class _AnimatedReorderableStaggeredGridItemWidgetState
   ) {
     super.didUpdateWidget(oldWidget);
 
-    if (widget.item.key != oldWidget.item.key) {
-      if (widget.item.key != widget.lastDraggedItem?.key) {
+    if (widget.item.child.key != oldWidget.item.child.key) {
+      if (widget.item.child.key != widget.lastDraggedItem?.child.key) {
         _controller.forward(from: 0);
       } else {
         widget.resetLastDraggedItem();
@@ -117,7 +117,7 @@ class _AnimatedReorderableStaggeredGridItemWidgetState
       // Child
       child: !widget.isDraggingEnabled
 
-          // Not enabled dragging, darg target, animations
+          // Not enabled dragging, drag target, animations
           ? widget.item.child
 
           // Enabled all

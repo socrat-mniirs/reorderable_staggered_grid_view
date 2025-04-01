@@ -55,7 +55,7 @@ class _DraggableGridItemState extends State<DraggableGridItem> {
   /// [_onLeave] - return the target object to its original place
   ///
   void _onLeave(Object? data) {
-    if (data == widget.item.key) {
+    if (data == widget.item.data) {
       return;
     }
 
@@ -65,7 +65,7 @@ class _DraggableGridItemState extends State<DraggableGridItem> {
   /// [_onWillAcceptWithDetails] - shifts the object, indicating that it is ready to replace another grid element
   ///
   bool _onWillAcceptWithDetails(DragTargetDetails<Object?> details) {
-    if (details.data == widget.item.key) {
+    if (details.data == widget.item.data) {
       return false;
     }
 
@@ -92,7 +92,7 @@ class _DraggableGridItemState extends State<DraggableGridItem> {
               // ===== LONG PRESS =====
 
               ? LongPressDraggable(
-                  data: widget.item.key,
+                  data: widget.item.data,
                   onDragStarted: widget.onDragStarted,
                   onDragUpdate: widget.onDragUpdate,
                   onDragEnd: widget.onDragEnd,
@@ -113,7 +113,7 @@ class _DraggableGridItemState extends State<DraggableGridItem> {
               // ===== DEFAULT PRESS =====
 
               : Draggable(
-                  data: widget.item.key,
+                  data: widget.item.data,
                   onDragStarted: widget.onDragStarted,
                   onDragUpdate: widget.onDragUpdate,
                   onDragEnd: widget.onDragEnd,
