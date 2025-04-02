@@ -13,6 +13,12 @@ class ReorderableStaggeredGridViewItem<T> {
   /// The [crossAxisCellCount] is the number of cells occupied by the element along the cross scroll axis.
   final int crossAxisCellCount;
 
+  final Duration duration;
+
+  final Curve curve;
+
+  final Offset offsetWhenAppear;
+
   /// The [child] is the widget content of the item.
   final Widget child;
 
@@ -21,6 +27,11 @@ class ReorderableStaggeredGridViewItem<T> {
     required this.animationKey,
     required this.mainAxisCellCount,
     required this.crossAxisCellCount,
+    this.duration = const Duration(milliseconds: 300),
+    this.curve = Curves.easeOut,
     required this.child,
-  });
+  }) : offsetWhenAppear = Offset(
+          1 / crossAxisCellCount,
+          (1 / mainAxisCellCount) * 100,
+        );
 }

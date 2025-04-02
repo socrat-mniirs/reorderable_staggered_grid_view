@@ -8,6 +8,8 @@ import 'animated_offset.dart';
 class DraggableGridItem extends StatefulWidget {
   final ReorderableStaggeredGridViewItem item;
 
+  final ReorderableStaggeredGridViewItem? lastDraggedItem;
+
   final bool isLongPressDraggable;
 
   final void Function()? onDragStarted;
@@ -48,6 +50,7 @@ class DraggableGridItem extends StatefulWidget {
     this.offsetDuration = const Duration(milliseconds: 200),
     this.buildFeedbackWidget,
     required this.scrollEndNotifier,
+    required this.lastDraggedItem,
   });
 
   @override
@@ -101,8 +104,16 @@ class _DraggableGridItemState extends State<DraggableGridItem> {
                   onDragStarted: widget.onDragStarted,
                   onDragUpdate: widget.onDragUpdate,
                   onDragEnd: widget.onDragEnd,
-                  childWhenDragging: const SizedBox.shrink(),
-                  feedback: _FeedbackWidget(
+                  childWhenDragging: TickerMode(
+                    enabled: false,
+                    child: AnimatedGridItemWidget(
+                      key: widget.item.animationKey,
+                      scrollEndNotifier: widget.scrollEndNotifier,
+                      lastDraggedItem: widget.lastDraggedItem,
+                      item: null,
+                    ),
+                  ),
+                  feedback: FeedbackWidget(
                     buildFeedbackWidget: widget.buildFeedbackWidget,
                     originalWidgetKey: widget.originalWidgetKey,
                     child: widget.item.child,
@@ -114,6 +125,7 @@ class _DraggableGridItemState extends State<DraggableGridItem> {
                     child: AnimatedGridItemWidget(
                       key: widget.item.animationKey,
                       scrollEndNotifier: widget.scrollEndNotifier,
+                      lastDraggedItem: widget.lastDraggedItem,
                       item: widget.item,
                     ),
                   ),
@@ -126,8 +138,16 @@ class _DraggableGridItemState extends State<DraggableGridItem> {
                   onDragStarted: widget.onDragStarted,
                   onDragUpdate: widget.onDragUpdate,
                   onDragEnd: widget.onDragEnd,
-                  childWhenDragging: const SizedBox.shrink(),
-                  feedback: _FeedbackWidget(
+                  childWhenDragging: TickerMode(
+                    enabled: false,
+                    child: AnimatedGridItemWidget(
+                      key: widget.item.animationKey,
+                      scrollEndNotifier: widget.scrollEndNotifier,
+                      lastDraggedItem: widget.lastDraggedItem,
+                      item: null,
+                    ),
+                  ),
+                  feedback: FeedbackWidget(
                     buildFeedbackWidget: widget.buildFeedbackWidget,
                     originalWidgetKey: widget.originalWidgetKey,
                     child: widget.item.child,
@@ -139,6 +159,7 @@ class _DraggableGridItemState extends State<DraggableGridItem> {
                     child: AnimatedGridItemWidget(
                       key: widget.item.animationKey,
                       scrollEndNotifier: widget.scrollEndNotifier,
+                      lastDraggedItem: widget.lastDraggedItem,
                       item: widget.item,
                     ),
                   ),
@@ -160,7 +181,7 @@ class _DraggableGridItemState extends State<DraggableGridItem> {
 }
 
 /// Feedback widget
-class _FeedbackWidget extends StatelessWidget {
+class FeedbackWidget extends StatelessWidget {
   final GlobalKey originalWidgetKey;
 
   final Widget Function(
@@ -171,7 +192,8 @@ class _FeedbackWidget extends StatelessWidget {
 
   final Widget child;
 
-  const _FeedbackWidget({
+  const FeedbackWidget({
+    super.key,
     required this.buildFeedbackWidget,
     required this.child,
     required this.originalWidgetKey,

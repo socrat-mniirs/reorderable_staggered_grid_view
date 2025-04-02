@@ -4,11 +4,15 @@ import 'package:reorderable_staggered_grid_view/src/data/scroll_end_notifier.dar
 
 class AnimatedGridItemWidget extends StatefulWidget {
   final ScrollEndNotifier scrollEndNotifier;
-  final ReorderableStaggeredGridViewItem item;
+
+  final ReorderableStaggeredGridViewItem? item;
+
+  final ReorderableStaggeredGridViewItem? lastDraggedItem;
 
   const AnimatedGridItemWidget({
     super.key,
     required this.item,
+    required this.lastDraggedItem,
     required this.scrollEndNotifier,
   });
 
@@ -34,42 +38,38 @@ class _AnimatedGridItemWidgetState extends State<AnimatedGridItemWidget>
 
     _controller = AnimationController(
       vsync: this,
-      duration: Duration(milliseconds: 300),
+      duration: widget.item?.duration ?? Duration(milliseconds: 300),
     );
 
-    final crossAxisOffsetCoef = 1 / widget.item.crossAxisCellCount;
-    final mainAxisOffsetCoef = 1 / widget.item.mainAxisCellCount;
-
-    // TODO initial animation
     _animation = Tween<Offset>(
-      begin: Offset(
-        0 * crossAxisOffsetCoef,
-        0 * mainAxisOffsetCoef,
-      ),
+      begin: widget.item?.offsetWhenAppear ??
+          Offset(
+            0 * (1 / (widget.item?.crossAxisCellCount ?? 1)),
+            100 * (1 / (widget.item?.mainAxisCellCount ?? 1)),
+          ),
       end: Offset.zero,
     ).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: Curves.easeOut,
+        curve: widget.item?.curve ?? Curves.easeOut,
       ),
     );
 
-    // _controller.forward(from: 0)
-    // .then(
-    //       (_) =>
-    //       WidgetsBinding.instance.addPostFrameCallback(
-    //         (_) => capturePosition(),
-    //       ),
-    //     )
-    //     ;
-    WidgetsBinding.instance.addPostFrameCallback(
-      (_) => capturePosition(),
-    );
+    _controller.forward(from: 0).then(
+          (_) => WidgetsBinding.instance.addPostFrameCallback(
+            (_) => capturePosition(),
+          ),
+        );
   }
 
   @override
   void didUpdateWidget(covariant AnimatedGridItemWidget oldWidget) {
-    startAnimation();
+    // Remove animation if objects this is the last dragged item
+    if (!identical(widget.lastDraggedItem, widget.item)) {
+      startAnimation();
+    } else {
+      capturePosition();
+    }
     super.didUpdateWidget(oldWidget);
   }
 
@@ -112,13 +112,17 @@ class _AnimatedGridItemWidgetState extends State<AnimatedGridItemWidget>
 
   @override
   Widget build(BuildContext context) {
+    if (widget.item == null) {
+      return const SizedBox.shrink();
+    }
+
     return AnimatedBuilder(
       animation: _animation,
       builder: (context, child) => Transform.translate(
         offset: _animation.value,
         child: child,
       ),
-      child: widget.item.child,
+      child: widget.item!.child,
     );
   }
 

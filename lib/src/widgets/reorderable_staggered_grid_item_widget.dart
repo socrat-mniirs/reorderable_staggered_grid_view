@@ -67,6 +67,7 @@ class ReorderableStaggeredGridItemWidget extends StatelessWidget {
         ? AnimatedGridItemWidget(
             key: item.animationKey,
             scrollEndNotifier: scrollEndNotifier,
+            lastDraggedItem: lastDraggedItem,
             item: item,
           )
 
@@ -97,6 +98,7 @@ class ReorderableStaggeredGridItemWidget extends StatelessWidget {
             buildFeedbackWidget: buildFeedbackWidget,
 
             // Child
+            lastDraggedItem: lastDraggedItem,
             item: item,
           );
   }
