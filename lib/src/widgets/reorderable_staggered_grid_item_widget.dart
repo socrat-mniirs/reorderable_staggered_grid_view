@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:reorderable_staggered_grid_view/src/data/reorderable_staggered_grid_view_item.dart';
+import 'package:reorderable_staggered_grid_view/src/data/scroll_end_notifier.dart';
 import 'package:reorderable_staggered_grid_view/src/widgets/draggable_grid_item.dart';
 import 'package:reorderable_staggered_grid_view/src/widgets/animated_grid_item_widget.dart';
 
@@ -36,6 +37,8 @@ class ReorderableStaggeredGridItemWidget extends StatelessWidget {
           BuildContext context, Widget child, GlobalKey originalWidgetKey)?
       buildFeedbackWidget;
 
+  final ScrollEndNotifier scrollEndNotifier;
+
   const ReorderableStaggeredGridItemWidget({
     super.key,
     required this.item,
@@ -53,6 +56,7 @@ class ReorderableStaggeredGridItemWidget extends StatelessWidget {
     required this.onWillAcceptWithDetails,
     required this.onAcceptWithDetails,
     required this.buildFeedbackWidget,
+    required this.scrollEndNotifier,
   });
 
   @override
@@ -62,6 +66,7 @@ class ReorderableStaggeredGridItemWidget extends StatelessWidget {
         // Not enabled dragging, drag target, animations
         ? AnimatedGridItemWidget(
             key: item.animationKey,
+            scrollEndNotifier: scrollEndNotifier,
             item: item,
           )
 
@@ -76,6 +81,7 @@ class ReorderableStaggeredGridItemWidget extends StatelessWidget {
             // Dragging + Auto-scroll
             onDragUpdate: onDragUpdate,
             onDragEnd: onDragEnd,
+            scrollEndNotifier: scrollEndNotifier,
 
             // Offset when dragging over
             animationOffset: willAcceptAnimationOffset,

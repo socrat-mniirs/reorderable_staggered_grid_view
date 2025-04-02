@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:reorderable_staggered_grid_view/src/data/scroll_end_notifier.dart';
 import 'package:reorderable_staggered_grid_view/src/widgets/animated_grid_item_widget.dart';
 
 import '../data/reorderable_staggered_grid_view_item.dart';
@@ -30,6 +31,8 @@ class DraggableGridItem extends StatefulWidget {
           BuildContext context, Widget child, GlobalKey originalWidgetKey)?
       buildFeedbackWidget;
 
+  final ScrollEndNotifier scrollEndNotifier;
+
   final originalWidgetKey = GlobalKey();
 
   DraggableGridItem({
@@ -44,6 +47,7 @@ class DraggableGridItem extends StatefulWidget {
     this.animationOffset = const Offset(50, 50),
     this.offsetDuration = const Duration(milliseconds: 200),
     this.buildFeedbackWidget,
+    required this.scrollEndNotifier,
   });
 
   @override
@@ -109,6 +113,7 @@ class _DraggableGridItemState extends State<DraggableGridItem> {
                     key: widget.originalWidgetKey,
                     child: AnimatedGridItemWidget(
                       key: widget.item.animationKey,
+                      scrollEndNotifier: widget.scrollEndNotifier,
                       item: widget.item,
                     ),
                   ),
@@ -133,6 +138,7 @@ class _DraggableGridItemState extends State<DraggableGridItem> {
                     key: widget.originalWidgetKey,
                     child: AnimatedGridItemWidget(
                       key: widget.item.animationKey,
+                      scrollEndNotifier: widget.scrollEndNotifier,
                       item: widget.item,
                     ),
                   ),

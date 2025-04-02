@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:reorderable_staggered_grid_view/src/data/scroll_end_notifier.dart';
 import 'package:staggered_grid_view/flutter_staggered_grid_view.dart';
 
 import '../reorderable_staggered_grid_view.dart';
@@ -102,17 +103,20 @@ class ReorderableStaggeredGridView extends StatefulWidget {
 class _ReorderableStaggeredGridViewState
     extends State<ReorderableStaggeredGridView> {
   late final ScrollController _scrollController;
-  late List<ReorderableStaggeredGridViewItem> items;
+  late List<ReorderableStaggeredGridViewItem> _items;
 
   double _dragY = 0;
   bool _isAutoScrolling = false;
 
-  ReorderableStaggeredGridViewItem? draggingItem;
-  ReorderableStaggeredGridViewItem? lastDraggedItem;
+  ReorderableStaggeredGridViewItem? _draggingItem;
+  ReorderableStaggeredGridViewItem? _lastDraggedItem;
+
+  late final ScrollEndNotifier _scrollEndNotifier;
 
   @override
   void initState() {
-    items = widget.items;
+    _scrollEndNotifier = ScrollEndNotifier();
+    _items = widget.items;
     _scrollController = widget.controller ?? ScrollController();
     super.initState();
   }
@@ -122,7 +126,7 @@ class _ReorderableStaggeredGridViewState
   void didUpdateWidget(covariant ReorderableStaggeredGridView oldWidget) {
     if (oldWidget.items.length != widget.items.length ||
         widget.enable != oldWidget.enable) {
-      items = widget.items;
+      _items = widget.items;
       return;
     }
 
@@ -188,95 +192,102 @@ class _ReorderableStaggeredGridViewState
 
   @override
   Widget build(BuildContext context) {
-    return StaggeredGridView.countBuilder(
-      // Scroll
-      controller: _scrollController,
-      addAutomaticKeepAlives: widget.addAutomaticKeepAlives,
-      addRepaintBoundaries: widget.addRepaintBoundaries,
-      physics: widget.physics,
-
-      // UI PARAMS
-      padding: widget.padding,
-      crossAxisCount: widget.crossAxisCount,
-      mainAxisSpacing: widget.mainAxisSpacing,
-      crossAxisSpacing: widget.crossAxisSpacing,
-
-      // CELL SIZE
-      staggeredTileBuilder: (index) {
-        final item = items[index];
-
-        return StaggeredTile.count(
-          item.crossAxisCellCount,
-          item.mainAxisCellCount.toDouble(),
-        );
+    return NotificationListener<ScrollEndNotification>(
+      onNotification: (notification) {
+        _scrollEndNotifier.scrollEnd();
+        return true;
       },
+      child: StaggeredGridView.countBuilder(
+        // Scroll
+        controller: _scrollController,
+        addAutomaticKeepAlives: widget.addAutomaticKeepAlives,
+        addRepaintBoundaries: widget.addRepaintBoundaries,
+        physics: widget.physics,
 
-      // ITEMS
-      itemCount: items.length,
-      itemBuilder: (context, index) {
-        final item = items[index];
+        // UI PARAMS
+        padding: widget.padding,
+        crossAxisCount: widget.crossAxisCount,
+        mainAxisSpacing: widget.mainAxisSpacing,
+        crossAxisSpacing: widget.crossAxisSpacing,
 
-        // Check that the grid or current item should not be dragged
-        if (widget.nonDraggableWidgetsKeys.contains(item.child.key)) {
-          return item.child;
-        }
+        // CELL SIZE
+        staggeredTileBuilder: (index) {
+          final item = _items[index];
 
-        return ReorderableStaggeredGridItemWidget(
-          // Items
-          item: item,
-          lastDraggedItem: lastDraggedItem,
-          draggingItem: draggingItem,
+          return StaggeredTile.count(
+            item.crossAxisCellCount,
+            item.mainAxisCellCount.toDouble(),
+          );
+        },
 
-          // UI
-          isDraggingEnabled: widget.enable,
-          isLongPressDraggable: widget.isLongPressDraggable,
+        // ITEMS
+        itemCount: _items.length,
+        itemBuilder: (context, index) {
+          final item = _items[index];
 
-          // Animation offset
-          slidableAnimationDuration: widget.slidableAnimationDuration,
-          slidableAnimationOffset: widget.slidableAnimationOffset,
-          willAcceptOffsetDuration: widget.willAcceptOffsetDuration,
-          willAcceptAnimationOffset: widget.willAcceptAnimationOffset,
+          // Check that the grid or current item should not be dragged
+          if (widget.nonDraggableWidgetsKeys.contains(item.child.key)) {
+            return item.child;
+          }
 
-          // Feedback widget
-          buildFeedbackWidget: widget.buildFeedbackWidget,
+          return ReorderableStaggeredGridItemWidget(
+            // Items
+            item: item,
+            lastDraggedItem: _lastDraggedItem,
+            draggingItem: _draggingItem,
 
-          // Dragging + Scroll
-          onDragUpdate: _autoScrollOnDragUpdate,
-          onDragEnd: (_) {
-            _stopAutoScroll();
-            setState(() => draggingItem = null);
-          },
+            // UI
+            isDraggingEnabled: widget.enable,
+            isLongPressDraggable: widget.isLongPressDraggable,
 
-          // Accepting
-          resetLastDraggedItem: () => lastDraggedItem = null,
-          onWillAcceptWithDetails: (details) {
-            // Draggable data is an item key
-            draggingItem = items.firstWhere(
-              (el) => el.data == details.data,
-            );
-            lastDraggedItem = draggingItem;
+            // Animation offset
+            slidableAnimationDuration: widget.slidableAnimationDuration,
+            slidableAnimationOffset: widget.slidableAnimationOffset,
+            willAcceptOffsetDuration: widget.willAcceptOffsetDuration,
+            willAcceptAnimationOffset: widget.willAcceptAnimationOffset,
 
-            if (_isAutoScrolling || details.data == item.data) return false;
+            // Feedback widget
+            buildFeedbackWidget: widget.buildFeedbackWidget,
 
-            // TODO still in development
+            // Dragging + Scroll
+            onDragUpdate: _autoScrollOnDragUpdate,
+            onDragEnd: (_) {
+              _stopAutoScroll();
+              setState(() => _draggingItem = null);
+            },
+            scrollEndNotifier: _scrollEndNotifier,
 
-            // items.remove(draggingItem);
-            // items.insert(index, draggingItem!);
+            // Accepting
+            resetLastDraggedItem: () => _lastDraggedItem = null,
+            onWillAcceptWithDetails: (details) {
+              // Draggable data is an item key
+              _draggingItem = _items.firstWhere(
+                (el) => el.data == details.data,
+              );
+              _lastDraggedItem = _draggingItem;
 
-            // setState(() {});
+              if (_isAutoScrolling || details.data == item.data) return false;
 
-            return true;
-          },
-          onAcceptWithDetails: (details) {
-            assert(draggingItem != null);
+              // TODO still in development
 
-            items.remove(draggingItem);
-            items.insert(index, draggingItem!);
+              // items.remove(draggingItem);
+              // items.insert(index, draggingItem!);
 
-            widget.onAcceptWithDetails?.call(details, index);
-          },
-        );
-      },
+              // setState(() {});
+
+              return true;
+            },
+            onAcceptWithDetails: (details) {
+              assert(_draggingItem != null);
+
+              _items.remove(_draggingItem);
+              _items.insert(index, _draggingItem!);
+
+              widget.onAcceptWithDetails?.call(details, index);
+            },
+          );
+        },
+      ),
     );
   }
 }

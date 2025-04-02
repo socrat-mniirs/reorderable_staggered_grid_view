@@ -1,12 +1,15 @@
 import 'package:flutter/widgets.dart';
 import 'package:reorderable_staggered_grid_view/src/data/reorderable_staggered_grid_view_item.dart';
+import 'package:reorderable_staggered_grid_view/src/data/scroll_end_notifier.dart';
 
 class AnimatedGridItemWidget extends StatefulWidget {
+  final ScrollEndNotifier scrollEndNotifier;
   final ReorderableStaggeredGridViewItem item;
 
   const AnimatedGridItemWidget({
     super.key,
     required this.item,
+    required this.scrollEndNotifier,
   });
 
   @override
@@ -19,9 +22,15 @@ class _AnimatedGridItemWidgetState extends State<AnimatedGridItemWidget>
   late AnimationController _controller;
   late Animation<Offset> _animation;
 
+  // Recalculation of positions after scroll completion
+  void _scrollEndListener() => capturePosition();
+
   @override
   void initState() {
     super.initState();
+
+    // Recalculation of positions after scroll completion
+    widget.scrollEndNotifier.addListener(_scrollEndListener);
 
     _controller = AnimationController(
       vsync: this,
@@ -116,6 +125,7 @@ class _AnimatedGridItemWidgetState extends State<AnimatedGridItemWidget>
   @override
   void dispose() {
     _controller.dispose();
+    widget.scrollEndNotifier.removeListener(_scrollEndListener);
     super.dispose();
   }
 }
