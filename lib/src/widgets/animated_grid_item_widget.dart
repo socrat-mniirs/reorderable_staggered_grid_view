@@ -47,15 +47,15 @@ class _AnimatedGridItemWidgetState extends State<AnimatedGridItemWidget>
 
     // _controller.forward(from: 0)
     // .then(
-    //       (_) => 
+    //       (_) =>
     //       WidgetsBinding.instance.addPostFrameCallback(
     //         (_) => capturePosition(),
     //       ),
     //     )
     //     ;
     WidgetsBinding.instance.addPostFrameCallback(
-            (_) => capturePosition(),
-          );
+      (_) => capturePosition(),
+    );
   }
 
   @override
@@ -72,28 +72,32 @@ class _AnimatedGridItemWidgetState extends State<AnimatedGridItemWidget>
   }
 
   void startAnimation() {
-    final renderBox = context.findRenderObject() as RenderBox?;
-    if (renderBox != null) {
-      final newPosition = renderBox.localToGlobal(Offset.zero);
-      final delta = _position - newPosition;
+    try {
+      final renderBox = context.findRenderObject() as RenderBox?;
+      if (renderBox != null) {
+        final newPosition = renderBox.localToGlobal(Offset.zero);
+        final delta = _position - newPosition;
 
-      setState(
-        () {
-          _animation = Tween<Offset>(
-            begin: Offset(delta.dx, delta.dy),
-            end: Offset.zero,
-          ).animate(
-            CurvedAnimation(
-              parent: _controller,
-              curve: Curves.easeOut,
-            ),
-          );
-        },
-      );
+        setState(
+          () {
+            _animation = Tween<Offset>(
+              begin: Offset(delta.dx, delta.dy),
+              end: Offset.zero,
+            ).animate(
+              CurvedAnimation(
+                parent: _controller,
+                curve: Curves.easeOut,
+              ),
+            );
+          },
+        );
 
-      _controller.forward(from: 0).then(
-            (_) => capturePosition(),
-          );
+        _controller.forward(from: 0).then(
+              (_) => capturePosition(),
+            );
+      }
+    } catch (_) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => startAnimation());
     }
   }
 
