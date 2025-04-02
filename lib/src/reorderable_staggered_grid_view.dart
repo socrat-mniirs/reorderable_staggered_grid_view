@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:staggered_grid_view/flutter_staggered_grid_view.dart';
 
 import '../reorderable_staggered_grid_view.dart';
-import 'widgets/animated_reorderable_staggered_grid_item_widget.dart';
+import 'widgets/reorderable_staggered_grid_item_widget.dart';
 
 class ReorderableStaggeredGridView extends StatefulWidget {
   /// The scroll controller for the scroll view
@@ -221,7 +221,7 @@ class _ReorderableStaggeredGridViewState
           return item.child;
         }
 
-        return AnimatedReorderableStaggeredGridItemWidget(
+        return ReorderableStaggeredGridItemWidget(
           // Items
           item: item,
           lastDraggedItem: lastDraggedItem,

@@ -14,11 +14,27 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  List<ReorderableStaggeredGridViewItem> items =
-      List.from(Constants.reorderableStaggeredGridViewItems);
+  List<ReorderableStaggeredGridViewItem> items = List.from(
+    Constants.reorderableStaggeredGridViewItems,
+  );
 
   bool enableLongPress = false;
   bool enableDragging = true;
+
+  void _addNewItem() {
+    final newItem = Constants.generateItem(items.length + 100);
+    items.add(newItem);
+  }
+
+  void _removeItem() {
+    if (items.isNotEmpty) {
+      // Necessary to avoid keys duplicates
+      final removedIndex = Constants.reorderableStaggeredGridViewItems.indexOf(items.last);
+      Constants.animationKeys.remove(removedIndex);
+      
+      items.removeLast();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -55,13 +71,13 @@ class _MyAppState extends State<MyApp> {
 
             // Remove last
             IconButton(
-              onPressed: () => setState(() => items.removeLast()),
+              onPressed: () => setState(_removeItem),
               icon: Icon(Icons.clear),
             ),
 
             // Add new
             IconButton(
-              onPressed: () => setState(() => items.add(items[1])),
+              onPressed: () => setState(_addNewItem),
               icon: Icon(Icons.add),
             ),
           ],
@@ -75,7 +91,7 @@ class _MyAppState extends State<MyApp> {
           crossAxisSpacing: Constants.spacing,
           isLongPressDraggable: enableLongPress,
           items: items,
-          nonDraggableWidgetsKeys: [Constants.keys[0]!],
+          nonDraggableWidgetsKeys: [Constants.widgetKeys[0]!],
         ),
       ),
     );

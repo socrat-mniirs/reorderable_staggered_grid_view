@@ -4,6 +4,9 @@ class ReorderableStaggeredGridViewItem<T> {
   /// The [data] is a required value for the item.
   final T? data;
 
+  /// The [animationKey] is a required unique identifier for the animation during dragging.
+  final GlobalKey animationKey;
+
   /// The [mainAxisCellCount] is the number of cells occupied by the element along the main scroll axis.
   final int mainAxisCellCount;
 
@@ -15,6 +18,7 @@ class ReorderableStaggeredGridViewItem<T> {
 
   ReorderableStaggeredGridViewItem({
     required this.data,
+    required this.animationKey,
     required this.mainAxisCellCount,
     required this.crossAxisCellCount,
     required this.child,

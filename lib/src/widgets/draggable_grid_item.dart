@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:reorderable_staggered_grid_view/src/widgets/animated_grid_item_widget.dart';
 
 import '../data/reorderable_staggered_grid_view_item.dart';
 import 'animated_offset.dart';
@@ -106,7 +107,10 @@ class _DraggableGridItemState extends State<DraggableGridItem> {
                   // Child
                   child: SizedBox(
                     key: widget.originalWidgetKey,
-                    child: widget.item.child,
+                    child: AnimatedGridItemWidget(
+                      key: widget.item.animationKey,
+                      item: widget.item,
+                    ),
                   ),
                 )
 
@@ -127,7 +131,10 @@ class _DraggableGridItemState extends State<DraggableGridItem> {
                   // Child
                   child: SizedBox(
                     key: widget.originalWidgetKey,
-                    child: widget.item.child,
+                    child: AnimatedGridItemWidget(
+                      key: widget.item.animationKey,
+                      item: widget.item,
+                    ),
                   ),
                 ),
         ),

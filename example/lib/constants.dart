@@ -9,31 +9,39 @@ abstract class Constants {
 
   static const spacing = 10.0;
 
-  static Map<int, GlobalKey> keys = {};
+  static Map<int, GlobalKey> widgetKeys = {};
+  static GlobalKey widgetKeyById(int id) =>
+      widgetKeys.putIfAbsent(id, () => GlobalKey());
 
-  static GlobalKey getKey(int id) => keys.putIfAbsent(id, () => GlobalKey());
+  static Map<int, GlobalKey> animationKeys = {};
+  static GlobalKey animationKeyById(int id) =>
+      animationKeys.putIfAbsent(id, () => GlobalKey());
 
   static final List<ReorderableStaggeredGridViewItem>
       reorderableStaggeredGridViewItems = List.generate(
     100,
-    (index) {
-      final key = getKey(index);
-
-      return ReorderableStaggeredGridViewItem(
-        data: index,
-        mainAxisCellCount: Random().nextInt(2) + 1,
-        crossAxisCellCount: Random().nextInt(2) + 1,
-        child: TileWidget(
-          key: key,
-          title: Text(index == 0 ? 'Not dragged' : index.toString()),
-          color: Color.from(
-            alpha: 0.1,
-            red: Random().nextInt(255).toDouble(),
-            green: Random().nextInt(255).toDouble(),
-            blue: Random().nextInt(255).toDouble(),
-          ),
-        ),
-      );
-    },
+    generateItem,
   );
+
+  static ReorderableStaggeredGridViewItem generateItem(dynamic id) {
+    final key = widgetKeyById(id);
+    final animationKey = animationKeyById(id);
+
+    return ReorderableStaggeredGridViewItem(
+      animationKey: animationKey,
+      data: id,
+      mainAxisCellCount: Random().nextInt(2) + 1,
+      crossAxisCellCount: Random().nextInt(2) + 1,
+      child: TileWidget(
+        key: key,
+        title: Text(id == 0 ? 'Not dragged' : id.toString()),
+        color: Color.from(
+          alpha: 0.1,
+          red: Random().nextInt(255).toDouble(),
+          green: Random().nextInt(255).toDouble(),
+          blue: Random().nextInt(255).toDouble(),
+        ),
+      ),
+    );
+  }
 }
