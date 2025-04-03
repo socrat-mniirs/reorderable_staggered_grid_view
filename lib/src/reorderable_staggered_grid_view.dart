@@ -6,32 +6,32 @@ import '../reorderable_staggered_grid_view.dart';
 import 'widgets/reorderable_staggered_grid_item_widget.dart';
 
 class ReorderableStaggeredGridView extends StatefulWidget {
-  /// The scroll controller for the scroll view
+  /// The scroll [controller] for the scroll view.
   final ScrollController? controller;
 
-  /// Is dragging enabled or not
+  /// The [enable] indicates is dragging enabled or not.
   final bool enable;
 
-  /// Padding around the grid view
+  /// The [padding] around the grid view.
   final EdgeInsets? padding;
 
-  /// The number of items in the cross-axis of the grid
+  /// The [crossAxisCount] is a number of items in the cross-axis of the grid.
   final int crossAxisCount;
 
-  /// Spacing between elements in the main-axis
+  /// The [mainAxisSpacing] is a spacing between elements in the main-axis.
   final double mainAxisSpacing;
 
-  /// Spacing between elements in the cross-axis
+  /// The [crossAxisSpacing] is a spacing between elements in the cross-axis.
   final double crossAxisSpacing;
 
-  /// Physics of the scroll view
+  /// The [physics] of the scroll view.
   final ScrollPhysics? physics;
 
-  /// Whether to wrap each child in an AutomaticKeepAlive.
+  /// Whether to wrap each child in an [AutomaticKeepAlive].
   /// Defaults to true.
   final bool addAutomaticKeepAlives;
 
-  /// Whether to wrap each child in a RepaintBoundary.
+  /// Whether to wrap each child in a [RepaintBoundary].
   /// Typically, children in a scrolling container are wrapped in repaint boundaries
   /// so that they do not need to be repainted as the list scrolls.
   /// If the children are easy to repaint (e.g., solid color blocks or a short snippet of text),
@@ -40,14 +40,14 @@ class ReorderableStaggeredGridView extends StatefulWidget {
   /// Defaults to true.
   final bool addRepaintBoundaries;
 
-  /// Does it take a long press to drag
+  /// The [isLongPressDraggable] indicates does it take a long press to drag or not.
   final bool isLongPressDraggable;
 
-  /// A callback when an item is accepted during a drag operation with drag target details
+  /// The [onAcceptWithDetails] is a callback when an item is accepted during a drag operation with drag target details
   final void Function(DragTargetDetails details, int newIndex)?
       onAcceptWithDetails;
 
-  /// A callback to custom building a feedback widget
+  /// The [buildFeedbackWidget] is a callback to custom building a feedback widget
   final Widget Function(
           BuildContext context, Widget child, GlobalKey originalWidgetKey)?
       buildFeedbackWidget;
@@ -55,13 +55,13 @@ class ReorderableStaggeredGridView extends StatefulWidget {
   /// Keys of widgets which cannot be dragged
   final List<Key> nonDraggableWidgetsKeys;
 
-  /// The [willAcceptAnimationOffset] animation duration
+  /// The [willAcceptAnimationOffset] is a callback which calls when there is a draggable widget above another drag target. 
   final Duration willAcceptOffsetDuration;
 
-  /// The animation offset when dragging widget over another item
+  /// The [willAcceptAnimationOffset] is the animation offset value when dragging widget over another drag target.
   final Offset willAcceptAnimationOffset;
 
-  /// List of items which can be reordered or dragged
+  /// The [items] is a list of items which can be reordered or dragged
   final List<ReorderableStaggeredGridViewItem> items;
 
   const ReorderableStaggeredGridView({
