@@ -1,19 +1,22 @@
-import 'package:example/constants.dart';
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:reorderable_staggered_grid_view/reorderable_staggered_grid_view.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const ReorderableStaggeredGridViewExample());
 }
 
-class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+class ReorderableStaggeredGridViewExample extends StatefulWidget {
+  const ReorderableStaggeredGridViewExample({super.key});
 
   @override
-  State<MyApp> createState() => _MyAppState();
+  State<ReorderableStaggeredGridViewExample> createState() =>
+      _ReorderableStaggeredGridViewExampleState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _ReorderableStaggeredGridViewExampleState
+    extends State<ReorderableStaggeredGridViewExample> {
   List<ReorderableStaggeredGridViewItem> items = List.from(
     Constants.reorderableStaggeredGridViewItems,
   );
@@ -22,16 +25,20 @@ class _MyAppState extends State<MyApp> {
   bool enableDragging = true;
 
   void _addNewItem() {
-    final newItem = Constants.generateItem(items.length + 100);
+    final newItem = Constants._generateItem(
+      items.length,
+    );
     items.add(newItem);
   }
 
   void _removeItem() {
     if (items.isNotEmpty) {
       // Necessary to avoid keys duplicates
-      final removedIndex = Constants.reorderableStaggeredGridViewItems.indexOf(items.last);
-      Constants.animationKeys.remove(removedIndex);
-      
+      final removedIndex = Constants.reorderableStaggeredGridViewItems.indexOf(
+        items.last,
+      );
+      Constants._animationKeys.remove(removedIndex);
+
       items.removeLast();
     }
   }
@@ -41,15 +48,24 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
+        // AppBar
         appBar: AppBar(
+          // Title
+          title: Text('Reorderable Staggered Grid View'),
+
+          // Actions with grid items
           actions: [
             // Switch enable
             Row(
               children: [
-                Text('Long press ${enableLongPress ? 'enabled' : 'disabled'}'),
+                Text(
+                  'Long press ${enableLongPress ? 'enabled' : 'disabled'}',
+                ),
                 Switch(
                   value: enableLongPress,
-                  onChanged: (value) => setState(() => enableLongPress = value),
+                  onChanged: (value) => setState(
+                    () => enableLongPress = value,
+                  ),
                 ),
               ],
             ),
@@ -59,10 +75,14 @@ class _MyAppState extends State<MyApp> {
             // Switch enable
             Row(
               children: [
-                Text('Dragging ${enableDragging ? 'enabled' : 'disabled'}'),
+                Text(
+                  'Dragging ${enableDragging ? 'enabled' : 'disabled'}',
+                ),
                 Switch(
                   value: enableDragging,
-                  onChanged: (value) => setState(() => enableDragging = value),
+                  onChanged: (value) => setState(
+                    () => enableDragging = value,
+                  ),
                 ),
               ],
             ),
@@ -70,19 +90,28 @@ class _MyAppState extends State<MyApp> {
             const SizedBox(width: 20),
 
             // Remove last
-            IconButton(
-              onPressed: () => setState(_removeItem),
-              icon: Icon(Icons.clear),
+            Tooltip(
+              message: 'Remove last item',
+              child: IconButton(
+                onPressed: () => setState(_removeItem),
+                icon: Icon(Icons.clear),
+              ),
             ),
 
             // Add new
-            IconButton(
-              onPressed: () => setState(_addNewItem),
-              icon: Icon(Icons.add),
+            Tooltip(
+              message: 'Add new item',
+              child: IconButton(
+                onPressed: () => setState(_addNewItem),
+                icon: Icon(Icons.add),
+              ),
             ),
+
+            const SizedBox(width: 20),
           ],
-          title: Text('Custom Reorderable Staggered Grid View'),
         ),
+
+        // Body
         body: ReorderableStaggeredGridView(
           padding: EdgeInsets.all(20),
           enable: enableDragging,
@@ -91,7 +120,79 @@ class _MyAppState extends State<MyApp> {
           crossAxisSpacing: Constants.spacing,
           isLongPressDraggable: enableLongPress,
           items: items,
-          nonDraggableWidgetsKeys: [Constants.widgetKeys[0]!],
+          nonDraggableWidgetsKeys: [Constants._widgetKeys[0]!],
+        ),
+      ),
+    );
+  }
+}
+
+/// A widget content of a grid item which using to demonstrate the package possibilities.
+class TileWidget extends StatelessWidget {
+  final Widget title;
+  final Color color;
+
+  const TileWidget({
+    super.key,
+    required this.title,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: color,
+        border: Border.all(color: Colors.black),
+      ),
+      child: Center(child: title),
+    );
+  }
+}
+
+/// An abstract class with demo data to demonstrate package possibilities.
+abstract class Constants {
+  static const crossAxisCount = 8;
+  static const spacing = 10.0;
+
+  // Widget's keys
+  static final Map<int, GlobalKey> _widgetKeys = {};
+  static GlobalKey widgetKeyById(int id) => _widgetKeys.putIfAbsent(
+        id,
+        () => GlobalKey(),
+      );
+
+  // Animation widget's keys
+  static final Map<int, GlobalKey> _animationKeys = {};
+  static GlobalKey animationKeyById(int id) => _animationKeys.putIfAbsent(
+        id,
+        () => GlobalKey(),
+      );
+
+  // Items
+  static final List<ReorderableStaggeredGridViewItem>
+      reorderableStaggeredGridViewItems = List.generate(
+    100,
+    _generateItem,
+  );
+
+  static ReorderableStaggeredGridViewItem _generateItem(dynamic id) {
+    final key = widgetKeyById(id);
+    final animationKey = animationKeyById(id);
+
+    return ReorderableStaggeredGridViewItem(
+      animationKey: animationKey,
+      data: id,
+      mainAxisCellCount: Random().nextInt(2) + 1,
+      crossAxisCellCount: Random().nextInt(2) + 1,
+      child: TileWidget(
+        key: key,
+        title: Text(id == 0 ? 'Not dragged' : id.toString()),
+        color: Color.from(
+          alpha: 0.1,
+          red: Random().nextInt(255).toDouble(),
+          green: Random().nextInt(255).toDouble(),
+          blue: Random().nextInt(255).toDouble(),
         ),
       ),
     );

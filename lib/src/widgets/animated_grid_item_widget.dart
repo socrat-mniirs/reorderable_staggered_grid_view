@@ -2,17 +2,25 @@ import 'package:flutter/widgets.dart';
 import 'package:reorderable_staggered_grid_view/src/data/reorderable_staggered_grid_view_item.dart';
 import 'package:reorderable_staggered_grid_view/src/data/scroll_end_notifier.dart';
 
+/// The [AnimatedGridItemWidget] is a widget that will be animated from its
+/// old position on the screen to its new position in grid after
+/// changing its index in an array of parent grid.
+///
+/// Animation works only if passed widget Key (GlobalKey recommended).
 class AnimatedGridItemWidget extends StatefulWidget {
+  /// The [scrollEndNotifier] notify animated grid items about end of scroll to recalculate their positions on the screen.
   final ScrollEndNotifier scrollEndNotifier;
 
+  /// The [item] is a grid widget that can be reordered or dragged.
   final ReorderableStaggeredGridViewItem? item;
 
-  final ReorderableStaggeredGridViewItem? lastDraggedItem;
+  /// The [isLastDraggedItem] define that the item should be animated after reordering or not.
+  final bool isLastDraggedItem;
 
   const AnimatedGridItemWidget({
-    super.key,
+    required super.key,
     required this.item,
-    required this.lastDraggedItem,
+    this.isLastDraggedItem = false,
     required this.scrollEndNotifier,
   });
 
@@ -23,6 +31,8 @@ class AnimatedGridItemWidget extends StatefulWidget {
 class _AnimatedGridItemWidgetState extends State<AnimatedGridItemWidget>
     with SingleTickerProviderStateMixin {
   Offset _position = Offset.zero;
+
+  // Animation
   late AnimationController _controller;
   late Animation<Offset> _animation;
 
@@ -65,7 +75,7 @@ class _AnimatedGridItemWidgetState extends State<AnimatedGridItemWidget>
   @override
   void didUpdateWidget(covariant AnimatedGridItemWidget oldWidget) {
     // Remove animation if objects this is the last dragged item
-    if (!identical(widget.lastDraggedItem, widget.item)) {
+    if (!widget.isLastDraggedItem) {
       startAnimation();
     } else {
       capturePosition();

@@ -6,20 +6,28 @@ import '../data/reorderable_staggered_grid_view_item.dart';
 import 'animated_offset.dart';
 
 class DraggableGridItem extends StatefulWidget {
+  /// The [item] is a grid widget that can be reordered or dragged.
   final ReorderableStaggeredGridViewItem item;
 
-  final ReorderableStaggeredGridViewItem? lastDraggedItem;
+  // TODO
+  final bool isLastDraggedItem;
 
+  // TODO
   final bool isLongPressDraggable;
 
+  // TODO
   final void Function()? onDragStarted;
 
+  // TODO
   final void Function(DragUpdateDetails details)? onDragUpdate;
 
+  // TODO
   final void Function(DraggableDetails details)? onDragEnd;
 
+  // TODO
   final void Function(DragTargetDetails<Object?> details)? onAcceptWithDetails;
 
+  // TODO
   final bool Function(DragTargetDetails<Object?> details)?
       onWillAcceptWithDetails;
 
@@ -29,17 +37,22 @@ class DraggableGridItem extends StatefulWidget {
   /// The [animationOffset] animation duration
   final Duration offsetDuration;
 
+  // TODO
   final Widget Function(
           BuildContext context, Widget child, GlobalKey originalWidgetKey)?
       buildFeedbackWidget;
 
+  // TODO
   final ScrollEndNotifier scrollEndNotifier;
 
+  // TODO
+  /// The [originalWidgetKey] using to get original sizes when building feedback widget.
   final originalWidgetKey = GlobalKey();
 
   DraggableGridItem({
     super.key,
     required this.item,
+    required this.isLastDraggedItem,
     this.isLongPressDraggable = false,
     this.onDragStarted,
     this.onDragUpdate,
@@ -50,7 +63,6 @@ class DraggableGridItem extends StatefulWidget {
     this.offsetDuration = const Duration(milliseconds: 200),
     this.buildFeedbackWidget,
     required this.scrollEndNotifier,
-    required this.lastDraggedItem,
   });
 
   @override
@@ -109,7 +121,6 @@ class _DraggableGridItemState extends State<DraggableGridItem> {
                     child: AnimatedGridItemWidget(
                       key: widget.item.animationKey,
                       scrollEndNotifier: widget.scrollEndNotifier,
-                      lastDraggedItem: widget.lastDraggedItem,
                       item: null,
                     ),
                   ),
@@ -125,7 +136,7 @@ class _DraggableGridItemState extends State<DraggableGridItem> {
                     child: AnimatedGridItemWidget(
                       key: widget.item.animationKey,
                       scrollEndNotifier: widget.scrollEndNotifier,
-                      lastDraggedItem: widget.lastDraggedItem,
+                      isLastDraggedItem: widget.isLastDraggedItem,
                       item: widget.item,
                     ),
                   ),
@@ -143,7 +154,6 @@ class _DraggableGridItemState extends State<DraggableGridItem> {
                     child: AnimatedGridItemWidget(
                       key: widget.item.animationKey,
                       scrollEndNotifier: widget.scrollEndNotifier,
-                      lastDraggedItem: widget.lastDraggedItem,
                       item: null,
                     ),
                   ),
@@ -159,7 +169,7 @@ class _DraggableGridItemState extends State<DraggableGridItem> {
                     child: AnimatedGridItemWidget(
                       key: widget.item.animationKey,
                       scrollEndNotifier: widget.scrollEndNotifier,
-                      lastDraggedItem: widget.lastDraggedItem,
+                      isLastDraggedItem: widget.isLastDraggedItem,
                       item: widget.item,
                     ),
                   ),

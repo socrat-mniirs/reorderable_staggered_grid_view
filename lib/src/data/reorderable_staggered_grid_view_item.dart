@@ -13,10 +13,13 @@ class ReorderableStaggeredGridViewItem<T> {
   /// The [crossAxisCellCount] is the number of cells occupied by the element along the cross scroll axis.
   final int crossAxisCellCount;
 
+  /// The [duration] is the time duration of the item's animation when dragging accepted.
   final Duration duration;
 
+  /// The [curve] is a parametric animation easing curve, i.e. a mapping of the unit interval to the unit interval.
   final Curve curve;
 
+  /// The [offsetWhenAppear] is the widget's animation offset when the widget's content firstly has been built.
   final Offset offsetWhenAppear;
 
   /// The [child] is the widget content of the item.

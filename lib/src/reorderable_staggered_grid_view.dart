@@ -9,6 +9,9 @@ class ReorderableStaggeredGridView extends StatefulWidget {
   /// The scroll controller for the scroll view
   final ScrollController? controller;
 
+  /// Is dragging enabled or not
+  final bool enable;
+
   /// Padding around the grid view
   final EdgeInsets? padding;
 
@@ -40,9 +43,6 @@ class ReorderableStaggeredGridView extends StatefulWidget {
   /// Does it take a long press to drag
   final bool isLongPressDraggable;
 
-  /// Is dragging enabled or not
-  final bool enable;
-
   /// A callback when an item is accepted during a drag operation with drag target details
   final void Function(DragTargetDetails details, int newIndex)?
       onAcceptWithDetails;
@@ -55,26 +55,18 @@ class ReorderableStaggeredGridView extends StatefulWidget {
   /// Keys of widgets which cannot be dragged
   final List<Key> nonDraggableWidgetsKeys;
 
-  /// Duration of slidable animation of the items when they are changed
-  final Duration slidableAnimationDuration;
-
-  /// Slidable animation offset of the items when they are changed.
-  /// It is set by relative values, where one unit is the size of 1 cell in the grid.
-  ///
-  /// The default value is [Offset(0, 1)]
-  final Offset slidableAnimationOffset;
-
   /// The [willAcceptAnimationOffset] animation duration
   final Duration willAcceptOffsetDuration;
 
   /// The animation offset when dragging widget over another item
   final Offset willAcceptAnimationOffset;
 
-  /// List of items that can be reordered or dragged
+  /// List of items which can be reordered or dragged
   final List<ReorderableStaggeredGridViewItem> items;
 
   const ReorderableStaggeredGridView({
     super.key,
+    this.enable = true,
     required this.items,
     required this.crossAxisCount,
     required this.isLongPressDraggable,
@@ -87,9 +79,6 @@ class ReorderableStaggeredGridView extends StatefulWidget {
     this.controller,
     this.onAcceptWithDetails,
     this.buildFeedbackWidget,
-    this.enable = true,
-    this.slidableAnimationDuration = const Duration(milliseconds: 250),
-    this.slidableAnimationOffset = const Offset(0, 1),
     this.willAcceptOffsetDuration = const Duration(milliseconds: 200),
     this.willAcceptAnimationOffset = const Offset(50, 50),
     this.nonDraggableWidgetsKeys = const [],
@@ -233,7 +222,7 @@ class _ReorderableStaggeredGridViewState
           return ReorderableStaggeredGridItemWidget(
             // Items
             item: item,
-            lastDraggedItem: _lastDraggedItem,
+            isLastDraggedItem: identical(item, _lastDraggedItem),
             draggingItem: _draggingItem,
 
             // UI
@@ -241,8 +230,6 @@ class _ReorderableStaggeredGridViewState
             isLongPressDraggable: widget.isLongPressDraggable,
 
             // Animation offset
-            slidableAnimationDuration: widget.slidableAnimationDuration,
-            slidableAnimationOffset: widget.slidableAnimationOffset,
             willAcceptOffsetDuration: widget.willAcceptOffsetDuration,
             willAcceptAnimationOffset: widget.willAcceptAnimationOffset,
 
