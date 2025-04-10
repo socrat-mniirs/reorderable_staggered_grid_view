@@ -55,7 +55,7 @@ class ReorderableStaggeredGridView extends StatefulWidget {
   /// Keys of widgets which cannot be dragged
   final List<Key> nonDraggableWidgetsKeys;
 
-  /// The [willAcceptAnimationOffset] is a callback which calls when there is a draggable widget above another drag target. 
+  /// The [willAcceptAnimationOffset] is a callback which calls when there is a draggable widget above another drag target.
   final Duration willAcceptOffsetDuration;
 
   /// The [willAcceptAnimationOffset] is the animation offset value when dragging widget over another drag target.
@@ -222,8 +222,8 @@ class _ReorderableStaggeredGridViewState
           return ReorderableStaggeredGridItemWidget(
             // Items
             item: item,
-            isLastDraggedItem: identical(item, _lastDraggedItem),
             draggingItem: _draggingItem,
+            isLastDraggedItem: identical(item, _lastDraggedItem),
 
             // UI
             isDraggingEnabled: widget.enable,
@@ -237,6 +237,10 @@ class _ReorderableStaggeredGridViewState
             buildFeedbackWidget: widget.buildFeedbackWidget,
 
             // Dragging + Scroll
+            onDragStarted: () {
+              _draggingItem = item;
+              _lastDraggedItem = item;
+            },
             onDragUpdate: _autoScrollOnDragUpdate,
             onDragEnd: (_) {
               _stopAutoScroll();
@@ -247,11 +251,6 @@ class _ReorderableStaggeredGridViewState
             // Accepting
             resetLastDraggedItem: () => _lastDraggedItem = null,
             onWillAcceptWithDetails: (details) {
-              // Draggable data is an item key
-              _draggingItem = _items.firstWhere(
-                (el) => el.data == details.data,
-              );
-              _lastDraggedItem = _draggingItem;
 
               if (_isAutoScrolling || details.data == item.data) return false;
 

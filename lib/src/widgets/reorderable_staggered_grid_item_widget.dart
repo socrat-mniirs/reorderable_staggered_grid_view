@@ -23,6 +23,8 @@ class ReorderableStaggeredGridItemWidget extends StatelessWidget {
 
   final void Function() resetLastDraggedItem;
 
+  final void Function() onDragStarted;
+
   final void Function(DragUpdateDetails details) onDragUpdate;
 
   final void Function(DraggableDetails details) onDragEnd;
@@ -47,6 +49,7 @@ class ReorderableStaggeredGridItemWidget extends StatelessWidget {
     required this.isLongPressDraggable,
     required this.willAcceptOffsetDuration,
     required this.willAcceptAnimationOffset,
+    required this.onDragStarted,
     required this.onDragUpdate,
     required this.onDragEnd,
     required this.onWillAcceptWithDetails,
@@ -57,6 +60,10 @@ class ReorderableStaggeredGridItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (identical(item, draggingItem)) {
+      return const SizedBox.shrink();
+    }
+
     return !isDraggingEnabled
 
         // Not enabled dragging and drag target
@@ -76,6 +83,7 @@ class ReorderableStaggeredGridItemWidget extends StatelessWidget {
             isLongPressDraggable: isLongPressDraggable,
 
             // Dragging + Auto-scroll
+            onDragStarted: onDragStarted,
             onDragUpdate: onDragUpdate,
             onDragEnd: onDragEnd,
             scrollEndNotifier: scrollEndNotifier,
