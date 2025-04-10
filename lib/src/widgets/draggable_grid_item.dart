@@ -9,10 +9,10 @@ class DraggableGridItem extends StatefulWidget {
   /// The [item] is a grid widget that can be reordered or dragged.
   final ReorderableStaggeredGridViewItem item;
 
-  // TODO
+  /// The [isLastDraggedItem] define that the item should be animated after reordering or not.
   final bool isLastDraggedItem;
 
-  // TODO
+  /// The [isLongPressDraggable] indicates does it take a long press to drag or not.
   final bool isLongPressDraggable;
 
   // TODO
