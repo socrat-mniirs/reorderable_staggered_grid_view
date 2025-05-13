@@ -64,6 +64,7 @@ class ReorderableStaggeredGridView extends StatefulWidget {
   /// The [items] is a list of items which can be reordered or dragged
   final List<ReorderableStaggeredGridViewItem> items;
 
+  /// The [ReorderableStaggeredGridView] main constructor. Provides lazy rendering of widgets and listening to the end of the scroll.
   const ReorderableStaggeredGridView({
     super.key,
     this.enable = true,

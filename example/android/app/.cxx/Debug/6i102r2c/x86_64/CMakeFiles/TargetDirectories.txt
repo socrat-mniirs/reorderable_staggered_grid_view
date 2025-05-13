@@ -1,0 +1,2 @@
+/Users/leonidgusev/projects/reorderable_staggered_grid_view/example/android/app/.cxx/Debug/6i102r2c/x86_64/CMakeFiles/edit_cache.dir
+/Users/leonidgusev/projects/reorderable_staggered_grid_view/example/android/app/.cxx/Debug/6i102r2c/x86_64/CMakeFiles/rebuild_cache.dir

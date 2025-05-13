@@ -24,6 +24,7 @@ class _ReorderableStaggeredGridViewExampleState
   bool enableLongPress = false;
   bool enableDragging = true;
 
+  // Add item
   void _addNewItem() {
     final newItem = Constants._generateItem(
       items.length,
@@ -31,6 +32,7 @@ class _ReorderableStaggeredGridViewExampleState
     items.add(newItem);
   }
 
+  // Remove item
   void _removeItem() {
     if (items.isNotEmpty) {
       // Necessary to avoid keys duplicates
@@ -45,9 +47,76 @@ class _ReorderableStaggeredGridViewExampleState
 
   @override
   Widget build(BuildContext context) {
+    final moveActionsFromAppBar = MediaQuery.of(context).size.width < 800;
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
+        // Show bottom sheet with actions
+        floatingActionButton: Builder(
+          builder: (context) => FloatingActionButton(
+            child: Icon(Icons.settings),
+            onPressed: () => showModalBottomSheet(
+              context: context,
+              builder: (context) => Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  spacing: 20,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Center(
+                      child: IconButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        icon: Container(
+                          width: 50,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    Row(
+                      spacing: 20,
+                      children: [
+                        Text(
+                          'Long press ${enableLongPress ? 'enabled' : 'disabled'}',
+                        ),
+                        Switch(
+                          value: enableLongPress,
+                          onChanged: (value) => setState(
+                            () => enableLongPress = value,
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    // Switch enable
+                    Row(
+                      spacing: 20,
+                      children: [
+                        Text(
+                          'Dragging ${enableDragging ? 'enabled' : 'disabled'}',
+                        ),
+                        Switch(
+                          value: enableDragging,
+                          onChanged: (value) => setState(
+                            () => enableDragging = value,
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 20),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+
         // AppBar
         appBar: AppBar(
           // Title
@@ -56,38 +125,40 @@ class _ReorderableStaggeredGridViewExampleState
           // Actions with grid items
           actions: [
             // Switch enable
-            Row(
-              children: [
-                Text(
-                  'Long press ${enableLongPress ? 'enabled' : 'disabled'}',
-                ),
-                Switch(
-                  value: enableLongPress,
-                  onChanged: (value) => setState(
-                    () => enableLongPress = value,
+            if (!moveActionsFromAppBar)
+              Row(
+                children: [
+                  Text(
+                    'Long press ${enableLongPress ? 'enabled' : 'disabled'}',
                   ),
-                ),
-              ],
-            ),
+                  Switch(
+                    value: enableLongPress,
+                    onChanged: (value) => setState(
+                      () => enableLongPress = value,
+                    ),
+                  ),
+                ],
+              ),
 
-            const SizedBox(width: 20),
+            if (!moveActionsFromAppBar) const SizedBox(width: 20),
 
             // Switch enable
-            Row(
-              children: [
-                Text(
-                  'Dragging ${enableDragging ? 'enabled' : 'disabled'}',
-                ),
-                Switch(
-                  value: enableDragging,
-                  onChanged: (value) => setState(
-                    () => enableDragging = value,
+            if (!moveActionsFromAppBar)
+              Row(
+                children: [
+                  Text(
+                    'Dragging ${enableDragging ? 'enabled' : 'disabled'}',
                   ),
-                ),
-              ],
-            ),
+                  Switch(
+                    value: enableDragging,
+                    onChanged: (value) => setState(
+                      () => enableDragging = value,
+                    ),
+                  ),
+                ],
+              ),
 
-            const SizedBox(width: 20),
+            if (!moveActionsFromAppBar) const SizedBox(width: 20),
 
             // Remove last
             Tooltip(
@@ -112,15 +183,19 @@ class _ReorderableStaggeredGridViewExampleState
         ),
 
         // Body
-        body: ReorderableStaggeredGridView(
-          padding: EdgeInsets.all(20),
-          enable: enableDragging,
-          crossAxisCount: Constants.crossAxisCount,
-          mainAxisSpacing: Constants.spacing,
-          crossAxisSpacing: Constants.spacing,
-          isLongPressDraggable: enableLongPress,
-          nonDraggableWidgetsKeys: [Constants._widgetKeys[0]!],
-          items: items,
+        body: LayoutBuilder(
+          builder: (context, constraints) => ReorderableStaggeredGridView(
+            padding: EdgeInsets.all(20),
+            enable: enableDragging,
+            crossAxisCount: Constants.calculateCrossAxisCount(
+              constraints.maxWidth,
+            ),
+            mainAxisSpacing: Constants.spacing,
+            crossAxisSpacing: Constants.spacing,
+            isLongPressDraggable: enableLongPress,
+            nonDraggableWidgetsKeys: [Constants._widgetKeys[0]!],
+            items: items,
+          ),
         ),
       ),
     );
@@ -140,59 +215,126 @@ class TileWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: color,
-        border: Border.all(color: Colors.black),
+    return Material(
+      color: Colors.transparent,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: color,
+          border: Border.all(color: Colors.black),
+        ),
+        child: Center(child: title),
       ),
-      child: Center(child: title),
     );
   }
 }
 
 /// An abstract class with demo data to demonstrate package possibilities.
 abstract class Constants {
-  static const crossAxisCount = 8;
   static const spacing = 10.0;
 
-  // Widget's keys
+  /// Calculate crossAxisCount by maxWidth
+  static int calculateCrossAxisCount(double maxWidth) {
+    if (maxWidth < 500) {
+      return 2;
+    } else if (maxWidth < 1000) {
+      return 4;
+    } else if (maxWidth < 1500) {
+      return 6;
+    } else {
+      return 8;
+    }
+  }
+
+  /// Widget's keys
   static final Map<int, GlobalKey> _widgetKeys = {};
   static GlobalKey widgetKeyById(int id) => _widgetKeys.putIfAbsent(
         id,
         () => GlobalKey(),
       );
 
-  // Animation widget's keys
+  /// Animation widget's keys
   static final Map<int, GlobalKey> _animationKeys = {};
   static GlobalKey animationKeyById(int id) => _animationKeys.putIfAbsent(
         id,
         () => GlobalKey(),
       );
 
-  // Items
+  /// Items
   static final List<ReorderableStaggeredGridViewItem>
       reorderableStaggeredGridViewItems = List.generate(
-    100,
+    10,
     _generateItem,
   );
 
-  static ReorderableStaggeredGridViewItem _generateItem(dynamic id) {
-    final key = widgetKeyById(id);
-    final animationKey = animationKeyById(id);
+  static ReorderableStaggeredGridViewItem _generateItem(int index) {
+    final key = widgetKeyById(index);
+    final animationKey = animationKeyById(index);
+
+    int? mainAxisCellCount;
+    int? crossAxisCellCount;
+
+    // Demonstration widgets
+    switch (index) {
+      case 0:
+        {
+          mainAxisCellCount = 1;
+          crossAxisCellCount = 2;
+        }
+      case 1:
+        {
+          mainAxisCellCount = 1;
+          crossAxisCellCount = 1;
+        }
+      case 2:
+        {
+          mainAxisCellCount = 1;
+          crossAxisCellCount = 1;
+        }
+      case 3:
+        {
+          mainAxisCellCount = 1;
+          crossAxisCellCount = 1;
+        }
+      case 4:
+        {
+          mainAxisCellCount = 1;
+          crossAxisCellCount = 1;
+        }
+      case 5:
+        {
+          mainAxisCellCount = 1;
+          crossAxisCellCount = 1;
+        }
+      case 6:
+        {
+          mainAxisCellCount = 1;
+          crossAxisCellCount = 1;
+        }
+      case 7:
+        {
+          mainAxisCellCount = 1;
+          crossAxisCellCount = 1;
+        }
+      case 8:
+        {
+          mainAxisCellCount = 1;
+          crossAxisCellCount = 1;
+        }
+    }
 
     return ReorderableStaggeredGridViewItem(
       animationKey: animationKey,
-      data: id,
-      mainAxisCellCount: Random().nextInt(2) + 1,
-      crossAxisCellCount: Random().nextInt(2) + 1,
+      data: index,
+      mainAxisCellCount: mainAxisCellCount ?? Random().nextInt(2) + 1,
+      crossAxisCellCount: crossAxisCellCount ?? Random().nextInt(2) + 1,
       child: TileWidget(
         key: key,
-        title: Text(id == 0 ? 'Not dragged' : id.toString()),
-        color: Color.from(
-          alpha: 0.1,
-          red: Random().nextInt(255).toDouble(),
-          green: Random().nextInt(255).toDouble(),
-          blue: Random().nextInt(255).toDouble(),
+        title: Text(index == 0 ? 'Not dragged' : index.toString()),
+        color: Color.fromRGBO(
+          Random().nextInt(255),
+          Random().nextInt(255),
+          Random().nextInt(255),
+          0.5,
         ),
       ),
     );
