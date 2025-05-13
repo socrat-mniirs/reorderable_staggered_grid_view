@@ -69,7 +69,7 @@ class ReorderableStaggeredGridView extends StatefulWidget {
     this.enable = true,
     required this.items,
     required this.crossAxisCount,
-    required this.isLongPressDraggable,
+    this.isLongPressDraggable = false,
     this.physics,
     this.addAutomaticKeepAlives = true,
     this.addRepaintBoundaries = true,
@@ -186,20 +186,22 @@ class _ReorderableStaggeredGridViewState
         _scrollEndNotifier.scrollEnd();
         return true;
       },
+
+      // The Staggered Grid
       child: StaggeredGridView.countBuilder(
-        // Scroll
+        // Scroll behavior
         controller: _scrollController,
         addAutomaticKeepAlives: widget.addAutomaticKeepAlives,
         addRepaintBoundaries: widget.addRepaintBoundaries,
         physics: widget.physics,
 
-        // UI PARAMS
+        // UI params
         padding: widget.padding,
         crossAxisCount: widget.crossAxisCount,
         mainAxisSpacing: widget.mainAxisSpacing,
         crossAxisSpacing: widget.crossAxisSpacing,
 
-        // CELL SIZE
+        // Cell size
         staggeredTileBuilder: (index) {
           final item = _items[index];
 
@@ -209,7 +211,7 @@ class _ReorderableStaggeredGridViewState
           );
         },
 
-        // ITEMS
+        // Items
         itemCount: _items.length,
         itemBuilder: (context, index) {
           final item = _items[index];
@@ -275,5 +277,12 @@ class _ReorderableStaggeredGridViewState
         },
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    _scrollEndNotifier.dispose();
+    super.dispose();
   }
 }

@@ -119,8 +119,8 @@ class _ReorderableStaggeredGridViewExampleState
           mainAxisSpacing: Constants.spacing,
           crossAxisSpacing: Constants.spacing,
           isLongPressDraggable: enableLongPress,
-          items: items,
           nonDraggableWidgetsKeys: [Constants._widgetKeys[0]!],
+          items: items,
         ),
       ),
     );
