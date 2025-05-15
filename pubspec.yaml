@@ -1,5 +1,5 @@
 name: reorderable_staggered_grid_view
-description: "A new Flutter package project."
+description: A Flutter package for creating reorderable and staggered grid views.
 version: 0.0.1
 homepage:
 
