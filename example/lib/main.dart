@@ -262,7 +262,7 @@ abstract class Constants {
   /// Items
   static final List<ReorderableStaggeredGridViewItem>
       reorderableStaggeredGridViewItems = List.generate(
-    10,
+    100,
     _generateItem,
   );
 
@@ -272,55 +272,6 @@ abstract class Constants {
 
     int? mainAxisCellCount;
     int? crossAxisCellCount;
-
-    // Demonstration widgets
-    switch (index) {
-      case 0:
-        {
-          mainAxisCellCount = 1;
-          crossAxisCellCount = 2;
-        }
-      case 1:
-        {
-          mainAxisCellCount = 1;
-          crossAxisCellCount = 1;
-        }
-      case 2:
-        {
-          mainAxisCellCount = 1;
-          crossAxisCellCount = 1;
-        }
-      case 3:
-        {
-          mainAxisCellCount = 1;
-          crossAxisCellCount = 1;
-        }
-      case 4:
-        {
-          mainAxisCellCount = 1;
-          crossAxisCellCount = 1;
-        }
-      case 5:
-        {
-          mainAxisCellCount = 1;
-          crossAxisCellCount = 1;
-        }
-      case 6:
-        {
-          mainAxisCellCount = 1;
-          crossAxisCellCount = 1;
-        }
-      case 7:
-        {
-          mainAxisCellCount = 1;
-          crossAxisCellCount = 1;
-        }
-      case 8:
-        {
-          mainAxisCellCount = 1;
-          crossAxisCellCount = 1;
-        }
-    }
 
     return ReorderableStaggeredGridViewItem(
       animationKey: animationKey,
