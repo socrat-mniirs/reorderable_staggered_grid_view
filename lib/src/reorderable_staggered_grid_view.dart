@@ -27,6 +27,22 @@ class ReorderableStaggeredGridView extends StatefulWidget {
   /// The [physics] of the scroll view.
   final ScrollPhysics? physics;
 
+  /// Whether the extent of the scroll view in the scrollDirection should be determined by the contents being viewed.
+  /// Defaults to false, meaning the scroll view expands to fit the parent.
+  final bool shrinkWrap;
+
+  /// The axis along which the scroll view scrolls.
+  /// Defaults to [Axis.vertical].
+  final Axis scrollDirection;
+
+  /// Whether the scroll view scrolls in the reading direction (false) or in the reverse (true).
+  /// Useful for scenarios like chat interfaces or bottom-up lists.
+  final bool reverse;
+
+  /// Whether this scroll view is the primary scroll view associated with the parent [PrimaryScrollController].
+  /// Should be true when there’s only one scroll view on the screen.
+  final bool? primary;
+
   /// Whether to wrap each child in an [AutomaticKeepAlive].
   /// Defaults to true.
   final bool addAutomaticKeepAlives;
@@ -94,6 +110,10 @@ class ReorderableStaggeredGridView extends StatefulWidget {
     required this.crossAxisCount,
     this.isLongPressDraggable = false,
     this.physics,
+    this.shrinkWrap = false,
+    this.scrollDirection = Axis.vertical,
+    this.reverse = false,
+    this.primary,
     this.addAutomaticKeepAlives = true,
     this.addRepaintBoundaries = true,
     this.padding,
@@ -222,6 +242,10 @@ class _ReorderableStaggeredGridViewState
         addAutomaticKeepAlives: widget.addAutomaticKeepAlives,
         addRepaintBoundaries: widget.addRepaintBoundaries,
         physics: widget.physics,
+        scrollDirection: widget.scrollDirection,
+        shrinkWrap: widget.shrinkWrap,
+        reverse: widget.reverse,
+        primary: widget.primary,
 
         // UI params
         padding: widget.padding,
