@@ -43,6 +43,29 @@ class ReorderableStaggeredGridView extends StatefulWidget {
   /// The [isLongPressDraggable] indicates does it take a long press to drag or not.
   final bool isLongPressDraggable;
 
+  /// The [onDragStarted] called when the draggable starts being dragged.
+  final void Function()? onDragStarted;
+
+  /// The [onDragUpdate] called when the draggable is dragged.
+  ///
+  /// This function will only be called while this widget is still mounted to
+  /// the tree (i.e. [State.mounted] is true), and if this widget has actually moved.
+  final void Function(DragUpdateDetails details)? onDragUpdate;
+
+  /// The [onDragEnd] called when the draggable is dropped.
+  ///
+  /// The velocity and offset at which the pointer was moving when it was
+  /// dropped is available in the [DraggableDetails]. Also included in the
+  /// `details` is whether the draggable's [DragTarget] accepted it.
+  ///
+  /// This function will only be called while this widget is still mounted to
+  /// the tree (i.e. [State.mounted] is true).
+  final void Function(DraggableDetails details)? onDragEnd;
+
+  /// The [onWillAcceptWithDetails] called to determine whether this widget is interested in receiving a given
+  /// piece of data being dragged over this drag target.
+  final bool Function(DragTargetDetails details)? onWillAcceptWithDetails;
+
   /// The [onAcceptWithDetails] is a callback when an item is accepted during a drag operation with drag target details
   final void Function(DragTargetDetails details, int newIndex)?
       onAcceptWithDetails;
@@ -68,7 +91,6 @@ class ReorderableStaggeredGridView extends StatefulWidget {
   const ReorderableStaggeredGridView({
     super.key,
     this.enable = true,
-    required this.items,
     required this.crossAxisCount,
     this.isLongPressDraggable = false,
     this.physics,
@@ -78,11 +100,16 @@ class ReorderableStaggeredGridView extends StatefulWidget {
     this.mainAxisSpacing = 0,
     this.crossAxisSpacing = 0,
     this.controller,
+    this.onDragStarted,
+    this.onDragUpdate,
+    this.onDragEnd,
+    this.onWillAcceptWithDetails,
     this.onAcceptWithDetails,
     this.buildFeedbackWidget,
     this.willAcceptOffsetDuration = const Duration(milliseconds: 200),
     this.willAcceptAnimationOffset = const Offset(50, 50),
     this.nonDraggableWidgetsKeys = const [],
+    required this.items,
   });
 
   @override
@@ -243,17 +270,26 @@ class _ReorderableStaggeredGridViewState
             onDragStarted: () {
               _draggingItem = item;
               _lastDraggedItem = item;
+              widget.onDragStarted?.call();
             },
-            onDragUpdate: _autoScrollOnDragUpdate,
-            onDragEnd: (_) {
+            onDragUpdate: (details) {
+              _autoScrollOnDragUpdate(details);
+              widget.onDragUpdate?.call(details);
+            },
+            onDragEnd: (details) {
               _stopAutoScroll();
               setState(() => _draggingItem = null);
+              widget.onDragEnd?.call(details);
             },
             scrollEndNotifier: _scrollEndNotifier,
 
             // Accepting
             onWillAcceptWithDetails: (details) {
               if (_isAutoScrolling || details.data == item.data) return false;
+
+              if (widget.onWillAcceptWithDetails != null) {
+                return widget.onWillAcceptWithDetails!(details);
+              }
 
               // TODO The functionality below is still in development
 
