@@ -2,7 +2,7 @@
 
 <!-- [![pub package](https://img.shields.io/pub/v/reorderable_staggered_grid_view.svg)](https://pub.dartlang.org/packages/reorderable_staggered_scroll_view) [![GitHub license](https://img.shields.io/github/license/itisnajim/reorderable_staggered_scroll_view)](https://github.com/itisnajim/reorderable_staggered_scroll_view/blob/master/LICENSE)  [![GitHub issues](https://img.shields.io/github/issues/itisnajim/reorderable_staggered_scroll_view)](https://github.com/itisnajim/reorderable_staggered_scroll_view/issues) -->
 
-A Flutter package for creating reorderable and draggable staggered grid views. This package provides an intuitive way to build a grid with the ability to change the order, and also supports lazy element construction, which allows it to be used for a large number of complex elements without loss of performance. 
+A Flutter package for creating reorderable and draggable staggered grid views. This package provides an intuitive way to build a grid with the ability to change the order, and also supports lazy element building, which allows it to be used for a large number of complex elements without loss of performance. 
 
 | Reordering | Not dragged |
 | :---: | :---: | 
