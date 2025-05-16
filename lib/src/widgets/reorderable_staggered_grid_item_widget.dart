@@ -13,30 +13,51 @@ class ReorderableStaggeredGridItemWidget extends StatelessWidget {
 
   final ReorderableStaggeredGridViewItem? draggingItem;
 
+  /// The [isLongPressDraggable] indicates does it take a long press to drag or not.
   final bool isLongPressDraggable;
 
+  /// The [isDraggingEnabled] indicates is dragging enabled or not.
   final bool isDraggingEnabled;
 
+  /// The [willAcceptOffsetDuration] is an animation duration of [willAcceptAnimationOffset].
   final Duration willAcceptOffsetDuration;
 
+  /// The [willAcceptAnimationOffset] is an animation offset on [onWillAcceptWithDetails].
   final Offset willAcceptAnimationOffset;
 
-  final void Function() resetLastDraggedItem;
-
+  /// The [onDragStarted] called when the draggable starts being dragged.
   final void Function() onDragStarted;
 
+  /// The [onDragUpdate] called when the draggable is dragged.
+  ///
+  /// This function will only be called while this widget is still mounted to
+  /// the tree (i.e. [State.mounted] is true), and if this widget has actually moved.
   final void Function(DragUpdateDetails details) onDragUpdate;
 
+  /// The [onDragEnd] called when the draggable is dropped.
+  ///
+  /// The velocity and offset at which the pointer was moving when it was
+  /// dropped is available in the [DraggableDetails]. Also included in the
+  /// `details` is whether the draggable's [DragTarget] accepted it.
+  ///
+  /// This function will only be called while this widget is still mounted to
+  /// the tree (i.e. [State.mounted] is true).
   final void Function(DraggableDetails details) onDragEnd;
 
+  /// The [onWillAcceptWithDetails] called to determine whether this widget is interested in receiving a given
+  /// piece of data being dragged over this drag target.
   final bool Function(DragTargetDetails details) onWillAcceptWithDetails;
 
+  /// The [onAcceptWithDetails] called when an acceptable piece of data was dropped over this drag target.
+  /// It will not be called if `data` is `null`.
   final void Function(DragTargetDetails details) onAcceptWithDetails;
 
+  /// The [buildFeedbackWidget] called when the dragging started to paint widget which will be shown as a dragging widget.
   final Widget Function(
           BuildContext context, Widget child, GlobalKey originalWidgetKey)?
       buildFeedbackWidget;
 
+  /// The [scrollEndNotifier] notify animated grid items about end of scroll to recalculate their positions on the screen.
   final ScrollEndNotifier scrollEndNotifier;
 
   const ReorderableStaggeredGridItemWidget({
@@ -44,7 +65,6 @@ class ReorderableStaggeredGridItemWidget extends StatelessWidget {
     required this.item,
     required this.isLastDraggedItem,
     required this.draggingItem,
-    required this.resetLastDraggedItem,
     required this.isDraggingEnabled,
     required this.isLongPressDraggable,
     required this.willAcceptOffsetDuration,

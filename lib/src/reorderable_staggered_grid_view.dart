@@ -252,12 +252,10 @@ class _ReorderableStaggeredGridViewState
             scrollEndNotifier: _scrollEndNotifier,
 
             // Accepting
-            resetLastDraggedItem: () => _lastDraggedItem = null,
             onWillAcceptWithDetails: (details) {
-
               if (_isAutoScrolling || details.data == item.data) return false;
 
-              // TODO still in development
+              // TODO The functionality below is still in development
 
               // items.remove(draggingItem);
               // items.insert(index, draggingItem!);

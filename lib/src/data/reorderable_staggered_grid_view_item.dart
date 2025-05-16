@@ -25,6 +25,8 @@ class ReorderableStaggeredGridViewItem<T> {
   /// The [child] is the widget content of the item.
   final Widget child;
 
+  /// The [ReorderableStaggeredGridViewItem] is an object which describe its [child] constraints and behavior 
+  /// in [ReorderableStaggeredGridView].
   ReorderableStaggeredGridViewItem({
     required this.data,
     required this.animationKey,
