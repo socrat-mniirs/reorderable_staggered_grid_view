@@ -142,6 +142,7 @@ class _ReorderableStaggeredGridViewState
   late final ScrollController _scrollController;
   late List<ReorderableStaggeredGridViewItem> _items;
 
+  // Autoscroll fields
   double _dragY = 0;
   bool _isAutoScrolling = false;
 
@@ -301,7 +302,10 @@ class _ReorderableStaggeredGridViewState
             },
             onDragEnd: (details) {
               _stopAutoScroll();
-              setState(() => _draggingItem = null);
+
+              if (_draggingItem != null) {
+                _draggingItem = null;
+              }
               widget.onDragEnd?.call(details);
             },
             scrollEndNotifier: _scrollEndNotifier,
@@ -329,6 +333,7 @@ class _ReorderableStaggeredGridViewState
               _items.remove(_draggingItem);
               _items.insert(index, _draggingItem!);
 
+              setState(() => _draggingItem = null);
               widget.onAcceptWithDetails?.call(details, index);
             },
           );
