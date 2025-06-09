@@ -52,7 +52,7 @@ class _AnimatedGridItemWidgetState extends State<AnimatedGridItemWidget>
     );
 
     _animation = Tween<Offset>(
-      begin: widget.item?.offsetWhenAppear ??
+      begin: widget.item?.startingOffset ??
           Offset(
             0 * (1 / (widget.item?.crossAxisCellCount ?? 1)),
             100 * (1 / (widget.item?.mainAxisCellCount ?? 1)),
@@ -74,7 +74,7 @@ class _AnimatedGridItemWidgetState extends State<AnimatedGridItemWidget>
 
   @override
   void didUpdateWidget(covariant AnimatedGridItemWidget oldWidget) {
-    // Remove animation if objects this is the last dragged item
+    // Remove animation if this object is the last dragged item
     if (!widget.isLastDraggedItem) {
       startAnimation();
     } else {

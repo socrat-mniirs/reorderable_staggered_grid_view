@@ -11,8 +11,6 @@ class ReorderableStaggeredGridItemWidget extends StatelessWidget {
   /// The [isLastDraggedItem] using to define that
   final bool isLastDraggedItem;
 
-  final ReorderableStaggeredGridViewItem? draggingItem;
-
   /// The [isLongPressDraggable] indicates does it take a long press to drag or not.
   final bool isLongPressDraggable;
 
@@ -64,7 +62,6 @@ class ReorderableStaggeredGridItemWidget extends StatelessWidget {
     super.key,
     required this.item,
     required this.isLastDraggedItem,
-    required this.draggingItem,
     required this.isDraggingEnabled,
     required this.isLongPressDraggable,
     required this.willAcceptOffsetDuration,
@@ -80,10 +77,6 @@ class ReorderableStaggeredGridItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (identical(item, draggingItem)) {
-      return const SizedBox.shrink();
-    }
-
     return !isDraggingEnabled
 
         // Not enabled dragging and drag target

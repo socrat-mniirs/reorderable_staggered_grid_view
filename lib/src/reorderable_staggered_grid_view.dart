@@ -276,7 +276,6 @@ class _ReorderableStaggeredGridViewState
           return ReorderableStaggeredGridItemWidget(
             // Items
             item: item,
-            draggingItem: _draggingItem,
             isLastDraggedItem: identical(item, _lastDraggedItem),
 
             // UI
