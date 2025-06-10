@@ -318,12 +318,14 @@ class _ReorderableStaggeredGridViewState
                 return widget.onWillAcceptWithDetails!(details);
               }
 
-              // TODO The functionality below is still in development
+              /// =====-----=====-----=====-----=====-----=====-----=====
+              /// The functionality below is still in development
 
               // items.remove(draggingItem);
               // items.insert(index, draggingItem!);
 
               // setState(() {});
+              /// =====-----=====-----=====-----=====-----=====-----=====
 
               return true;
             },

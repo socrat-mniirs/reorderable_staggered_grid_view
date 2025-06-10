@@ -74,7 +74,7 @@ class _AnimatedGridItemWidgetState extends State<AnimatedGridItemWidget>
 
   @override
   void didUpdateWidget(covariant AnimatedGridItemWidget oldWidget) {
-    // Remove animation if this object is the last dragged item
+    // Remove animation if this object is a last dragged item
     if (!widget.isLastDraggedItem) {
       startAnimation();
     } else {
