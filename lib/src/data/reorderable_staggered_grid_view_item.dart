@@ -19,24 +19,26 @@ class ReorderableStaggeredGridViewItem<T> {
   /// The [curve] is a parametric animation easing curve, i.e. a mapping of the unit interval to the unit interval.
   final Curve curve;
 
-  /// The [offsetWhenAppear] is the widget's animation offset when the widget's content firstly has been built.
-  final Offset offsetWhenAppear;
+  /// The [startingOffset] is the widget's animation offset when the widget's content firstly has been built.
+  final Offset startingOffset;
 
   /// The [child] is the widget content of the item.
   final Widget child;
 
-  /// The [ReorderableStaggeredGridViewItem] is an object which describe its [child] constraints and behavior 
-  /// in [ReorderableStaggeredGridView].
+  /// The [ReorderableStaggeredGridViewItem] is an object which describe its [child] constraints and behavior
+  /// in grid view.
   ReorderableStaggeredGridViewItem({
     required this.data,
     required this.animationKey,
     required this.mainAxisCellCount,
     required this.crossAxisCellCount,
+    Offset? startingOffset,
     this.duration = const Duration(milliseconds: 300),
     this.curve = Curves.easeOut,
     required this.child,
-  }) : offsetWhenAppear = Offset(
-          1 / crossAxisCellCount,
-          (1 / mainAxisCellCount) * 100,
-        );
+  }) : startingOffset = startingOffset ??
+            Offset(
+              1 / crossAxisCellCount,
+              (1 / mainAxisCellCount) * 100,
+            );
 }

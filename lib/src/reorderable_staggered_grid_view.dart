@@ -78,6 +78,13 @@ class ReorderableStaggeredGridView extends StatefulWidget {
   /// the tree (i.e. [State.mounted] is true).
   final void Function(DraggableDetails details)? onDragEnd;
 
+  /// The [onMove] called when draggable moving within drag target.
+  final void Function(DragTargetDetails details)? onMove;
+
+  /// The [onLeave] called when a given piece of data being dragged over this target leaves
+  /// the target.
+  final void Function(Object? data)? onLeave;
+
   /// The [onWillAcceptWithDetails] called to determine whether this widget is interested in receiving a given
   /// piece of data being dragged over this drag target.
   final bool Function(DragTargetDetails details)? onWillAcceptWithDetails;
@@ -123,6 +130,8 @@ class ReorderableStaggeredGridView extends StatefulWidget {
     this.onDragStarted,
     this.onDragUpdate,
     this.onDragEnd,
+    this.onMove,
+    this.onLeave,
     this.onWillAcceptWithDetails,
     this.onAcceptWithDetails,
     this.buildFeedbackWidget,
@@ -142,6 +151,7 @@ class _ReorderableStaggeredGridViewState
   late final ScrollController _scrollController;
   late List<ReorderableStaggeredGridViewItem> _items;
 
+  // Autoscroll fields
   double _dragY = 0;
   bool _isAutoScrolling = false;
 
@@ -274,10 +284,10 @@ class _ReorderableStaggeredGridViewState
           }
 
           return ReorderableStaggeredGridItemWidget(
-            // Items
+            // Item
             item: item,
-            draggingItem: _draggingItem,
             isLastDraggedItem: identical(item, _lastDraggedItem),
+            index: index,
 
             // UI
             isDraggingEnabled: widget.enable,
@@ -302,9 +312,14 @@ class _ReorderableStaggeredGridViewState
             },
             onDragEnd: (details) {
               _stopAutoScroll();
-              setState(() => _draggingItem = null);
+
+              if (_draggingItem != null) {
+                _draggingItem = null;
+              }
               widget.onDragEnd?.call(details);
             },
+            onLeave: widget.onLeave,
+            onMove: widget.onMove,
             scrollEndNotifier: _scrollEndNotifier,
 
             // Accepting
@@ -315,12 +330,14 @@ class _ReorderableStaggeredGridViewState
                 return widget.onWillAcceptWithDetails!(details);
               }
 
-              // TODO The functionality below is still in development
+              /// =====-----=====-----=====-----=====-----=====-----=====
+              /// The functionality below is still in development
 
               // items.remove(draggingItem);
               // items.insert(index, draggingItem!);
 
               // setState(() {});
+              /// =====-----=====-----=====-----=====-----=====-----=====
 
               return true;
             },
@@ -330,6 +347,7 @@ class _ReorderableStaggeredGridViewState
               _items.remove(_draggingItem);
               _items.insert(index, _draggingItem!);
 
+              setState(() => _draggingItem = null);
               widget.onAcceptWithDetails?.call(details, index);
             },
           );

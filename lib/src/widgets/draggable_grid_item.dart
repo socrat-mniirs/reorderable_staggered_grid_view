@@ -9,6 +9,9 @@ class DraggableGridItem extends StatefulWidget {
   /// The [item] is a grid widget that can be reordered or dragged.
   final ReorderableStaggeredGridViewItem item;
 
+  /// The [index] determines whether the position of the element in the grid has changed and whether animation needs to be started.
+  final int index;
+
   /// The [isLastDraggedItem] define that the item should be animated after reordering or not.
   final bool isLastDraggedItem;
 
@@ -33,6 +36,13 @@ class DraggableGridItem extends StatefulWidget {
   /// This function will only be called while this widget is still mounted to
   /// the tree (i.e. [State.mounted] is true).
   final void Function(DraggableDetails details)? onDragEnd;
+
+  /// The [onMove] called when draggable moving within drag target.
+  final void Function(DragTargetDetails details)? onMove;
+
+  /// The [onLeave] called when a given piece of data being dragged over this target leaves
+  /// the target.
+  final void Function(Object? data)? onLeave;
 
   /// The [onAcceptWithDetails] called when an acceptable piece of data was dropped over this drag target.
   /// It will not be called if `data` is `null`.
@@ -65,16 +75,19 @@ class DraggableGridItem extends StatefulWidget {
     super.key,
     required this.item,
     required this.isLastDraggedItem,
-    this.isLongPressDraggable = false,
-    this.onDragStarted,
-    this.onDragUpdate,
-    this.onDragEnd,
-    this.onAcceptWithDetails,
-    this.onWillAcceptWithDetails,
-    this.animationOffset = const Offset(50, 50),
-    this.offsetDuration = const Duration(milliseconds: 200),
-    this.buildFeedbackWidget,
+    required this.isLongPressDraggable,
+    required this.onDragStarted,
+    required this.onDragUpdate,
+    required this.onDragEnd,
+    required this.onMove,
+    required this.onLeave,
+    required this.onAcceptWithDetails,
+    required this.onWillAcceptWithDetails,
+    required this.animationOffset,
+    required this.offsetDuration,
+    required this.buildFeedbackWidget,
     required this.scrollEndNotifier,
+    required this.index,
   });
 
   @override
@@ -91,8 +104,13 @@ class _DraggableGridItemState extends State<DraggableGridItem> {
       return;
     }
 
+    widget.onLeave?.call(data);
     setState(() => offset -= widget.animationOffset);
   }
+
+  /// [_onMove] - called when Draggable moving within DragTarget
+  ///
+  void _onMove(DragTargetDetails details) => widget.onMove?.call(details);
 
   /// [_onWillAcceptWithDetails] - shifts the object, indicating that it is ready to replace another grid element
   ///
@@ -132,8 +150,9 @@ class _DraggableGridItemState extends State<DraggableGridItem> {
                     enabled: false,
                     child: AnimatedGridItemWidget(
                       key: widget.item.animationKey,
-                      scrollEndNotifier: widget.scrollEndNotifier,
                       item: null,
+                      index: widget.index,
+                      scrollEndNotifier: widget.scrollEndNotifier,
                     ),
                   ),
                   feedback: FeedbackWidget(
@@ -147,6 +166,7 @@ class _DraggableGridItemState extends State<DraggableGridItem> {
                     key: widget.originalWidgetKey,
                     child: AnimatedGridItemWidget(
                       key: widget.item.animationKey,
+                      index: widget.index,
                       scrollEndNotifier: widget.scrollEndNotifier,
                       isLastDraggedItem: widget.isLastDraggedItem,
                       item: widget.item,
@@ -165,6 +185,7 @@ class _DraggableGridItemState extends State<DraggableGridItem> {
                     enabled: false,
                     child: AnimatedGridItemWidget(
                       key: widget.item.animationKey,
+                      index: widget.index,
                       scrollEndNotifier: widget.scrollEndNotifier,
                       item: null,
                     ),
@@ -180,6 +201,7 @@ class _DraggableGridItemState extends State<DraggableGridItem> {
                     key: widget.originalWidgetKey,
                     child: AnimatedGridItemWidget(
                       key: widget.item.animationKey,
+                      index: widget.index,
                       scrollEndNotifier: widget.scrollEndNotifier,
                       isLastDraggedItem: widget.isLastDraggedItem,
                       item: widget.item,
@@ -192,6 +214,7 @@ class _DraggableGridItemState extends State<DraggableGridItem> {
         Positioned.fill(
           child: DragTarget(
             onLeave: _onLeave,
+            onMove: _onMove,
             onWillAcceptWithDetails: _onWillAcceptWithDetails,
             onAcceptWithDetails: _onAcceptWithDetails,
             builder: (context, _, __) => const SizedBox.shrink(),
