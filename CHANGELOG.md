@@ -1,4 +1,4 @@
-## 0.0.1+1
+## 0.1.0
 
 * NEW: Add two callbacks - ```onMove()``` and ```onLeave()```
 * NEW: Rename ```offsetWhenAppear``` -> ```startingOffset``` and make it open in the initialization constructor of ```ReorderableStaggeredGridViewItem```.
