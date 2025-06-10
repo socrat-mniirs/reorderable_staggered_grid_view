@@ -78,6 +78,13 @@ class ReorderableStaggeredGridView extends StatefulWidget {
   /// the tree (i.e. [State.mounted] is true).
   final void Function(DraggableDetails details)? onDragEnd;
 
+  /// The [onMove] called when draggable moving within drag target.
+  final void Function(DragTargetDetails details)? onMove;
+
+  /// The [onLeave] called when a given piece of data being dragged over this target leaves
+  /// the target.
+  final void Function(Object? data)? onLeave;
+
   /// The [onWillAcceptWithDetails] called to determine whether this widget is interested in receiving a given
   /// piece of data being dragged over this drag target.
   final bool Function(DragTargetDetails details)? onWillAcceptWithDetails;
@@ -123,6 +130,8 @@ class ReorderableStaggeredGridView extends StatefulWidget {
     this.onDragStarted,
     this.onDragUpdate,
     this.onDragEnd,
+    this.onMove,
+    this.onLeave,
     this.onWillAcceptWithDetails,
     this.onAcceptWithDetails,
     this.buildFeedbackWidget,
@@ -275,9 +284,10 @@ class _ReorderableStaggeredGridViewState
           }
 
           return ReorderableStaggeredGridItemWidget(
-            // Items
+            // Item
             item: item,
             isLastDraggedItem: identical(item, _lastDraggedItem),
+            index: index,
 
             // UI
             isDraggingEnabled: widget.enable,
@@ -308,6 +318,8 @@ class _ReorderableStaggeredGridViewState
               }
               widget.onDragEnd?.call(details);
             },
+            onLeave: widget.onLeave,
+            onMove: widget.onMove,
             scrollEndNotifier: _scrollEndNotifier,
 
             // Accepting

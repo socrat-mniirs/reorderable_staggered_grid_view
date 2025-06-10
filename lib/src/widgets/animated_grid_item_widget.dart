@@ -14,12 +14,16 @@ class AnimatedGridItemWidget extends StatefulWidget {
   /// The [item] is a grid widget that can be reordered or dragged.
   final ReorderableStaggeredGridViewItem? item;
 
+  /// The [index] determines whether the position of the element in the grid has changed and whether animation needs to be started.
+  final int index;
+
   /// The [isLastDraggedItem] define that the item should be animated after reordering or not.
   final bool isLastDraggedItem;
 
   const AnimatedGridItemWidget({
     required super.key,
     required this.item,
+    required this.index,
     this.isLastDraggedItem = false,
     required this.scrollEndNotifier,
   });
@@ -37,7 +41,7 @@ class _AnimatedGridItemWidgetState extends State<AnimatedGridItemWidget>
   late Animation<Offset> _animation;
 
   // Recalculation of positions after scroll completion
-  void _scrollEndListener() => capturePosition();
+  void _scrollEndListener() => _capturePosition();
 
   @override
   void initState() {
@@ -67,30 +71,47 @@ class _AnimatedGridItemWidgetState extends State<AnimatedGridItemWidget>
 
     _controller.forward(from: 0).then(
           (_) => WidgetsBinding.instance.addPostFrameCallback(
-            (_) => capturePosition(),
+            (_) => _capturePosition(),
           ),
         );
   }
 
   @override
   void didUpdateWidget(covariant AnimatedGridItemWidget oldWidget) {
-    // Remove animation if this object is a last dragged item
-    if (!widget.isLastDraggedItem) {
-      startAnimation();
+    // Check if animation is necessary and proceed to actions
+    if (_isAnimationNeeded(oldWidget)) {
+      _startAnimation();
     } else {
-      capturePosition();
+      _capturePosition();
     }
+
     super.didUpdateWidget(oldWidget);
   }
 
-  void capturePosition() {
+  // Check if animation is needed.
+  // Do not start animation if this item is last dragged or its index in grid has not changed.
+  bool _isAnimationNeeded(covariant AnimatedGridItemWidget oldWidget) {
+    if (widget.isLastDraggedItem) {
+      return false;
+    }
+
+    if (widget.index == oldWidget.index) {
+      return false;
+    }
+
+    return true;
+  }
+
+  // Saving the current position of the grid element
+  void _capturePosition() {
     final renderBox = context.findRenderObject() as RenderBox?;
     if (renderBox != null) {
       _position = renderBox.localToGlobal(Offset.zero);
     }
   }
 
-  void startAnimation() {
+  // Animating the grid element to a new position and saving the current position after that
+  void _startAnimation() {
     try {
       final renderBox = context.findRenderObject() as RenderBox?;
       if (renderBox != null) {
@@ -112,11 +133,11 @@ class _AnimatedGridItemWidgetState extends State<AnimatedGridItemWidget>
         );
 
         _controller.forward(from: 0).then(
-              (_) => capturePosition(),
+              (_) => _capturePosition(),
             );
       }
     } catch (_) {
-      WidgetsBinding.instance.addPostFrameCallback((_) => startAnimation());
+      WidgetsBinding.instance.addPostFrameCallback((_) => _startAnimation());
     }
   }
 
