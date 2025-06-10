@@ -1,3 +1,7 @@
+## 0.1.0+1
+
+* Format dart code
+
 ## 0.1.0
 
 * NEW: Add two callbacks - ```onMove()``` and ```onLeave()```

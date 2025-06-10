@@ -1,6 +1,6 @@
 name: reorderable_staggered_grid_view
 description: A Flutter package for creating reorderable and staggered grid views.
-version: 0.1.0
+version: 0.1.0+1
 
 homepage: https://github.com/socrat-mniirs/reorderable_staggered_grid_view
 repository: https://github.com/socrat-mniirs/reorderable_staggered_grid_view
