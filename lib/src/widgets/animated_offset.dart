@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 /// The [AnimatedOffset] is an [ImplicitlyAnimatedWidget] that can be shifted relating to [offset].
 class AnimatedOffset extends ImplicitlyAnimatedWidget {
-  /// The [offset] when there is a draggable widget above this drag target. 
+  /// The [offset] when there is a draggable widget above this drag target.
   final Offset offset;
 
   /// The [child] is the widget content of the item.

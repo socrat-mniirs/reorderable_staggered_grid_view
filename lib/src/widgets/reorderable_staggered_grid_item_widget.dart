@@ -8,10 +8,11 @@ class ReorderableStaggeredGridItemWidget extends StatelessWidget {
   /// The [item] which can be reordered or dragged.
   final ReorderableStaggeredGridViewItem item;
 
+  /// The [index] determines whether the position of the element in the grid has changed and whether animation needs to be started.
+  final int index;
+
   /// The [isLastDraggedItem] using to define that
   final bool isLastDraggedItem;
-
-  final ReorderableStaggeredGridViewItem? draggingItem;
 
   /// The [isLongPressDraggable] indicates does it take a long press to drag or not.
   final bool isLongPressDraggable;
@@ -44,6 +45,13 @@ class ReorderableStaggeredGridItemWidget extends StatelessWidget {
   /// the tree (i.e. [State.mounted] is true).
   final void Function(DraggableDetails details) onDragEnd;
 
+  /// The [onMove] called when draggable moving within drag target.
+  final void Function(DragTargetDetails details)? onMove;
+
+  /// The [onLeave] called when a given piece of data being dragged over this target leaves
+  /// the target.
+  final void Function(Object? data)? onLeave;
+
   /// The [onWillAcceptWithDetails] called to determine whether this widget is interested in receiving a given
   /// piece of data being dragged over this drag target.
   final bool Function(DragTargetDetails details) onWillAcceptWithDetails;
@@ -64,7 +72,6 @@ class ReorderableStaggeredGridItemWidget extends StatelessWidget {
     super.key,
     required this.item,
     required this.isLastDraggedItem,
-    required this.draggingItem,
     required this.isDraggingEnabled,
     required this.isLongPressDraggable,
     required this.willAcceptOffsetDuration,
@@ -76,19 +83,19 @@ class ReorderableStaggeredGridItemWidget extends StatelessWidget {
     required this.onAcceptWithDetails,
     required this.buildFeedbackWidget,
     required this.scrollEndNotifier,
+    required this.index,
+    required this.onMove,
+    required this.onLeave,
   });
 
   @override
   Widget build(BuildContext context) {
-    if (identical(item, draggingItem)) {
-      return const SizedBox.shrink();
-    }
-
     return !isDraggingEnabled
 
         // Not enabled dragging and drag target
         ? AnimatedGridItemWidget(
             key: item.animationKey,
+            index: index,
             scrollEndNotifier: scrollEndNotifier,
             isLastDraggedItem: isLastDraggedItem,
             item: item,
@@ -98,6 +105,7 @@ class ReorderableStaggeredGridItemWidget extends StatelessWidget {
         : DraggableGridItem(
             // Required key to start animation
             key: ObjectKey(item),
+            index: index,
 
             // Is long press need
             isLongPressDraggable: isLongPressDraggable,
@@ -106,6 +114,8 @@ class ReorderableStaggeredGridItemWidget extends StatelessWidget {
             onDragStarted: onDragStarted,
             onDragUpdate: onDragUpdate,
             onDragEnd: onDragEnd,
+            onLeave: onLeave,
+            onMove: onMove,
             scrollEndNotifier: scrollEndNotifier,
 
             // Offset when dragging over
