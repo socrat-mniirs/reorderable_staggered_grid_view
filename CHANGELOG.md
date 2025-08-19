@@ -1,3 +1,7 @@
+## 0.1.1
+
+* FIX: Fixed the error of dynamically changing crossAxisCount by changing the grid key (the scenario is a bypass of the well-known bug in the StaggeredGridView package, in which the positions of elements are incorrectly recalculated or not redrawn).
+
 ## 0.1.0+1
 
 * Format dart code

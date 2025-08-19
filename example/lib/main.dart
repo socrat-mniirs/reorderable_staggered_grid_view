@@ -24,6 +24,9 @@ class _ReorderableStaggeredGridViewExampleState
   bool enableLongPress = false;
   bool enableDragging = true;
 
+  UniqueKey? _gridKey;
+  int? _lastCrossAxisCount;
+
   // Add item
   void _addNewItem() {
     final newItem = Constants._generateItem(
@@ -184,18 +187,28 @@ class _ReorderableStaggeredGridViewExampleState
 
         // Body
         body: LayoutBuilder(
-          builder: (context, constraints) => ReorderableStaggeredGridView(
-            padding: EdgeInsets.all(20),
-            enable: enableDragging,
-            crossAxisCount: Constants.calculateCrossAxisCount(
+          builder: (context, constraints) {
+            final crossAxisCount = Constants.calculateCrossAxisCount(
               constraints.maxWidth,
-            ),
-            mainAxisSpacing: Constants.spacing,
-            crossAxisSpacing: Constants.spacing,
-            isLongPressDraggable: enableLongPress,
-            nonDraggableWidgetsKeys: [Constants._widgetKeys[0]!],
-            items: items,
-          ),
+            );
+
+            if (_lastCrossAxisCount != crossAxisCount) {
+              _lastCrossAxisCount = crossAxisCount;
+              _gridKey = UniqueKey();
+            }
+
+            return ReorderableStaggeredGridView(
+              key: _gridKey,
+              padding: EdgeInsets.all(20),
+              enable: enableDragging,
+              crossAxisCount: crossAxisCount,
+              mainAxisSpacing: Constants.spacing,
+              crossAxisSpacing: Constants.spacing,
+              isLongPressDraggable: enableLongPress,
+              nonDraggableWidgetsKeys: [Constants._widgetKeys[0]!],
+              items: items,
+            );
+          },
         ),
       ),
     );
