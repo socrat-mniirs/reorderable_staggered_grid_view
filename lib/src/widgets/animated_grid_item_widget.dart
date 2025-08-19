@@ -104,10 +104,16 @@ class _AnimatedGridItemWidgetState extends State<AnimatedGridItemWidget>
 
   // Saving the current position of the grid element
   void _capturePosition() {
-    final renderBox = context.findRenderObject() as RenderBox?;
-    if (renderBox != null) {
-      _position = renderBox.localToGlobal(Offset.zero);
-    }
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) {
+        if (mounted) {
+          final renderBox = context.findRenderObject() as RenderBox?;
+          if (renderBox != null) {
+            _position = renderBox.localToGlobal(Offset.zero);
+          }
+        }
+      },
+    );
   }
 
   // Animating the grid element to a new position and saving the current position after that
