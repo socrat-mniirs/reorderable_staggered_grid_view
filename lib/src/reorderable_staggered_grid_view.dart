@@ -183,14 +183,12 @@ class _ReorderableStaggeredGridViewState
   // ========== AUTO-SCROLL METHODS ==========
 
   /// Refresh the Y-position relative to scroll
-
   void _autoScrollOnDragUpdate(DragUpdateDetails details) {
     _dragY = details.globalPosition.dy;
     _checkAutoScroll();
   }
 
   /// Start/stop auto-scroll and selecting the auth-scroll direction
-
   void _checkAutoScroll() {
     final gridHeight = (context.findRenderObject() as RenderBox).size.height;
     const scrollThreshold = 25.0;
@@ -210,7 +208,6 @@ class _ReorderableStaggeredGridViewState
   }
 
   /// Start auto-scroll
-
   void _startAutoScroll({required bool up}) {
     if (_isAutoScrolling) return;
     _isAutoScrolling = true;
@@ -232,7 +229,6 @@ class _ReorderableStaggeredGridViewState
   }
 
   /// Stop auto-scroll
-
   void _stopAutoScroll() => _isAutoScrolling = false;
 
   /// ========================================
