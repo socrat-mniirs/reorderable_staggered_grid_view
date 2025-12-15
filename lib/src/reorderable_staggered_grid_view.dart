@@ -101,6 +101,10 @@ class ReorderableStaggeredGridView extends StatefulWidget {
   /// Keys of widgets which cannot be dragged
   final List<Key> nonDraggableWidgetsKeys;
 
+  /// The [onWillAcceptDuration] is the delay before the animation which indicates that the rebuild will be accepted.
+  final Duration onWillAcceptDuration;
+
+  // TODO remove or rename
   /// The [willAcceptAnimationOffset] is a callback which calls when there is a draggable widget above another drag target.
   final Duration willAcceptOffsetDuration;
 
@@ -135,6 +139,7 @@ class ReorderableStaggeredGridView extends StatefulWidget {
     this.onWillAcceptWithDetails,
     this.onAcceptWithDetails,
     this.buildFeedbackWidget,
+    this.onWillAcceptDuration = Duration.zero,
     this.willAcceptOffsetDuration = const Duration(milliseconds: 200),
     this.willAcceptAnimationOffset = const Offset(50, 50),
     this.nonDraggableWidgetsKeys = const [],
@@ -292,6 +297,7 @@ class _ReorderableStaggeredGridViewState
             // Animation offset
             willAcceptOffsetDuration: widget.willAcceptOffsetDuration,
             willAcceptAnimationOffset: widget.willAcceptAnimationOffset,
+            onWillAcceptDuration: widget.onWillAcceptDuration,
 
             // Feedback widget
             buildFeedbackWidget: widget.buildFeedbackWidget,
@@ -322,10 +328,6 @@ class _ReorderableStaggeredGridViewState
             onWillAcceptWithDetails: (details) {
               if (_isAutoScrolling || details.data == item.data) return false;
 
-              if (widget.onWillAcceptWithDetails != null) {
-                return widget.onWillAcceptWithDetails!(details);
-              }
-
               /// =====-----=====-----=====-----=====-----=====-----=====
               /// The functionality below is still in development
 
@@ -335,7 +337,7 @@ class _ReorderableStaggeredGridViewState
               // setState(() {});
               /// =====-----=====-----=====-----=====-----=====-----=====
 
-              return true;
+              return widget.onWillAcceptWithDetails?.call(details) ?? true;
             },
             onAcceptWithDetails: (details) {
               assert(_draggingItem != null);

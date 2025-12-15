@@ -209,6 +209,7 @@ class _ReorderableStaggeredGridViewExampleState
               crossAxisSpacing: 10,
               isLongPressDraggable: enableLongPress,
               nonDraggableWidgetsKeys: [ExampleData._widgetKeys[0]!],
+              onWillAcceptDuration: Durations.long1,
               items: items,
             );
           },

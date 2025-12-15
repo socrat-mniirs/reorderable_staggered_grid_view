@@ -20,6 +20,10 @@ class ReorderableStaggeredGridItemWidget extends StatelessWidget {
   /// The [isDraggingEnabled] indicates is dragging enabled or not.
   final bool isDraggingEnabled;
 
+  /// The [onWillAcceptDuration] is the delay before the animation which indicates that the rebuild will be accepted.
+  final Duration onWillAcceptDuration;
+
+  // TODO remove or rename
   /// The [willAcceptOffsetDuration] is an animation duration of [willAcceptAnimationOffset].
   final Duration willAcceptOffsetDuration;
 
@@ -52,13 +56,13 @@ class ReorderableStaggeredGridItemWidget extends StatelessWidget {
   /// the target.
   final void Function(Object? data)? onLeave;
 
-  /// The [onWillAcceptWithDetails] called to determine whether this widget is interested in receiving a given
-  /// piece of data being dragged over this drag target.
-  final bool Function(DragTargetDetails details) onWillAcceptWithDetails;
-
   /// The [onAcceptWithDetails] called when an acceptable piece of data was dropped over this drag target.
   /// It will not be called if `data` is `null`.
   final void Function(DragTargetDetails details) onAcceptWithDetails;
+
+  /// The [onWillAcceptWithDetails] called to determine whether this widget is interested in receiving a given
+  /// piece of data being dragged over this drag target.
+  final bool Function(DragTargetDetails details) onWillAcceptWithDetails;
 
   /// The [buildFeedbackWidget] called when the dragging started to paint widget which will be shown as a dragging widget.
   final Widget Function(
@@ -76,6 +80,7 @@ class ReorderableStaggeredGridItemWidget extends StatelessWidget {
     required this.isLongPressDraggable,
     required this.willAcceptOffsetDuration,
     required this.willAcceptAnimationOffset,
+    required this.onWillAcceptDuration,
     required this.onDragStarted,
     required this.onDragUpdate,
     required this.onDragEnd,
@@ -121,6 +126,7 @@ class ReorderableStaggeredGridItemWidget extends StatelessWidget {
             // Offset when dragging over
             animationOffset: willAcceptAnimationOffset,
             offsetDuration: willAcceptOffsetDuration,
+            onWillAcceptDuration: onWillAcceptDuration,
 
             // Will accept
             onWillAcceptWithDetails: onWillAcceptWithDetails,

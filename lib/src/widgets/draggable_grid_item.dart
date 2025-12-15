@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:reorderable_staggered_grid_view/src/data/scroll_end_notifier.dart';
 import 'package:reorderable_staggered_grid_view/src/widgets/animated_grid_item_widget.dart';
@@ -53,6 +55,9 @@ class DraggableGridItem extends StatefulWidget {
   final bool Function(DragTargetDetails<Object?> details)?
       onWillAcceptWithDetails;
 
+  /// The [onWillAcceptDuration] is the delay before the animation which indicates that the rebuild will be accepted.
+  final Duration onWillAcceptDuration;
+
   /// The animation offset on [onWillAcceptWithDetails].
   final Offset animationOffset;
 
@@ -83,6 +88,7 @@ class DraggableGridItem extends StatefulWidget {
     required this.onLeave,
     required this.onAcceptWithDetails,
     required this.onWillAcceptWithDetails,
+    required this.onWillAcceptDuration,
     required this.animationOffset,
     required this.offsetDuration,
     required this.buildFeedbackWidget,
@@ -97,6 +103,17 @@ class DraggableGridItem extends StatefulWidget {
 class _DraggableGridItemState extends State<DraggableGridItem> {
   Offset offset = Offset.zero;
 
+  // 'Will accept' handler
+  bool _canAccept = false;
+  bool _willAcceptDelayStarted = false;
+  Timer? _willAcceptDelayTimer;
+
+  @override
+  void dispose() {
+    super.dispose();
+    _willAcceptDelayTimer?.cancel();
+  }
+
   /// [_onLeave] - return the target object to its original place
   ///
   void _onLeave(Object? data) {
@@ -104,8 +121,15 @@ class _DraggableGridItemState extends State<DraggableGridItem> {
       return;
     }
 
+    // Reset 'will accept' data
+    _willAcceptDelayTimer?.cancel();
+    _willAcceptDelayStarted = false;
+    _canAccept = false;
+
     widget.onLeave?.call(data);
-    setState(() => offset -= widget.animationOffset);
+    setState(
+      () => offset = Offset.zero,
+    );
   }
 
   /// [_onMove] - called when Draggable moving within DragTarget
@@ -119,9 +143,29 @@ class _DraggableGridItemState extends State<DraggableGridItem> {
       return false;
     }
 
-    setState(() => offset += widget.animationOffset);
+    if (_canAccept) {
+      setState(() => offset += widget.animationOffset);
+      return widget.onWillAcceptWithDetails?.call(details) ?? true;
+    }
 
-    return widget.onWillAcceptWithDetails?.call(details) ?? true;
+    // Start animation timer
+    if (!_willAcceptDelayStarted) {
+      _willAcceptDelayStarted = true;
+
+      _willAcceptDelayTimer = Timer(
+        widget.onWillAcceptDuration,
+        () {
+          if (!mounted) return;
+
+          setState(() {
+            _canAccept = true;
+            offset += widget.animationOffset;
+          });
+        },
+      );
+    }
+
+    return widget.onWillAcceptWithDetails?.call(details) ?? false;
   }
 
   /// [_onAcceptWithDetails] - calling the passed function
@@ -135,8 +179,8 @@ class _DraggableGridItemState extends State<DraggableGridItem> {
       children: [
         // Animated draggable widget (above drag target)
         AnimatedOffset(
-          duration: widget.offsetDuration,
           offset: offset,
+          duration: widget.offsetDuration,
           child: widget.isLongPressDraggable
 
               // ===== LONG PRESS =====
