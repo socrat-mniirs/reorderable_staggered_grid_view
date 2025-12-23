@@ -78,14 +78,14 @@ class _AnimatedGridItemWidgetState extends State<AnimatedGridItemWidget>
 
   @override
   void didUpdateWidget(covariant AnimatedGridItemWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
     // Check if animation is necessary and proceed to actions
     if (_isAnimationNeeded(oldWidget)) {
       _startAnimation();
     } else {
       _capturePosition();
     }
-
-    super.didUpdateWidget(oldWidget);
   }
 
   // Check if animation is needed.
@@ -124,19 +124,21 @@ class _AnimatedGridItemWidgetState extends State<AnimatedGridItemWidget>
         final newPosition = renderBox.localToGlobal(Offset.zero);
         final delta = _position - newPosition;
 
-        setState(
-          () {
-            _animation = Tween<Offset>(
-              begin: Offset(delta.dx, delta.dy),
-              end: Offset.zero,
-            ).animate(
-              CurvedAnimation(
-                parent: _controller,
-                curve: Curves.easeOut,
-              ),
-            );
-          },
-        );
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          setState(
+            () {
+              _animation = Tween<Offset>(
+                begin: Offset(delta.dx, delta.dy),
+                end: Offset.zero,
+              ).animate(
+                CurvedAnimation(
+                  parent: _controller,
+                  curve: Curves.easeOut,
+                ),
+              );
+            },
+          );
+        });
 
         _controller.forward(from: 0).then(
               (_) => _capturePosition(),

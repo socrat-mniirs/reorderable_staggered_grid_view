@@ -104,7 +104,6 @@ class _DraggableGridItemState extends State<DraggableGridItem> {
   Offset offset = Offset.zero;
 
   // 'Will accept' handler
-  bool _canAccept = false;
   bool _willAcceptDelayStarted = false;
   Timer? _willAcceptDelayTimer;
 
@@ -124,9 +123,9 @@ class _DraggableGridItemState extends State<DraggableGridItem> {
     // Reset 'will accept' data
     _willAcceptDelayTimer?.cancel();
     _willAcceptDelayStarted = false;
-    _canAccept = false;
 
     widget.onLeave?.call(data);
+
     setState(
       () => offset = Offset.zero,
     );
@@ -143,11 +142,6 @@ class _DraggableGridItemState extends State<DraggableGridItem> {
       return false;
     }
 
-    if (_canAccept) {
-      setState(() => offset += widget.animationOffset);
-      return widget.onWillAcceptWithDetails?.call(details) ?? true;
-    }
-
     // Start animation timer
     if (!_willAcceptDelayStarted) {
       _willAcceptDelayStarted = true;
@@ -158,7 +152,6 @@ class _DraggableGridItemState extends State<DraggableGridItem> {
           if (!mounted) return;
 
           setState(() {
-            _canAccept = true;
             offset += widget.animationOffset;
           });
         },

@@ -167,10 +167,12 @@ class _ReorderableStaggeredGridViewState
 
   @override
   void initState() {
-    _scrollEndNotifier = ScrollEndNotifier();
-    _items = widget.items;
-    _scrollController = widget.controller ?? ScrollController();
     super.initState();
+
+    _items = widget.items;
+
+    _scrollEndNotifier = ScrollEndNotifier();
+    _scrollController = widget.controller ?? ScrollController();
   }
 
   // Update grid if items changed
@@ -287,31 +289,38 @@ class _ReorderableStaggeredGridViewState
           return ReorderableStaggeredGridItemWidget(
             // Item
             item: item,
-            isLastDraggedItem: identical(item, _lastDraggedItem),
             index: index,
+            isLastDraggedItem: identical(item, _lastDraggedItem),
 
             // UI
             isDraggingEnabled: widget.enable,
+            scrollEndNotifier: _scrollEndNotifier,
             isLongPressDraggable: widget.isLongPressDraggable,
 
             // Animation offset
+            onWillAcceptDuration: widget.onWillAcceptDuration,
             willAcceptOffsetDuration: widget.willAcceptOffsetDuration,
             willAcceptAnimationOffset: widget.willAcceptAnimationOffset,
-            onWillAcceptDuration: widget.onWillAcceptDuration,
 
             // Feedback widget
             buildFeedbackWidget: widget.buildFeedbackWidget,
 
-            // Dragging + Scroll
+            // Dragging callbacks
             onDragStarted: () {
               _draggingItem = item;
               _lastDraggedItem = item;
               widget.onDragStarted?.call();
             },
+
+            onMove: widget.onMove,
+
             onDragUpdate: (details) {
               _autoScrollOnDragUpdate(details);
               widget.onDragUpdate?.call(details);
             },
+
+            onLeave: widget.onLeave,
+
             onDragEnd: (details) {
               _stopAutoScroll();
 
@@ -320,25 +329,19 @@ class _ReorderableStaggeredGridViewState
               }
               widget.onDragEnd?.call(details);
             },
-            onLeave: widget.onLeave,
-            onMove: widget.onMove,
-            scrollEndNotifier: _scrollEndNotifier,
 
-            // Accepting
+            // Will accept
             onWillAcceptWithDetails: (details) {
-              if (_isAutoScrolling || details.data == item.data) return false;
+              assert(_draggingItem != null);
 
-              /// =====-----=====-----=====-----=====-----=====-----=====
-              /// The functionality below is still in development
-
-              // items.remove(draggingItem);
-              // items.insert(index, draggingItem!);
-
-              // setState(() {});
-              /// =====-----=====-----=====-----=====-----=====-----=====
+              if (_isAutoScrolling) return false;
+              if (_draggingItem == null) return false;
+              if (details.data == item.data) return false;
 
               return widget.onWillAcceptWithDetails?.call(details) ?? true;
             },
+
+            // Accept
             onAcceptWithDetails: (details) {
               assert(_draggingItem != null);
 
