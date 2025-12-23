@@ -37,7 +37,7 @@ class _AnimatedGridItemWidgetState extends State<AnimatedGridItemWidget>
   Offset _position = Offset.zero;
 
   // Animation
-  late AnimationController _controller;
+  late AnimationController _animationController;
   late Animation<Offset> _animation;
 
   // Recalculation of positions after scroll completion
@@ -50,7 +50,7 @@ class _AnimatedGridItemWidgetState extends State<AnimatedGridItemWidget>
     // Recalculation of positions after scroll completion
     widget.scrollEndNotifier.addListener(_scrollEndListener);
 
-    _controller = AnimationController(
+    _animationController = AnimationController(
       vsync: this,
       duration: widget.item?.duration ?? Duration(milliseconds: 300),
     );
@@ -64,12 +64,12 @@ class _AnimatedGridItemWidgetState extends State<AnimatedGridItemWidget>
       end: Offset.zero,
     ).animate(
       CurvedAnimation(
-        parent: _controller,
+        parent: _animationController,
         curve: widget.item?.curve ?? Curves.easeOut,
       ),
     );
 
-    _controller.forward(from: 0).then(
+    _animationController.forward(from: 0).then(
           (_) => WidgetsBinding.instance.addPostFrameCallback(
             (_) => _capturePosition(),
           ),
@@ -86,6 +86,13 @@ class _AnimatedGridItemWidgetState extends State<AnimatedGridItemWidget>
     } else {
       _capturePosition();
     }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _animationController.dispose();
+    widget.scrollEndNotifier.removeListener(_scrollEndListener);
   }
 
   // Check if animation is needed.
@@ -132,7 +139,7 @@ class _AnimatedGridItemWidgetState extends State<AnimatedGridItemWidget>
                 end: Offset.zero,
               ).animate(
                 CurvedAnimation(
-                  parent: _controller,
+                  parent: _animationController,
                   curve: Curves.easeOut,
                 ),
               );
@@ -140,7 +147,7 @@ class _AnimatedGridItemWidgetState extends State<AnimatedGridItemWidget>
           );
         });
 
-        _controller.forward(from: 0).then(
+        _animationController.forward(from: 0).then(
               (_) => _capturePosition(),
             );
       }
@@ -163,12 +170,5 @@ class _AnimatedGridItemWidgetState extends State<AnimatedGridItemWidget>
       ),
       child: widget.item!.child,
     );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    widget.scrollEndNotifier.removeListener(_scrollEndListener);
-    super.dispose();
   }
 }

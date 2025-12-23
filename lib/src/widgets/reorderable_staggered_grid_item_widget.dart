@@ -99,11 +99,11 @@ class ReorderableStaggeredGridItemWidget extends StatelessWidget {
 
         // Not enabled dragging and drag target
         ? AnimatedGridItemWidget(
-            key: item.animationKey,
+            item: item,
             index: index,
+            key: item.animationKey,
             scrollEndNotifier: scrollEndNotifier,
             isLastDraggedItem: isLastDraggedItem,
-            item: item,
           )
 
         // Enabled all

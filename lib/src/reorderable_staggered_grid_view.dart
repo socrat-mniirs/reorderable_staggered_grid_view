@@ -154,6 +154,7 @@ class ReorderableStaggeredGridView extends StatefulWidget {
 class _ReorderableStaggeredGridViewState
     extends State<ReorderableStaggeredGridView> {
   late final ScrollController _scrollController;
+
   late List<ReorderableStaggeredGridViewItem> _items;
 
   // Autoscroll fields
@@ -169,8 +170,10 @@ class _ReorderableStaggeredGridViewState
   void initState() {
     super.initState();
 
+    // Items
     _items = widget.items;
 
+    // Scroll
     _scrollEndNotifier = ScrollEndNotifier();
     _scrollController = widget.controller ?? ScrollController();
   }
@@ -242,6 +245,7 @@ class _ReorderableStaggeredGridViewState
 
   @override
   Widget build(BuildContext context) {
+    // Listen to scroll end notifications
     return NotificationListener<ScrollEndNotification>(
       onNotification: (notification) {
         _scrollEndNotifier.scrollEnd();
@@ -323,17 +327,12 @@ class _ReorderableStaggeredGridViewState
 
             onDragEnd: (details) {
               _stopAutoScroll();
-
-              if (_draggingItem != null) {
-                _draggingItem = null;
-              }
+              _draggingItem = null;
               widget.onDragEnd?.call(details);
             },
 
             // Will accept
             onWillAcceptWithDetails: (details) {
-              assert(_draggingItem != null);
-
               if (_isAutoScrolling) return false;
               if (_draggingItem == null) return false;
               if (details.data == item.data) return false;
