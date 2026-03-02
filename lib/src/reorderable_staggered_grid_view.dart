@@ -470,24 +470,26 @@ class _ReorderableStaggeredGridViewState
               ),
 
               // Invisible preview grid for calculating positions
-              IgnorePointer(
-                child: Offstage(
-                  child: _PreviewGrid(
-                    mainGridScrollController: _scrollController,
-                    physics: widget.physics,
-                    reverse: widget.reverse,
-                    padding: widget.padding,
-                    primary: widget.primary,
-                    shrinkWrap: widget.shrinkWrap,
-                    scrollDirection: widget.scrollDirection,
-                    addRepaintBoundaries: widget.addRepaintBoundaries,
-                    addAutomaticKeepAlives: widget.addAutomaticKeepAlives,
-                    crossAxisCount: widget.crossAxisCount,
-                    mainAxisSpacing: widget.mainAxisSpacing,
-                    crossAxisSpacing: widget.crossAxisSpacing,
+              if (widget.mode ==
+                  ReorderableStaggeredGridViewMode.withReorderPreview)
+                IgnorePointer(
+                  child: Offstage(
+                    child: _PreviewGrid(
+                      mainGridScrollController: _scrollController,
+                      physics: widget.physics,
+                      reverse: widget.reverse,
+                      padding: widget.padding,
+                      primary: widget.primary,
+                      shrinkWrap: widget.shrinkWrap,
+                      scrollDirection: widget.scrollDirection,
+                      addRepaintBoundaries: widget.addRepaintBoundaries,
+                      addAutomaticKeepAlives: widget.addAutomaticKeepAlives,
+                      crossAxisCount: widget.crossAxisCount,
+                      mainAxisSpacing: widget.mainAxisSpacing,
+                      crossAxisSpacing: widget.crossAxisSpacing,
+                    ),
                   ),
                 ),
-              ),
             ],
           ),
         ),
@@ -677,5 +679,5 @@ class __PreviewItemState extends State<_PreviewItem> {
   }
 
   @override
-  Widget build(BuildContext context) => SizedBox(key: _key);
+  Widget build(BuildContext context) => SizedBox.shrink(key: _key);
 }
