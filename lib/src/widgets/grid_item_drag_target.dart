@@ -1,6 +1,14 @@
-part of 'reorderable_staggered_grid_item_widget.dart';
+import 'dart:async';
 
-class _GridItemDragTarget extends StatefulWidget {
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../data/reorder_preview_controller.dart';
+import '../data/reorderable_staggered_grid_view_item.dart';
+import '../data/reorderable_staggered_grid_view_mode.dart';
+import 'animated_offset.dart';
+
+class GridItemDragTarget extends StatefulWidget {
   /// The [item] is a grid widget that can be reordered or dragged.
   final ReorderableStaggeredGridViewItem item;
 
@@ -13,7 +21,8 @@ class _GridItemDragTarget extends StatefulWidget {
   /// The [onMove] called when draggable moving within drag target.
   final void Function(DragTargetDetails details)? onMove;
 
-  /// The [onLeave] called when a given piece of data being dragged over this target leaves the target.
+  /// The [onLeave] called when a given piece of data being dragged over this target leaves
+  /// the target.
   final void Function(Object? data)? onLeave;
 
   /// The [onAcceptWithDetails] called when an acceptable piece of data was dropped over this drag target.
@@ -34,14 +43,12 @@ class _GridItemDragTarget extends StatefulWidget {
   /// The [offsetDuration] is an animation duration of [animationOffset].
   final Duration offsetDuration;
 
-  /// The [buildFeedbackWidget] called when the dragging started to paint widget which will be shown as a dragging widget.
-  final Widget Function(
-          BuildContext context, Widget child, GlobalKey originalWidgetKey)?
-      buildFeedbackWidget;
+  /// The [child] is the widget content of the item.
+  final Widget child;
 
-  const _GridItemDragTarget({
+  const GridItemDragTarget({
+    super.key,
     required this.item,
-    required this.index,
     required this.mode,
     required this.onMove,
     required this.onLeave,
@@ -50,14 +57,15 @@ class _GridItemDragTarget extends StatefulWidget {
     required this.onWillAcceptDuration,
     required this.animationOffset,
     required this.offsetDuration,
-    required this.buildFeedbackWidget,
+    required this.index,
+    required this.child,
   });
 
   @override
-  State<_GridItemDragTarget> createState() => _GridItemDragTargetState();
+  State<GridItemDragTarget> createState() => _GridItemDragTargetState();
 }
 
-class _GridItemDragTargetState extends State<_GridItemDragTarget> {
+class _GridItemDragTargetState extends State<GridItemDragTarget> {
   late final ReorderPreviewController _reorderController;
 
   Offset _offset = Offset.zero;
@@ -84,26 +92,32 @@ class _GridItemDragTargetState extends State<_GridItemDragTarget> {
       return false;
     }
 
-    // In normal mode, the animation starts immediately when the draggable is hovered over the target
-    if (widget.mode == ReorderableStaggeredGridViewMode.normal) {
-      setState(() => _offset += widget.animationOffset);
-    }
+    switch (widget.mode) {
+      // With offset animations
+      case ReorderableStaggeredGridViewMode.withOffsetAnimations:
+        setState(() => _offset += widget.animationOffset);
+        break;
 
-    // In reorder previw mode, the animation starts after a delay when the draggable is hovered over the target
-    else if (!_willAcceptDelayStarted) {
-      // Start animation timer
-      _willAcceptDelayStarted = true;
-
-      _willAcceptDelayTimer = Timer(
-        widget.onWillAcceptDuration,
-        () {
-          if (!mounted) return;
-
-          _reorderController.reorderPreviewItemsOnWillAccept(
-            targetIndex: widget.index,
+      // With reorder preview
+      // The animation starts after a delay when the draggable is hovered over the target
+      case ReorderableStaggeredGridViewMode.withReorderPreview:
+        if (!_willAcceptDelayStarted) {
+          _willAcceptDelayStarted = true;
+          _willAcceptDelayTimer = Timer(
+            widget.onWillAcceptDuration,
+            () {
+              if (!mounted) return;
+              _reorderController.reorderPreviewItemsOnWillAccept(
+                targetIndex: widget.index,
+              );
+            },
           );
-        },
-      );
+        }
+        break;
+
+      // Normal mode doesn't have any animation on will accept
+      default:
+        break;
     }
 
     return widget.onWillAcceptWithDetails?.call(details) ?? false;
@@ -119,22 +133,30 @@ class _GridItemDragTargetState extends State<_GridItemDragTarget> {
       return;
     }
 
-    // Normal mode
-    if (widget.mode == ReorderableStaggeredGridViewMode.normal) {
-      setState(() => _offset = Offset.zero);
-    }
+    switch (widget.mode) {
+      // With offset animations
+      case ReorderableStaggeredGridViewMode.withOffsetAnimations:
+        setState(() => _offset = Offset.zero);
+        break;
 
-    // Preview mode
-    else {
-      // Reset 'will accept' data
-      _willAcceptDelayTimer?.cancel();
-      _willAcceptDelayStarted = false;
+      // With reorder preview
+      case ReorderableStaggeredGridViewMode.withReorderPreview:
+        {
+          // Reset 'will accept' data
+          _willAcceptDelayTimer?.cancel();
+          _willAcceptDelayStarted = false;
 
-      widget.onLeave?.call(data);
+          widget.onLeave?.call(data);
 
-      if (!mounted) return;
+          if (!mounted) return;
 
-      _reorderController.cancelPreviousReorderChangesOnLeave();
+          _reorderController.cancelPreviousReorderChangesOnLeave();
+        }
+        break;
+
+      // Normal mode
+      default:
+        break;
     }
   }
 
@@ -143,14 +165,26 @@ class _GridItemDragTargetState extends State<_GridItemDragTarget> {
 
   @override
   Widget build(BuildContext context) {
-    return Positioned.fill(
-      child: DragTarget(
-        onMove: _onMove,
-        onLeave: _onLeave,
-        onWillAcceptWithDetails: _onWillAcceptWithDetails,
-        onAcceptWithDetails: _onAcceptWithDetails,
-        builder: (context, _, __) => const SizedBox.shrink(),
-      ),
+    return Stack(
+      children: [
+        // Animated draggable widget (above drag target)
+        AnimatedOffset(
+          offset: _offset,
+          duration: widget.offsetDuration,
+          child: widget.child,
+        ),
+
+        // Drag target (under the draggable widget)
+        Positioned.fill(
+          child: DragTarget(
+            onMove: _onMove,
+            onLeave: _onLeave,
+            onWillAcceptWithDetails: _onWillAcceptWithDetails,
+            onAcceptWithDetails: _onAcceptWithDetails,
+            builder: (context, _, __) => const SizedBox.shrink(),
+          ),
+        ),
+      ],
     );
   }
 }

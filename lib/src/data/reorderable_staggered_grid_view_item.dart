@@ -4,9 +4,8 @@ class ReorderableStaggeredGridViewItem<T> {
   /// The [data] is a required value for the item.
   final T? data;
 
-  // TODO rename
-  /// The [animationKey] is a required unique identifier for the animation during dragging.
-  final GlobalKey animationKey;
+  /// The [key] is a required unique identifier for the animation during dragging.
+  final GlobalKey key;
 
   /// The [mainAxisCellCount] is the number of cells occupied by the element along the main scroll axis.
   final int mainAxisCellCount;
@@ -27,12 +26,12 @@ class ReorderableStaggeredGridViewItem<T> {
   /// in grid view.
   ReorderableStaggeredGridViewItem({
     required this.data,
-    required this.animationKey,
+    GlobalKey? key,
     required this.mainAxisCellCount,
     required this.crossAxisCellCount,
     Offset? startingOffset,
     this.duration = Durations.medium2,
     this.curve = Curves.easeOut,
     required this.child,
-  });
+  }) : key = key ?? GlobalKey();
 }

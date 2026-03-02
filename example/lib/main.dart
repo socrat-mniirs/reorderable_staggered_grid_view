@@ -258,13 +258,11 @@ class ExampleData {
   /// Generate [ReorderableStaggeredGridViewItem]
   static ReorderableStaggeredGridViewItem _generateItem(int index) {
     final key = widgetKeyById(index);
-    final animationKey = animationKeyById(index);
 
     int? mainAxisCellCount;
     int? crossAxisCellCount;
 
     return ReorderableStaggeredGridViewItem(
-      animationKey: animationKey,
       data: index,
       mainAxisCellCount: mainAxisCellCount ?? Random().nextInt(2) + 1,
       crossAxisCellCount: crossAxisCellCount ?? Random().nextInt(2) + 1,

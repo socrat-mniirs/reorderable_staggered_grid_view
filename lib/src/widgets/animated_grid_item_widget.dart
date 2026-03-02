@@ -78,7 +78,7 @@ class _AnimatedGridItemWidgetState extends State<AnimatedGridItemWidget>
 
     // Find target position
     final positions = _reorderPreviewNotifier.positions;
-    final targetPosition = positions[widget.item!.animationKey];
+    final targetPosition = positions[widget.item!.key];
     if (targetPosition == null || !mounted) return;
 
     // Create animation

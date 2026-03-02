@@ -20,7 +20,7 @@ class ReorderPreviewNotifier extends ChangeNotifier {
 
       try {
         final position = renderBox.localToGlobal(Offset.zero);
-        positions[item.animationKey] = position;
+        positions[item.key] = position;
       } catch (_) {
         // TODO
         // Should log?

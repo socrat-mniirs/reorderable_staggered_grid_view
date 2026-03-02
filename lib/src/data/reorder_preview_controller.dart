@@ -12,7 +12,7 @@ class ReorderPreviewController extends ChangeNotifier {
   final Map<GlobalKey, GlobalKey> _previewActualKeys = {};
   GlobalKey keyByItem(ReorderableStaggeredGridViewItem item) =>
       _previewActualKeys.putIfAbsent(
-        item.animationKey,
+        item.key,
         () => GlobalKey(),
       );
 

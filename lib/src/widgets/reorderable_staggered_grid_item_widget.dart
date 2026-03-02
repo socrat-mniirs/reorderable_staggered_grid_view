@@ -1,17 +1,10 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
-import '../data/reorder_preview_controller.dart';
 import '../data/scroll_end_notifier.dart';
 import '../data/reorderable_staggered_grid_view_item.dart';
 import '../data/reorderable_staggered_grid_view_mode.dart';
 import 'animated_grid_item_widget.dart';
-import 'draggable_target.dart';
-
-part 'grid_item_draggable.dart';
-part 'grid_item_drag_target.dart';
+import 'grid_item_drag_target.dart';
 
 class ReorderableStaggeredGridItemWidget extends StatelessWidget {
   /// The [item] which can be reordered or dragged.
@@ -112,12 +105,12 @@ class ReorderableStaggeredGridItemWidget extends StatelessWidget {
         // Not enabled dragging and drag target
         ? AnimatedGridItemWidget(
             item: item,
-            key: item.animationKey,
+            key: item.key,
             isLastDraggedItem: isLastDraggedItem,
           )
 
         // Enabled all
-        : DraggableTarget(
+        : GridItemDragTarget(
             // Required key to start animation
             key: ObjectKey(item),
 
@@ -143,11 +136,8 @@ class ReorderableStaggeredGridItemWidget extends StatelessWidget {
             // Accept
             onAcceptWithDetails: onAcceptWithDetails,
 
-            // Feedback widget
-            buildFeedbackWidget: buildFeedbackWidget,
-
             // Draggable
-            draggable: _GridItemDraggable(
+            child: _GridItemDraggable(
               data: item.data,
               isLongPressDraggable: isLongPressDraggable,
 
@@ -161,7 +151,7 @@ class ReorderableStaggeredGridItemWidget extends StatelessWidget {
                 enabled: false,
                 child: AnimatedGridItemWidget(
                   item: null,
-                  key: item.animationKey,
+                  key: item.key,
                 ),
               ),
 
@@ -170,17 +160,17 @@ class ReorderableStaggeredGridItemWidget extends StatelessWidget {
                     context,
                     item.child,
                     // TODO is this need?
-                    item.animationKey,
+                    item.key,
                   ) ??
                   _FeedbackWidget(
-                    originalWidgetKey: item.animationKey,
+                    originalWidgetKey: item.key,
                     child: item.child,
                   ),
 
               // Child
               child: AnimatedGridItemWidget(
                 item: item,
-                key: item.animationKey,
+                key: item.key,
                 isLastDraggedItem: isLastDraggedItem,
               ),
             ),
@@ -188,10 +178,83 @@ class ReorderableStaggeredGridItemWidget extends StatelessWidget {
   }
 }
 
-/// Feedback widget
+/// Widget for dragging a grid item
+class _GridItemDraggable extends StatelessWidget {
+  final Object? data;
+
+  /// The [isLongPressDraggable] indicates does it take a long press to drag or not.
+  final bool isLongPressDraggable;
+
+  /// The [onDragStarted] called when the draggable starts being dragged.
+  final void Function()? onDragStarted;
+
+  /// The [onDragUpdate] called when the draggable is dragged.
+  ///
+  /// This function will only be called while this widget is still mounted to
+  /// the tree (i.e. [State.mounted] is true), and if this widget has actually moved.
+  final void Function(DragUpdateDetails details)? onDragUpdate;
+
+  /// The [onDragEnd] called when the draggable is dropped.
+  ///
+  /// The velocity and offset at which the pointer was moving when it was
+  /// dropped is available in the [DraggableDetails]. Also included in the
+  /// `details` is whether the draggable's [DragTarget] accepted it.
+  ///
+  /// This function will only be called while this widget is still mounted to
+  /// the tree (i.e. [State.mounted] is true).
+  final void Function(DraggableDetails details)? onDragEnd;
+
+  /// TODO doc
+  final Widget childWhenDragging;
+  final Widget feedback;
+  final Widget child;
+
+  const _GridItemDraggable({
+    required this.data,
+    this.onDragStarted,
+    this.onDragUpdate,
+    this.onDragEnd,
+    required this.isLongPressDraggable,
+    required this.childWhenDragging,
+    required this.feedback,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return isLongPressDraggable
+
+        // Long press draggable
+        ? LongPressDraggable(
+            data: data,
+            onDragStarted: onDragStarted,
+            onDragUpdate: onDragUpdate,
+            onDragEnd: onDragEnd,
+
+            // Child widgets
+            feedback: feedback,
+            childWhenDragging: childWhenDragging,
+            child: child,
+          )
+
+        // Default draggable
+        : Draggable(
+            data: data,
+            onDragStarted: onDragStarted,
+            onDragUpdate: onDragUpdate,
+            onDragEnd: onDragEnd,
+
+            // Child widgets
+            feedback: feedback,
+            childWhenDragging: childWhenDragging,
+            child: child,
+          );
+  }
+}
+
+/// The widget which will be shown as a default dragging widget
 class _FeedbackWidget extends StatelessWidget {
   final GlobalKey originalWidgetKey;
-
   final Widget child;
 
   const _FeedbackWidget({

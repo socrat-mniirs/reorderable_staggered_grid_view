@@ -146,13 +146,52 @@ class ReorderableStaggeredGridView extends StatefulWidget {
     this.onWillAcceptWithDetails,
     this.onAcceptWithDetails,
     this.buildFeedbackWidget,
-    this.willAcceptOffsetDuration = const Duration(milliseconds: 200),
-    this.willAcceptAnimationOffset = const Offset(50, 50),
     this.nonDraggableWidgetsKeys = const [],
     required this.items,
   })  :
         // Setting mode to normal
         mode = ReorderableStaggeredGridViewMode.normal,
+
+        // Unused parameter without preview of reorder
+        onWillAcceptDuration = Duration.zero,
+
+        // Unused params without offset animations
+        willAcceptAnimationOffset = Offset.zero,
+        willAcceptOffsetDuration = Duration.zero;
+
+  /// The [ReorderableStaggeredGridView.withOffsetAnimation] constructor.
+  /// Provides lazy rendering of widgets and offset animation when dragging widget over another drag target.
+  const ReorderableStaggeredGridView.withOffsetAnimation({
+    super.key,
+    this.enable = true,
+    required this.crossAxisCount,
+    this.isLongPressDraggable = false,
+    this.physics,
+    this.shrinkWrap = false,
+    this.scrollDirection = Axis.vertical,
+    this.reverse = false,
+    this.primary,
+    this.addAutomaticKeepAlives = true,
+    this.addRepaintBoundaries = true,
+    this.padding,
+    this.mainAxisSpacing = 0,
+    this.crossAxisSpacing = 0,
+    this.controller,
+    this.onDragStarted,
+    this.onDragUpdate,
+    this.onDragEnd,
+    this.onMove,
+    this.onLeave,
+    this.onWillAcceptWithDetails,
+    this.onAcceptWithDetails,
+    this.buildFeedbackWidget,
+    this.willAcceptOffsetDuration = const Duration(milliseconds: 200),
+    required this.willAcceptAnimationOffset,
+    this.nonDraggableWidgetsKeys = const [],
+    required this.items,
+  })  :
+        // Setting mode to withOffsetAnimation
+        mode = ReorderableStaggeredGridViewMode.withOffsetAnimations,
 
         // Unused parameter without preview of reorder
         onWillAcceptDuration = Duration.zero;
@@ -633,7 +672,7 @@ class __PreviewItemState extends State<_PreviewItem> {
       // Save item position without notifying listeners
       try {
         final position = renderBox.localToGlobal(Offset.zero);
-        _previewOffsetNotifier.positions[widget.item.animationKey] = position;
+        _previewOffsetNotifier.positions[widget.item.key] = position;
       } catch (e) {
         // TODO
         // Should log?
