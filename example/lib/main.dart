@@ -208,7 +208,6 @@ class _ReorderableStaggeredGridViewExampleState
               mainAxisSpacing: 10,
               crossAxisSpacing: 10,
               isLongPressDraggable: enableLongPress,
-              nonDraggableWidgetsKeys: [ExampleData._widgetKeys[0]!],
               onWillAcceptDuration: Durations.long2,
               items: items,
             );
@@ -266,6 +265,7 @@ class ExampleData {
       data: index,
       mainAxisCellCount: mainAxisCellCount ?? Random().nextInt(2) + 1,
       crossAxisCellCount: crossAxisCellCount ?? Random().nextInt(2) + 1,
+      isDraggable: index != 0, // Make the first item not draggable
 
       // Tile widget
       child: DecoratedBox(

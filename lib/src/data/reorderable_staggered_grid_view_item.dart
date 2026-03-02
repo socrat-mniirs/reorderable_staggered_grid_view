@@ -7,6 +7,9 @@ class ReorderableStaggeredGridViewItem<T> {
   /// The [key] is a required unique identifier for the animation during dragging.
   final GlobalKey key;
 
+  /// The [isDraggable] determines whether the item can be dragged.
+  final bool isDraggable;
+
   /// The [mainAxisCellCount] is the number of cells occupied by the element along the main scroll axis.
   final int mainAxisCellCount;
 
@@ -30,6 +33,7 @@ class ReorderableStaggeredGridViewItem<T> {
     required this.mainAxisCellCount,
     required this.crossAxisCellCount,
     Offset? startingOffset,
+    this.isDraggable = true,
     this.duration = Durations.medium2,
     this.curve = Curves.easeOut,
     required this.child,

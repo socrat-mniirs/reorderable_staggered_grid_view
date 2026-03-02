@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:reorderable_staggered_grid_view/src/widgets/animated_grid_item_widget.dart';
 import 'package:staggered_grid_view/flutter_staggered_grid_view.dart';
 
 import 'data/scroll_end_notifier.dart';
@@ -102,10 +103,6 @@ class ReorderableStaggeredGridView extends StatefulWidget {
           BuildContext context, Widget child, GlobalKey originalWidgetKey)?
       buildFeedbackWidget;
 
-  /// Keys of widgets which cannot be dragged
-  /// TODO rework to just items
-  final List<Key> nonDraggableWidgetsKeys;
-
   /// The [onWillAcceptDuration] is the delay before the animation which indicates that the rebuild will be accepted.
   final Duration onWillAcceptDuration;
 
@@ -146,7 +143,6 @@ class ReorderableStaggeredGridView extends StatefulWidget {
     this.onWillAcceptWithDetails,
     this.onAcceptWithDetails,
     this.buildFeedbackWidget,
-    this.nonDraggableWidgetsKeys = const [],
     required this.items,
   })  :
         // Setting mode to normal
@@ -159,7 +155,6 @@ class ReorderableStaggeredGridView extends StatefulWidget {
         willAcceptAnimationOffset = Offset.zero,
         willAcceptOffsetDuration = Duration.zero;
 
-  /// The [ReorderableStaggeredGridView.withOffsetAnimation] constructor.
   /// Provides lazy rendering of widgets and offset animation when dragging widget over another drag target.
   const ReorderableStaggeredGridView.withOffsetAnimation({
     super.key,
@@ -187,7 +182,6 @@ class ReorderableStaggeredGridView extends StatefulWidget {
     this.buildFeedbackWidget,
     this.willAcceptOffsetDuration = const Duration(milliseconds: 200),
     required this.willAcceptAnimationOffset,
-    this.nonDraggableWidgetsKeys = const [],
     required this.items,
   })  :
         // Setting mode to withOffsetAnimation
@@ -196,7 +190,6 @@ class ReorderableStaggeredGridView extends StatefulWidget {
         // Unused parameter without preview of reorder
         onWillAcceptDuration = Duration.zero;
 
-  /// The [ReorderableStaggeredGridView.withReorderPreview] constructor.
   /// Provides lazy rendering of widgets and preview of reorder operation.
   const ReorderableStaggeredGridView.withReorderPreview({
     super.key,
@@ -223,7 +216,6 @@ class ReorderableStaggeredGridView extends StatefulWidget {
     this.onAcceptWithDetails,
     this.buildFeedbackWidget,
     this.onWillAcceptDuration = Durations.long2,
-    this.nonDraggableWidgetsKeys = const [],
     required this.items,
   })  :
         // Setting mode to withReorderPreview
@@ -390,23 +382,27 @@ class _ReorderableStaggeredGridViewState
                 itemCount: _items.length,
                 itemBuilder: (context, index) {
                   final item = _items[index];
+                  final isLastDraggedItem = identical(item, _lastDraggedItem);
 
                   // Check that the grid or current item should not be dragged
-                  if (widget.nonDraggableWidgetsKeys.contains(item.child.key)) {
-                    return item.child;
+                  if (!widget.enable || !item.isDraggable) {
+                    return AnimatedGridItemWidget(
+                      key: item.key,
+                      item: item,
+                      isLastDraggedItem: isLastDraggedItem,
+                    );
                   }
 
                   return ReorderableStaggeredGridItemWidget(
                     // Item
                     item: item,
                     index: index,
-                    isLastDraggedItem: identical(item, _lastDraggedItem),
+                    isLastDraggedItem: isLastDraggedItem,
 
                     // Grid mode
                     mode: widget.mode,
 
                     // UI
-                    isDraggingEnabled: widget.enable,
                     scrollEndNotifier: _scrollEndNotifier,
                     isLongPressDraggable: widget.isLongPressDraggable,
 
@@ -418,7 +414,7 @@ class _ReorderableStaggeredGridViewState
                     // Feedback widget
                     buildFeedbackWidget: widget.buildFeedbackWidget,
 
-                    // Dragging callbacks
+                    // On drag started
                     onDragStarted: () {
                       _draggingItem = item;
                       _lastDraggedItem = item;
