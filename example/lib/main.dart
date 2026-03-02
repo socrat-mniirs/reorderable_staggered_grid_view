@@ -200,7 +200,7 @@ class _ReorderableStaggeredGridViewExampleState
               _gridKey = UniqueKey();
             }
 
-            return ReorderableStaggeredGridView(
+            return ReorderableStaggeredGridView.withReorderPreview(
               key: _gridKey,
               padding: EdgeInsets.all(10),
               enable: enableDragging,
@@ -209,7 +209,7 @@ class _ReorderableStaggeredGridViewExampleState
               crossAxisSpacing: 10,
               isLongPressDraggable: enableLongPress,
               nonDraggableWidgetsKeys: [ExampleData._widgetKeys[0]!],
-              onWillAcceptDuration: Durations.long1,
+              onWillAcceptDuration: Durations.long2,
               items: items,
             );
           },
