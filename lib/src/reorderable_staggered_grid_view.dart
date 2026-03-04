@@ -334,7 +334,6 @@ class _ReorderableStaggeredGridViewState
 
   @override
   Widget build(BuildContext context) {
-    // Remove provider from library in future
     return ChangeNotifierProvider.value(
       value: _reorderPreviewController,
       child: ChangeNotifierProvider.value(

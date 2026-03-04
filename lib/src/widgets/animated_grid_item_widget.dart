@@ -61,11 +61,12 @@ class _AnimatedGridItemWidgetState extends State<AnimatedGridItemWidget>
 
   @override
   void dispose() {
-    super.dispose();
     _animationController.dispose();
     _reorderPreviewNotifier.removeListener(_previewListener);
+    super.dispose();
   }
 
+  // Preview listener
   void _previewListener() {
     if (widget.item == null) return;
 

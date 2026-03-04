@@ -32,7 +32,6 @@ class ReorderableStaggeredGridViewItem<T> {
     GlobalKey? key,
     required this.mainAxisCellCount,
     required this.crossAxisCellCount,
-    Offset? startingOffset,
     this.isDraggable = true,
     this.duration = Durations.medium2,
     this.curve = Curves.easeOut,
