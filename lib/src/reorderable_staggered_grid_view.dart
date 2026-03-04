@@ -3,9 +3,9 @@ import 'package:provider/provider.dart';
 import 'package:reorderable_staggered_grid_view/src/widgets/animated_grid_item_widget.dart';
 import 'package:staggered_grid_view/flutter_staggered_grid_view.dart';
 
-import 'data/scroll_end_notifier.dart';
-import 'data/reorder_preview_notifier.dart';
-import 'data/reorder_preview_controller.dart';
+import 'provider/scroll_end_notifier.dart';
+import 'provider/reorder_preview_notifier.dart';
+import 'provider/reorder_preview_controller.dart';
 import 'data/reorderable_staggered_grid_view_mode.dart';
 import 'data/reorderable_staggered_grid_view_item.dart';
 import 'widgets/reorderable_staggered_grid_item_widget.dart';
@@ -338,158 +338,163 @@ class _ReorderableStaggeredGridViewState
       value: _reorderPreviewController,
       child: ChangeNotifierProvider.value(
         value: _reorderPreviewNotifier,
+        child: ChangeNotifierProvider.value(
+          value: _scrollEndNotifier,
 
-        // Listen to scroll end notifications
-        child: NotificationListener<ScrollEndNotification>(
-          onNotification: (notification) {
-            _scrollEndNotifier.scrollEnd();
-            return true;
-          },
+          // Listen to scroll end notifications
+          child: NotificationListener<ScrollEndNotification>(
+            onNotification: (notification) {
+              _scrollEndNotifier.scrollEnd();
+              return true;
+            },
 
-          // Staggered Grid
-          child: Stack(
-            children: [
-              // Main grid
-              StaggeredGridView.countBuilder(
-                // Scroll behavior
-                controller: _scrollController,
-                addAutomaticKeepAlives: widget.addAutomaticKeepAlives,
-                addRepaintBoundaries: widget.addRepaintBoundaries,
-                physics: widget.physics,
-                scrollDirection: widget.scrollDirection,
-                shrinkWrap: widget.shrinkWrap,
-                reverse: widget.reverse,
-                primary: widget.primary,
+            // Staggered Grid
+            child: Stack(
+              children: [
+                // Main grid
+                StaggeredGridView.countBuilder(
+                  // Scroll behavior
+                  controller: _scrollController,
+                  addAutomaticKeepAlives: widget.addAutomaticKeepAlives,
+                  addRepaintBoundaries: widget.addRepaintBoundaries,
+                  physics: widget.physics,
+                  scrollDirection: widget.scrollDirection,
+                  shrinkWrap: widget.shrinkWrap,
+                  reverse: widget.reverse,
+                  primary: widget.primary,
 
-                // UI params
-                padding: widget.padding,
-                crossAxisCount: widget.crossAxisCount,
-                mainAxisSpacing: widget.mainAxisSpacing,
-                crossAxisSpacing: widget.crossAxisSpacing,
+                  // UI params
+                  padding: widget.padding,
+                  crossAxisCount: widget.crossAxisCount,
+                  mainAxisSpacing: widget.mainAxisSpacing,
+                  crossAxisSpacing: widget.crossAxisSpacing,
 
-                // Cell size
-                staggeredTileBuilder: (index) {
-                  final item = _items[index];
+                  // Cell size
+                  staggeredTileBuilder: (index) {
+                    final item = _items[index];
 
-                  return StaggeredTile.count(
-                    item.crossAxisCellCount,
-                    item.mainAxisCellCount.toDouble(),
-                  );
-                },
-
-                // Items
-                itemCount: _items.length,
-                itemBuilder: (context, index) {
-                  final item = _items[index];
-                  final isLastDraggedItem = identical(item, _lastDraggedItem);
-
-                  // Check that the grid or current item should not be dragged
-                  if (!widget.enable || !item.isDraggable) {
-                    return AnimatedGridItemWidget(
-                      key: item.key,
-                      item: item,
-                      isLastDraggedItem: isLastDraggedItem,
+                    return StaggeredTile.count(
+                      item.crossAxisCellCount,
+                      item.mainAxisCellCount.toDouble(),
                     );
-                  }
+                  },
 
-                  return ReorderableStaggeredGridItemWidget(
-                    // Item
-                    item: item,
-                    index: index,
-                    isLastDraggedItem: isLastDraggedItem,
+                  // Items
+                  itemCount: _items.length,
+                  itemBuilder: (context, index) {
+                    final item = _items[index];
+                    final isLastDraggedItem = identical(item, _lastDraggedItem);
 
-                    // Grid mode
-                    mode: widget.mode,
+                    // Check that the grid or current item should not be dragged
+                    if (!widget.enable || !item.isDraggable) {
+                      return AnimatedGridItemWidget(
+                        key: item.key,
+                        item: item,
+                        mode: widget.mode,
+                        isLastDraggedItem: isLastDraggedItem,
+                      );
+                    }
 
-                    // UI
-                    scrollEndNotifier: _scrollEndNotifier,
-                    isLongPressDraggable: widget.isLongPressDraggable,
+                    return ReorderableStaggeredGridItemWidget(
+                      // Item
+                      item: item,
+                      index: index,
+                      isLastDraggedItem: isLastDraggedItem,
 
-                    // Animation offset
-                    onWillAcceptDuration: widget.onWillAcceptDuration,
-                    willAcceptOffsetDuration: widget.willAcceptOffsetDuration,
-                    willAcceptAnimationOffset: widget.willAcceptAnimationOffset,
+                      // Grid mode
+                      mode: widget.mode,
 
-                    // Feedback widget
-                    buildFeedbackWidget: widget.buildFeedbackWidget,
+                      // UI
+                      scrollEndNotifier: _scrollEndNotifier,
+                      isLongPressDraggable: widget.isLongPressDraggable,
 
-                    // On drag started
-                    onDragStarted: () {
-                      _draggingItem = item;
-                      _lastDraggedItem = item;
-                      _reorderPreviewController.updateDraggingIndex(index);
+                      // Animation offset
+                      onWillAcceptDuration: widget.onWillAcceptDuration,
+                      willAcceptOffsetDuration: widget.willAcceptOffsetDuration,
+                      willAcceptAnimationOffset:
+                          widget.willAcceptAnimationOffset,
 
-                      widget.onDragStarted?.call();
-                    },
+                      // Feedback widget
+                      buildFeedbackWidget: widget.buildFeedbackWidget,
 
-                    // On move
-                    onMove: widget.onMove,
+                      // On drag started
+                      onDragStarted: () {
+                        _draggingItem = item;
+                        _lastDraggedItem = item;
+                        _reorderPreviewController.updateDraggingIndex(index);
 
-                    // On drag update
-                    onDragUpdate: (details) {
-                      _autoScrollOnDragUpdate(details);
-                      widget.onDragUpdate?.call(details);
-                    },
+                        widget.onDragStarted?.call();
+                      },
 
-                    // On leave
-                    onLeave: widget.onLeave,
+                      // On move
+                      onMove: widget.onMove,
 
-                    // On drag end
-                    onDragEnd: (details) {
-                      _stopAutoScroll();
-                      _draggingItem = null;
-                      _reorderPreviewController.updateDraggingIndex(null);
-                      widget.onDragEnd?.call(details);
-                    },
+                      // On drag update
+                      onDragUpdate: (details) {
+                        _autoScrollOnDragUpdate(details);
+                        widget.onDragUpdate?.call(details);
+                      },
 
-                    // Will accept
-                    onWillAcceptWithDetails: (details) {
-                      if (_isAutoScrolling) return false;
-                      if (_draggingItem == null) return false;
-                      if (details.data == item.data) return false;
+                      // On leave
+                      onLeave: widget.onLeave,
 
-                      return widget.onWillAcceptWithDetails?.call(details) ??
-                          true;
-                    },
+                      // On drag end
+                      onDragEnd: (details) {
+                        _stopAutoScroll();
+                        _draggingItem = null;
+                        _reorderPreviewController.updateDraggingIndex(null);
+                        widget.onDragEnd?.call(details);
+                      },
 
-                    // Accept
-                    onAcceptWithDetails: (details) {
-                      assert(_draggingItem != null);
+                      // Will accept
+                      onWillAcceptWithDetails: (details) {
+                        if (_isAutoScrolling) return false;
+                        if (_draggingItem == null) return false;
+                        if (details.data == item.data) return false;
 
-                      _items.remove(_draggingItem);
-                      _items.insert(index, _draggingItem!);
+                        return widget.onWillAcceptWithDetails?.call(details) ??
+                            true;
+                      },
 
-                      _reorderPreviewController.syncItems(_items);
+                      // Accept
+                      onAcceptWithDetails: (details) {
+                        assert(_draggingItem != null);
 
-                      setState(() => _draggingItem = null);
-                      widget.onAcceptWithDetails?.call(details, index);
-                    },
-                  );
-                },
-              ),
+                        _items.remove(_draggingItem);
+                        _items.insert(index, _draggingItem!);
 
-              // Invisible preview grid for calculating positions
-              if (widget.mode ==
-                  ReorderableStaggeredGridViewMode.withReorderPreview)
-                IgnorePointer(
-                  child: Offstage(
-                    child: _PreviewGrid(
-                      mainGridScrollController: _scrollController,
-                      physics: widget.physics,
-                      reverse: widget.reverse,
-                      padding: widget.padding,
-                      primary: widget.primary,
-                      shrinkWrap: widget.shrinkWrap,
-                      scrollDirection: widget.scrollDirection,
-                      addRepaintBoundaries: widget.addRepaintBoundaries,
-                      addAutomaticKeepAlives: widget.addAutomaticKeepAlives,
-                      crossAxisCount: widget.crossAxisCount,
-                      mainAxisSpacing: widget.mainAxisSpacing,
-                      crossAxisSpacing: widget.crossAxisSpacing,
+                        _reorderPreviewController.syncItems(_items);
+
+                        setState(() => _draggingItem = null);
+                        widget.onAcceptWithDetails?.call(details, index);
+                      },
+                    );
+                  },
+                ),
+
+                // Invisible preview grid for calculating positions
+                if (widget.mode ==
+                    ReorderableStaggeredGridViewMode.withReorderPreview)
+                  IgnorePointer(
+                    child: Offstage(
+                      child: _PreviewGrid(
+                        mainGridScrollController: _scrollController,
+                        physics: widget.physics,
+                        reverse: widget.reverse,
+                        padding: widget.padding,
+                        primary: widget.primary,
+                        shrinkWrap: widget.shrinkWrap,
+                        scrollDirection: widget.scrollDirection,
+                        addRepaintBoundaries: widget.addRepaintBoundaries,
+                        addAutomaticKeepAlives: widget.addAutomaticKeepAlives,
+                        crossAxisCount: widget.crossAxisCount,
+                        mainAxisSpacing: widget.mainAxisSpacing,
+                        crossAxisSpacing: widget.crossAxisSpacing,
+                      ),
                     ),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

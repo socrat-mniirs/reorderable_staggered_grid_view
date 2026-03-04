@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../data/reorder_preview_controller.dart';
-import '../data/scroll_end_notifier.dart';
+import '../provider/reorder_preview_controller.dart';
+import '../provider/scroll_end_notifier.dart';
 import '../data/reorderable_staggered_grid_view_item.dart';
 import '../data/reorderable_staggered_grid_view_mode.dart';
 import 'animated_grid_item_widget.dart';
@@ -121,8 +121,8 @@ class _ReorderableStaggeredGridItemWidgetState
 
   @override
   void dispose() {
-    super.dispose();
     _willAcceptDelayTimer?.cancel();
+    super.dispose();
   }
 
   /// Shifts the object, indicating that it is ready to replace another grid element
@@ -172,10 +172,11 @@ class _ReorderableStaggeredGridItemWidgetState
       return;
     }
 
+    widget.onLeave?.call(data);
     switch (widget.mode) {
       // With offset animations
       case ReorderableStaggeredGridViewMode.withOffsetAnimations:
-        setState(() => _offset = Offset.zero);
+        setState(() => _offset -= widget.willAcceptAnimationOffset);
         break;
 
       // With reorder preview
@@ -217,8 +218,9 @@ class _ReorderableStaggeredGridItemWidgetState
       childWhenDragging: TickerMode(
         enabled: false,
         child: AnimatedGridItemWidget(
-          item: null,
           key: widget.item.key,
+          item: null,
+          mode: widget.mode,
         ),
       ),
 
@@ -235,27 +237,24 @@ class _ReorderableStaggeredGridItemWidgetState
 
       // Child
       child: AnimatedGridItemWidget(
-        item: widget.item,
         key: widget.item.key,
+        item: widget.item,
+        mode: widget.mode,
         isLastDraggedItem: widget.isLastDraggedItem,
       ),
     );
 
     return Stack(
       children: [
-        // Draggable widget
-        switch (widget.mode) {
-          // With offset animations
-          ReorderableStaggeredGridViewMode.withOffsetAnimations =>
-            AnimatedOffset(
-              offset: widget.willAcceptAnimationOffset,
-              duration: widget.willAcceptOffsetDuration,
-              child: child,
-            ),
-
-          // Other modes
-          _ => child,
-        },
+        if (widget.mode ==
+            ReorderableStaggeredGridViewMode.withOffsetAnimations)
+          AnimatedOffset(
+            offset: _offset,
+            duration: widget.willAcceptOffsetDuration,
+            child: child,
+          )
+        else
+          child,
 
         // Drag target (under the draggable widget)
         Positioned.fill(

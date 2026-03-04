@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:reorderable_staggered_grid_view/reorderable_staggered_grid_view.dart';
+
+import '../data/reorderable_staggered_grid_view_item.dart';
 
 class ReorderPreviewNotifier extends ChangeNotifier {
   // Using global keys from original items
