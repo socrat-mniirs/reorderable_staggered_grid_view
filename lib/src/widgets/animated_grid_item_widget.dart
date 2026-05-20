@@ -77,11 +77,10 @@ class _AnimatedGridItemWidgetState extends State<AnimatedGridItemWidget>
   void didUpdateWidget(covariant AnimatedGridItemWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    // Do not use addPostframeCallback because blinking occurs, but in this case, asserts from the StaggeredGridView package can be called
-    // So use try-catch to prevent them, but in the future, it is necessary to find a more elegant solution
-    try {
-      _updatePosition(animate: !widget.isLastDraggedItem);
-    } catch (_) {}
+    // TODO sometimes blinking occurs
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _updatePosition(animate: !widget.isLastDraggedItem),
+    );
   }
 
   @override
@@ -196,9 +195,9 @@ class _AnimatedGridItemWidgetState extends State<AnimatedGridItemWidget>
         ),
 
       // Offset animation
-      ReorderableStaggeredGridMode.withOffsetAnimations => 
-      // TODO убрать отсюда AnimatedOffset или придумать как не нарушить логику рендера, тк сдвигать можно ТОЛЬКО Draggable
-      AnimatedOffset(
+      ReorderableStaggeredGridMode.withOffsetAnimations =>
+        // TODO убрать отсюда AnimatedOffset или придумать как не нарушить логику рендера, тк сдвигать можно ТОЛЬКО Draggable
+        AnimatedOffset(
           offset: widget.offset ?? Offset.zero,
           // TODO
           duration: Durations.medium2,

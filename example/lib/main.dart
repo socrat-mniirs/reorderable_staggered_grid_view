@@ -152,7 +152,7 @@ class _ReorderableStaggeredGridViewExampleState
             }
 
             // Use [.withReorderPreview] named constructor to preview reorder operations
-            return ReorderableStaggeredGridView.withReorderPreview(
+            return ReorderableStaggeredGridView(
               key: _gridKey,
               padding: EdgeInsets.all(10),
               enable: enableDragging,
