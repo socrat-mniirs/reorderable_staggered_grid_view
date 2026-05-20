@@ -7,10 +7,6 @@ import '../provider/reorder_preview_notifier.dart';
 import '../data/reorderable_staggered_grid_item.dart';
 import '../provider/scroll_end_notifier.dart';
 
-// TODO ГДЕ-то теряется стейт некоторых итемов сетки, скорее всего где то ошибка с ключами
-// Потому что не обновляется стейт -> не обновляется позиция -> виджеты отстают на шаг
-
-// TODO earlier passed scrollEndNotifier to capture positions on scroll end, check it
 // TODO make private
 class AnimatedGridItemWidget extends StatefulWidget {
   final Offset? offset;
@@ -49,7 +45,7 @@ class _AnimatedGridItemWidgetState extends State<AnimatedGridItemWidget>
     // Create animation controller
     _controller = AnimationController(
       vsync: this,
-      duration: widget.item?.duration ?? const Duration(milliseconds: 300),
+      duration: widget.item?.duration ?? Durations.medium2,
     );
 
     // Initial animation
@@ -108,7 +104,7 @@ class _AnimatedGridItemWidgetState extends State<AnimatedGridItemWidget>
     }
   }
 
-  // Animating the grid element to a new position and saving the current position after that
+  // Animating the grid element to a new position
   Future<void> _startAnimation({
     required Offset oldPosition,
     required Offset newPosition,
@@ -195,11 +191,9 @@ class _AnimatedGridItemWidgetState extends State<AnimatedGridItemWidget>
         ),
 
       // Offset animation
-      ReorderableStaggeredGridMode.withOffsetAnimations =>
-        // TODO убрать отсюда AnimatedOffset или придумать как не нарушить логику рендера, тк сдвигать можно ТОЛЬКО Draggable
-        AnimatedOffset(
+      ReorderableStaggeredGridMode.withOffsetAnimations => AnimatedOffset(
           offset: widget.offset ?? Offset.zero,
-          // TODO
+          // TODO make external
           duration: Durations.medium2,
           child: child,
         ),

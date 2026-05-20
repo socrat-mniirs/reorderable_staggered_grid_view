@@ -210,7 +210,6 @@ class _ReorderableStaggeredGridItemWidgetState
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        // TODO Вернуть обертку AnimatedOffset (убрал в animated_grid_item)
         // Draggable
         _GridItemDraggable(
           data: widget.item.data,
