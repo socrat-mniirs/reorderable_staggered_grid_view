@@ -1,24 +1,29 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
-import 'package:reorderable_staggered_grid_view/src/data/reorderable_staggered_grid_view_mode.dart';
+import 'package:reorderable_staggered_grid_view/src/data/reorderable_staggered_grid_mode.dart';
+import 'package:reorderable_staggered_grid_view/src/widgets/animated_offset.dart';
 
 import '../provider/reorder_preview_notifier.dart';
-import '../data/reorderable_staggered_grid_view_item.dart';
+import '../data/reorderable_staggered_grid_item.dart';
 import '../provider/scroll_end_notifier.dart';
+
+// TODO ГДЕ-то теряется стейт некоторых итемов сетки, скорее всего где то ошибка с ключами
+// Потому что не обновляется стейт -> не обновляется позиция -> виджеты отстают на шаг
 
 // TODO earlier passed scrollEndNotifier to capture positions on scroll end, check it
 // TODO make private
 class AnimatedGridItemWidget extends StatefulWidget {
-  final ReorderableStaggeredGridViewItem? item;
-  final ReorderableStaggeredGridViewMode mode;
+  final Offset? offset;
+  final ReorderableStaggeredGridItem? item;
+  final ReorderableStaggeredGridMode mode;
   final bool isLastDraggedItem;
 
   const AnimatedGridItemWidget({
-    required super.key,
+    super.key,
     required this.item,
     required this.mode,
-    this.isLastDraggedItem = false,
+    required this.isLastDraggedItem,
+    this.offset,
   });
 
   @override
@@ -63,7 +68,9 @@ class _AnimatedGridItemWidgetState extends State<AnimatedGridItemWidget>
 
     // Listen to scroll end to capture positions after scrolling
     _scrollEndNotifier = context.read<ScrollEndNotifier>();
-    _scrollEndNotifier.addListener(_updatePosition);
+    _scrollEndNotifier.addListener(
+      () => _updatePosition(animate: false),
+    );
   }
 
   @override
@@ -73,7 +80,7 @@ class _AnimatedGridItemWidgetState extends State<AnimatedGridItemWidget>
     // Do not use addPostframeCallback because blinking occurs, but in this case, asserts from the StaggeredGridView package can be called
     // So use try-catch to prevent them, but in the future, it is necessary to find a more elegant solution
     try {
-      widget.isLastDraggedItem ? _updatePosition() : _startAnimation();
+      _updatePosition(animate: !widget.isLastDraggedItem);
     } catch (_) {}
   }
 
@@ -84,48 +91,30 @@ class _AnimatedGridItemWidgetState extends State<AnimatedGridItemWidget>
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    if (widget.item == null) return const SizedBox.shrink();
-
-    // Build UI
-    final child = AnimatedBuilder(
-      animation: _animation,
-      builder: (_, __) => Transform.translate(
-        offset: _animation.value,
-        child: widget.item?.child,
-      ),
-    );
-
-    return switch (widget.mode) {
-      // Listen to reorder preview changes
-      ReorderableStaggeredGridViewMode.withReorderPreview =>
-        _ReorderPreviewListener(
-          listener: _previewListener,
-          child: child,
-        ),
-
-      // Default mode
-      _ => child,
-    };
-  }
-
   // Update current position of the item
-  void _updatePosition() {
+  void _updatePosition({bool animate = true}) async {
     final renderBox = context.findRenderObject() as RenderBox?;
     if (renderBox == null || !mounted) return;
-    
-    _position = renderBox.localToGlobal(Offset.zero);
+
+    final oldPosition = _position;
+    final newPosition = renderBox.localToGlobal(Offset.zero);
+    _position = newPosition;
+
+    // Animate from old position to a new position
+    if (animate) {
+      await _startAnimation(
+        oldPosition: oldPosition,
+        newPosition: newPosition,
+      );
+    }
   }
 
   // Animating the grid element to a new position and saving the current position after that
-  void _startAnimation() {
-    final renderBox = context.findRenderObject() as RenderBox?;
-    if (renderBox == null || !mounted) return;
-
-    final newPosition = renderBox.localToGlobal(Offset.zero);
-    final delta = _position - newPosition;
-
+  Future<void> _startAnimation({
+    required Offset oldPosition,
+    required Offset newPosition,
+  }) async {
+    final delta = oldPosition - newPosition;
     if (delta == Offset.zero) return;
 
     _animation = Tween<Offset>(
@@ -138,7 +127,7 @@ class _AnimatedGridItemWidgetState extends State<AnimatedGridItemWidget>
       ),
     );
 
-    _controller.forward(from: 0).then((_) => _updatePosition());
+    await _controller.forward(from: 0);
   }
 
   // Preview listener
@@ -183,6 +172,42 @@ class _AnimatedGridItemWidgetState extends State<AnimatedGridItemWidget>
       // TODO попроьовать обновлять позицию не в конце а во время анимации
       _controller.reverse().then((_) => _updatePosition());
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.item == null) return const SizedBox.shrink();
+
+    // Build UI
+    final child = AnimatedBuilder(
+      animation: _animation,
+      builder: (_, __) => Transform.translate(
+        offset: _animation.value,
+        child: widget.item?.child,
+      ),
+    );
+
+    return switch (widget.mode) {
+      // Listen to reorder preview changes
+      ReorderableStaggeredGridMode.withReorderPreview =>
+        _ReorderPreviewListener(
+          listener: _previewListener,
+          child: child,
+        ),
+
+      // Offset animation
+      ReorderableStaggeredGridMode.withOffsetAnimations => 
+      // TODO убрать отсюда AnimatedOffset или придумать как не нарушить логику рендера, тк сдвигать можно ТОЛЬКО Draggable
+      AnimatedOffset(
+          offset: widget.offset ?? Offset.zero,
+          // TODO
+          duration: Durations.medium2,
+          child: child,
+        ),
+
+      // Default mode
+      _ => child,
+    };
   }
 }
 

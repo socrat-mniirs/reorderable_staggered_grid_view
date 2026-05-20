@@ -5,17 +5,16 @@ import 'package:provider/provider.dart';
 
 import '../provider/reorder_preview_controller.dart';
 import '../provider/scroll_end_notifier.dart';
-import '../data/reorderable_staggered_grid_view_item.dart';
-import '../data/reorderable_staggered_grid_view_mode.dart';
+import '../data/reorderable_staggered_grid_item.dart';
+import '../data/reorderable_staggered_grid_mode.dart';
 import 'animated_grid_item_widget.dart';
-import 'animated_offset.dart';
 
 class ReorderableStaggeredGridItemWidget extends StatefulWidget {
   /// The [item] which can be reordered or dragged.
-  final ReorderableStaggeredGridViewItem item;
+  final ReorderableStaggeredGridItem item;
 
   /// The [mode] of the reorderable staggered grid view.
-  final ReorderableStaggeredGridViewMode mode;
+  final ReorderableStaggeredGridMode mode;
 
   /// The [index] determines whether the position of the element in the grid has changed and whether animation needs to be started.
   final int index;
@@ -71,8 +70,10 @@ class ReorderableStaggeredGridItemWidget extends StatefulWidget {
 
   /// The [buildFeedbackWidget] called when the dragging started to paint widget which will be shown as a dragging widget.
   final Widget Function(
-          BuildContext context, Widget child, GlobalKey originalWidgetKey)?
-      buildFeedbackWidget;
+    BuildContext context,
+    Widget child,
+    Size originalWidgetSize,
+  )? buildFeedbackWidget;
 
   /// The [scrollEndNotifier] notify animated grid items about end of scroll to recalculate their positions on the screen.
   final ScrollEndNotifier scrollEndNotifier;
@@ -133,13 +134,13 @@ class _ReorderableStaggeredGridItemWidgetState
 
     switch (widget.mode) {
       // With offset animations
-      case ReorderableStaggeredGridViewMode.withOffsetAnimations:
+      case ReorderableStaggeredGridMode.withOffsetAnimations:
         setState(() => _offset += widget.willAcceptAnimationOffset);
         break;
 
       // With reorder preview
       // The animation starts after a delay when the draggable is hovered over the target
-      case ReorderableStaggeredGridViewMode.withReorderPreview:
+      case ReorderableStaggeredGridMode.withReorderPreview:
         if (!_willAcceptDelayStarted) {
           _willAcceptDelayStarted = true;
           _willAcceptDelayTimer = Timer(
@@ -163,8 +164,12 @@ class _ReorderableStaggeredGridItemWidgetState
   }
 
   /// Calling the passed function
-  void _onAcceptWithDetails(DragTargetDetails<Object?> details) =>
-      widget.onAcceptWithDetails(details);
+  void _onAcceptWithDetails(DragTargetDetails<Object?> details) {
+    if (widget.mode == ReorderableStaggeredGridMode.withOffsetAnimations) {
+      setState(() => _offset = Offset.zero);
+    }
+    widget.onAcceptWithDetails(details);
+  }
 
   /// Return the target object to its original place
   void _onLeave(Object? data) {
@@ -172,21 +177,18 @@ class _ReorderableStaggeredGridItemWidgetState
       return;
     }
 
-    widget.onLeave?.call(data);
     switch (widget.mode) {
       // With offset animations
-      case ReorderableStaggeredGridViewMode.withOffsetAnimations:
+      case ReorderableStaggeredGridMode.withOffsetAnimations:
         setState(() => _offset -= widget.willAcceptAnimationOffset);
         break;
 
       // With reorder preview
-      case ReorderableStaggeredGridViewMode.withReorderPreview:
+      case ReorderableStaggeredGridMode.withReorderPreview:
         {
           // Reset 'will accept' data
           _willAcceptDelayTimer?.cancel();
           _willAcceptDelayStarted = false;
-
-          widget.onLeave?.call(data);
 
           if (!mounted) return;
           _reorderController.cancelPreviousReorderChangesOnLeave();
@@ -197,6 +199,8 @@ class _ReorderableStaggeredGridItemWidgetState
       default:
         break;
     }
+
+    widget.onLeave?.call(data);
   }
 
   /// Called when Draggable moving within DragTarget
@@ -204,66 +208,55 @@ class _ReorderableStaggeredGridItemWidgetState
 
   @override
   Widget build(BuildContext context) {
-    // TODO
-    final child = _GridItemDraggable(
-      data: widget.item.data,
-      isLongPressDraggable: widget.isLongPressDraggable,
-
-      // Dragging callbacks
-      onDragStarted: widget.onDragStarted,
-      onDragUpdate: widget.onDragUpdate,
-      onDragEnd: widget.onDragEnd,
-
-      // Child when dragging
-      childWhenDragging: TickerMode(
-        enabled: false,
-        child: AnimatedGridItemWidget(
-          key: widget.item.key,
-          item: null,
-          mode: widget.mode,
-        ),
-      ),
-
-      // Feedback
-      feedback: widget.buildFeedbackWidget?.call(
-            context,
-            widget.item.child,
-            widget.item.key,
-          ) ??
-          _FeedbackWidget(
-            originalWidgetKey: widget.item.key,
-            child: widget.item.child,
-          ),
-
-      // Child
-      child: AnimatedGridItemWidget(
-        key: widget.item.key,
-        item: widget.item,
-        mode: widget.mode,
-        isLastDraggedItem: widget.isLastDraggedItem,
-      ),
-    );
-
     return Stack(
       children: [
-        if (widget.mode ==
-            ReorderableStaggeredGridViewMode.withOffsetAnimations)
-          AnimatedOffset(
-            offset: _offset,
-            duration: widget.willAcceptOffsetDuration,
-            child: child,
-          )
-        else
-          child,
+        // TODO Вернуть обертку AnimatedOffset (убрал в animated_grid_item)
+        // Draggable
+        _GridItemDraggable(
+          data: widget.item.data,
+          isLongPressDraggable: widget.isLongPressDraggable,
 
-        // Drag target (under the draggable widget)
+          // Dragging callbacks
+          onDragStarted: widget.onDragStarted,
+          onDragUpdate: widget.onDragUpdate,
+          onDragEnd: widget.onDragEnd,
+
+          // Feedback
+          feedback: _Feedback(
+            item: widget.item,
+            buildFeedbackWidget: widget.buildFeedbackWidget,
+          ),
+
+          // TODO create as an external param
+          // Child when dragging
+          childWhenDragging: TickerMode(
+            enabled: false,
+            child: AnimatedGridItemWidget(
+              key: widget.item.key,
+              item: null,
+              mode: widget.mode,
+              isLastDraggedItem: widget.isLastDraggedItem,
+            ),
+          ),
+
+          // Child
+          child: AnimatedGridItemWidget(
+            key: widget.item.key,
+            item: widget.item,
+            mode: widget.mode,
+            offset: _offset,
+            isLastDraggedItem: widget.isLastDraggedItem,
+          ),
+        ),
+
+        // Drag target
         Positioned.fill(
           child: DragTarget(
             onMove: _onMove,
             onLeave: _onLeave,
-            onWillAcceptWithDetails: _onWillAcceptWithDetails,
             onAcceptWithDetails: _onAcceptWithDetails,
-            builder: (context, _, __) => const SizedBox.shrink(),
+            onWillAcceptWithDetails: _onWillAcceptWithDetails,
+            builder: (_, __, ___) => const SizedBox.shrink(),
           ),
         ),
       ],
@@ -274,30 +267,10 @@ class _ReorderableStaggeredGridItemWidgetState
 /// Widget for dragging a grid item
 class _GridItemDraggable extends StatelessWidget {
   final Object? data;
-
-  /// The [isLongPressDraggable] indicates does it take a long press to drag or not.
   final bool isLongPressDraggable;
-
-  /// The [onDragStarted] called when the draggable starts being dragged.
   final void Function()? onDragStarted;
-
-  /// The [onDragUpdate] called when the draggable is dragged.
-  ///
-  /// This function will only be called while this widget is still mounted to
-  /// the tree (i.e. [State.mounted] is true), and if this widget has actually moved.
   final void Function(DragUpdateDetails details)? onDragUpdate;
-
-  /// The [onDragEnd] called when the draggable is dropped.
-  ///
-  /// The velocity and offset at which the pointer was moving when it was
-  /// dropped is available in the [DraggableDetails]. Also included in the
-  /// `details` is whether the draggable's [DragTarget] accepted it.
-  ///
-  /// This function will only be called while this widget is still mounted to
-  /// the tree (i.e. [State.mounted] is true).
   final void Function(DraggableDetails details)? onDragEnd;
-
-  /// TODO doc
   final Widget childWhenDragging;
   final Widget feedback;
   final Widget child;
@@ -324,7 +297,7 @@ class _GridItemDraggable extends StatelessWidget {
             onDragUpdate: onDragUpdate,
             onDragEnd: onDragEnd,
 
-            // Child widgets
+            // Widgets
             feedback: feedback,
             childWhenDragging: childWhenDragging,
             child: child,
@@ -337,7 +310,7 @@ class _GridItemDraggable extends StatelessWidget {
             onDragUpdate: onDragUpdate,
             onDragEnd: onDragEnd,
 
-            // Child widgets
+            // Widgets
             feedback: feedback,
             childWhenDragging: childWhenDragging,
             child: child,
@@ -345,18 +318,24 @@ class _GridItemDraggable extends StatelessWidget {
   }
 }
 
-/// The widget which will be shown as a default dragging widget
-class _FeedbackWidget extends StatelessWidget {
-  final GlobalKey originalWidgetKey;
-  final Widget child;
+/// The widget which will be shown as a default feedback widget
+class _Feedback extends StatelessWidget {
+  final ReorderableStaggeredGridItem item;
+  final Widget Function(
+    BuildContext context,
+    Widget child,
+    Size originalWidgetSize,
+  )? buildFeedbackWidget;
 
-  const _FeedbackWidget({
-    required this.child,
-    required this.originalWidgetKey,
+  const _Feedback({
+    required this.item,
+    this.buildFeedbackWidget,
   });
 
   @override
   Widget build(BuildContext context) {
+    final originalWidgetKey = item.key;
+
     // Default build
     assert(originalWidgetKey.currentContext != null);
 
@@ -365,14 +344,17 @@ class _FeedbackWidget extends StatelessWidget {
         originalWidgetKey.currentContext?.findRenderObject() as RenderBox;
     final size = itemWidget.size;
 
-    return Material(
-      elevation: 15,
-      shadowColor: Colors.black,
-      child: SizedBox(
-        height: size.height,
-        width: size.width,
-        child: child,
-      ),
-    );
+    return buildFeedbackWidget?.call(context, item.child, size) ??
+
+        // Default feedback widget
+        Material(
+          elevation: 15,
+          shadowColor: Colors.black,
+          child: SizedBox(
+            height: size.height,
+            width: size.width,
+            child: item.child,
+          ),
+        );
   }
 }

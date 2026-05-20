@@ -6,8 +6,8 @@ import 'package:staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'provider/scroll_end_notifier.dart';
 import 'provider/reorder_preview_notifier.dart';
 import 'provider/reorder_preview_controller.dart';
-import 'data/reorderable_staggered_grid_view_mode.dart';
-import 'data/reorderable_staggered_grid_view_item.dart';
+import 'data/reorderable_staggered_grid_mode.dart';
+import 'data/reorderable_staggered_grid_item.dart';
 import 'widgets/reorderable_staggered_grid_item_widget.dart';
 
 class ReorderableStaggeredGridView extends StatefulWidget {
@@ -95,13 +95,17 @@ class ReorderableStaggeredGridView extends StatefulWidget {
   final bool Function(DragTargetDetails details)? onWillAcceptWithDetails;
 
   /// The [onAcceptWithDetails] is a callback when an item is accepted during a drag operation with drag target details
-  final void Function(DragTargetDetails details, int newIndex)?
-      onAcceptWithDetails;
+  final void Function(
+    DragTargetDetails details,
+    int newIndex,
+  )? onAcceptWithDetails;
 
   /// The [buildFeedbackWidget] is a callback to custom building a feedback widget
   final Widget Function(
-          BuildContext context, Widget child, GlobalKey originalWidgetKey)?
-      buildFeedbackWidget;
+    BuildContext context,
+    Widget child,
+    Size originalWidgetSize,
+  )? buildFeedbackWidget;
 
   /// The [onWillAcceptDuration] is the delay before the animation which indicates that the rebuild will be accepted.
   final Duration onWillAcceptDuration;
@@ -113,10 +117,10 @@ class ReorderableStaggeredGridView extends StatefulWidget {
   final Offset willAcceptAnimationOffset;
 
   /// The [items] is a list of items which can be reordered or dragged
-  final List<ReorderableStaggeredGridViewItem> items;
+  final List<ReorderableStaggeredGridItem> items;
 
   /// The [mode] of the reorderable staggered grid view.
-  final ReorderableStaggeredGridViewMode mode;
+  final ReorderableStaggeredGridMode mode;
 
   /// The [ReorderableStaggeredGridView] main constructor. Provides lazy rendering of widgets.
   const ReorderableStaggeredGridView({
@@ -146,7 +150,7 @@ class ReorderableStaggeredGridView extends StatefulWidget {
     required this.items,
   })  :
         // Setting mode to normal
-        mode = ReorderableStaggeredGridViewMode.normal,
+        mode = ReorderableStaggeredGridMode.normal,
 
         // Unused parameter without preview of reorder
         onWillAcceptDuration = Duration.zero,
@@ -185,7 +189,7 @@ class ReorderableStaggeredGridView extends StatefulWidget {
     required this.items,
   })  :
         // Setting mode to withOffsetAnimation
-        mode = ReorderableStaggeredGridViewMode.withOffsetAnimations,
+        mode = ReorderableStaggeredGridMode.withOffsetAnimations,
 
         // Unused parameter without preview of reorder
         onWillAcceptDuration = Duration.zero;
@@ -219,7 +223,7 @@ class ReorderableStaggeredGridView extends StatefulWidget {
     required this.items,
   })  :
         // Setting mode to withReorderPreview
-        mode = ReorderableStaggeredGridViewMode.withReorderPreview,
+        mode = ReorderableStaggeredGridMode.withReorderPreview,
 
         // Unused params with reorder preview
         willAcceptAnimationOffset = Offset.zero,
@@ -238,14 +242,14 @@ class _ReorderableStaggeredGridViewState
 
   late final ScrollController _scrollController;
 
-  late List<ReorderableStaggeredGridViewItem> _items;
+  late List<ReorderableStaggeredGridItem> _items;
 
   // Autoscroll fields
   double _dragY = 0;
   bool _isAutoScrolling = false;
 
-  ReorderableStaggeredGridViewItem? _draggingItem;
-  ReorderableStaggeredGridViewItem? _lastDraggedItem;
+  ReorderableStaggeredGridItem? _draggingItem;
+  ReorderableStaggeredGridItem? _lastDraggedItem;
 
   late final ScrollEndNotifier _scrollEndNotifier;
 
@@ -277,6 +281,13 @@ class _ReorderableStaggeredGridViewState
       _items = widget.items;
       return;
     }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    _scrollEndNotifier.dispose();
+    super.dispose();
   }
 
   // ========== AUTO-SCROLL METHODS ==========
@@ -355,13 +366,13 @@ class _ReorderableStaggeredGridViewState
                 StaggeredGridView.countBuilder(
                   // Scroll behavior
                   controller: _scrollController,
-                  addAutomaticKeepAlives: widget.addAutomaticKeepAlives,
-                  addRepaintBoundaries: widget.addRepaintBoundaries,
-                  physics: widget.physics,
-                  scrollDirection: widget.scrollDirection,
-                  shrinkWrap: widget.shrinkWrap,
-                  reverse: widget.reverse,
                   primary: widget.primary,
+                  physics: widget.physics,
+                  reverse: widget.reverse,
+                  shrinkWrap: widget.shrinkWrap,
+                  scrollDirection: widget.scrollDirection,
+                  addRepaintBoundaries: widget.addRepaintBoundaries,
+                  addAutomaticKeepAlives: widget.addAutomaticKeepAlives,
 
                   // UI params
                   padding: widget.padding,
@@ -372,7 +383,6 @@ class _ReorderableStaggeredGridViewState
                   // Cell size
                   staggeredTileBuilder: (index) {
                     final item = _items[index];
-
                     return StaggeredTile.count(
                       item.crossAxisCellCount,
                       item.mainAxisCellCount.toDouble(),
@@ -383,7 +393,7 @@ class _ReorderableStaggeredGridViewState
                   itemCount: _items.length,
                   itemBuilder: (context, index) {
                     final item = _items[index];
-                    final isLastDraggedItem = identical(item, _lastDraggedItem);
+                    final isLastDraggedItem = item == _lastDraggedItem;
 
                     // Check that the grid or current item should not be dragged
                     if (!widget.enable || !item.isDraggable) {
@@ -474,7 +484,7 @@ class _ReorderableStaggeredGridViewState
 
                 // Invisible preview grid for calculating positions
                 if (widget.mode ==
-                    ReorderableStaggeredGridViewMode.withReorderPreview)
+                    ReorderableStaggeredGridMode.withReorderPreview)
                   IgnorePointer(
                     child: Offstage(
                       child: _PreviewGrid(
@@ -499,13 +509,6 @@ class _ReorderableStaggeredGridViewState
         ),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    _scrollEndNotifier.dispose();
-    super.dispose();
   }
 }
 
@@ -630,7 +633,7 @@ class _PreviewGridState extends State<_PreviewGrid> {
 
 /// Preview item widget to get its position
 class _PreviewItem extends StatefulWidget {
-  final ReorderableStaggeredGridViewItem item;
+  final ReorderableStaggeredGridItem item;
 
   const _PreviewItem(this.item, {super.key});
 
@@ -676,8 +679,7 @@ class __PreviewItemState extends State<_PreviewItem> {
         final position = renderBox.localToGlobal(Offset.zero);
         _previewOffsetNotifier.positions[widget.item.key] = position;
       } catch (e) {
-        // TODO
-        // Should log?
+        debugPrint(e.toString());
       }
     }
   }

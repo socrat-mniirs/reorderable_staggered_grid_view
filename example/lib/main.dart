@@ -18,7 +18,7 @@ class ReorderableStaggeredGridViewExample extends StatefulWidget {
 class _ReorderableStaggeredGridViewExampleState
     extends State<ReorderableStaggeredGridViewExample> {
   // Items
-  late final List<ReorderableStaggeredGridViewItem> _items;
+  late final List<ReorderableStaggeredGridItem> _items;
 
   // Configurations
   bool enableDragging = true;
@@ -32,7 +32,7 @@ class _ReorderableStaggeredGridViewExampleState
     super.initState();
 
     // Generate items
-    _items = List<ReorderableStaggeredGridViewItem>.generate(
+    _items = List<ReorderableStaggeredGridItem>.generate(
       20,
       _generateItem,
     );
@@ -49,8 +49,8 @@ class _ReorderableStaggeredGridViewExampleState
   }
 
   // Generate item
-  ReorderableStaggeredGridViewItem _generateItem(int index) =>
-      ReorderableStaggeredGridViewItem(
+  ReorderableStaggeredGridItem _generateItem(int index) =>
+      ReorderableStaggeredGridItem(
         // Data
         data: index,
         isDraggable: index != 0, // Make the first item not draggable
@@ -160,7 +160,6 @@ class _ReorderableStaggeredGridViewExampleState
               mainAxisSpacing: 10,
               crossAxisSpacing: 10,
               isLongPressDraggable: enableLongPress,
-              onWillAcceptDuration: Durations.long2,
               items: _items,
             );
           },

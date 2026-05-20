@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../data/reorderable_staggered_grid_view_item.dart';
+import '../data/reorderable_staggered_grid_item.dart';
 
 class ReorderPreviewController extends ChangeNotifier {
-  List<ReorderableStaggeredGridViewItem> previewItems = [];
+  List<ReorderableStaggeredGridItem> previewItems = [];
 
   int? _draggingIndex;
 
@@ -11,7 +11,7 @@ class ReorderPreviewController extends ChangeNotifier {
   int? _lastTargetIndex;
 
   final Map<GlobalKey, GlobalKey> _previewActualKeys = {};
-  GlobalKey keyByItem(ReorderableStaggeredGridViewItem item) =>
+  GlobalKey keyByItem(ReorderableStaggeredGridItem item) =>
       _previewActualKeys.putIfAbsent(
         item.key,
         () => GlobalKey(),
@@ -22,7 +22,7 @@ class ReorderPreviewController extends ChangeNotifier {
   }
 
   /// Synchronize preview items with actual items
-  void syncItems(List<ReorderableStaggeredGridViewItem> items) {
+  void syncItems(List<ReorderableStaggeredGridItem> items) {
     previewItems = List.of(items);
     notifyListeners();
   }

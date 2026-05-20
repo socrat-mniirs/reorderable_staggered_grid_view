@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 
-import '../data/reorderable_staggered_grid_view_item.dart';
+import '../data/reorderable_staggered_grid_item.dart';
 
 class ReorderPreviewNotifier extends ChangeNotifier {
   // Using global keys from original items
   final Map<GlobalKey, Offset> positions = {};
 
   void update(
-    List<ReorderableStaggeredGridViewItem> items, {
+    List<ReorderableStaggeredGridItem> items, {
     required GlobalKey Function(
-      ReorderableStaggeredGridViewItem item,
+      ReorderableStaggeredGridItem item,
     ) previewItemKey,
   }) {
     positions.clear();
@@ -22,9 +22,9 @@ class ReorderPreviewNotifier extends ChangeNotifier {
       try {
         final position = renderBox.localToGlobal(Offset.zero);
         positions[item.key] = position;
-      } catch (_) {
-        // TODO
-        // Should log?
+      } catch (e) {
+        // Log error in debug mode
+        debugPrint(e.toString());
       }
     }
 

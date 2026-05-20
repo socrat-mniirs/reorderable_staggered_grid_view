@@ -1,5 +1,5 @@
 /// The mode of the reorderable staggered grid view.
-enum ReorderableStaggeredGridViewMode {
+enum ReorderableStaggeredGridMode {
   /// Lazy building
   normal,
 

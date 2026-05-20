@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class ReorderableStaggeredGridViewItem<T> {
+class ReorderableStaggeredGridItem<T extends Object> {
   /// The [data] is a required value for the item.
   final T? data;
 
@@ -25,9 +25,9 @@ class ReorderableStaggeredGridViewItem<T> {
   /// The [child] is the widget content of the item.
   final Widget child;
 
-  /// The [ReorderableStaggeredGridViewItem] is an object which describe its [child] constraints and behavior
+  /// The [ReorderableStaggeredGridItem] is an object which describe its [child] constraints and behavior
   /// in grid view.
-  ReorderableStaggeredGridViewItem({
+  ReorderableStaggeredGridItem({
     required this.data,
     GlobalKey? key,
     required this.mainAxisCellCount,
