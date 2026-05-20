@@ -583,7 +583,7 @@ class _PreviewGridState extends State<_PreviewGrid> {
         WidgetsBinding.instance.addPostFrameCallback(
           (_) => context.read<PreviewPositionsController>().update(
                 items,
-                previewItemKey: state.keyByItem,
+                keyByItem: state.keyByItem,
               ),
         );
 
@@ -668,12 +668,8 @@ class __PreviewItemState extends State<_PreviewItem> {
     if (renderBox != null) {
       // TODO тоже интересное место, стремно так изменять основной список
       // Save item position without notifying listeners
-      try {
-        final position = renderBox.localToGlobal(Offset.zero);
-        _previewPositionsController.positions[widget.item.key] = position;
-      } catch (e) {
-        debugPrint(e.toString());
-      }
+      final position = renderBox.localToGlobal(Offset.zero);
+      _previewPositionsController.positions[widget.item.key] = position;
     }
   }
 

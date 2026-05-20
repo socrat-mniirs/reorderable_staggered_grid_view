@@ -8,24 +8,17 @@ class PreviewPositionsController extends ChangeNotifier {
 
   void update(
     List<ReorderableStaggeredGridItem> items, {
-    required GlobalKey Function(
-      ReorderableStaggeredGridItem item,
-    ) previewItemKey,
+    required GlobalKey Function(ReorderableStaggeredGridItem item) keyByItem,
   }) {
     positions.clear();
 
     for (final item in items) {
-      final key = previewItemKey(item);
+      final key = keyByItem(item);
       final renderBox = key.currentContext?.findRenderObject() as RenderBox?;
       if (renderBox == null) continue;
 
-      try {
-        final position = renderBox.localToGlobal(Offset.zero);
-        positions[item.key] = position;
-      } catch (e) {
-        // Log error in debug mode
-        debugPrint(e.toString());
-      }
+      final position = renderBox.localToGlobal(Offset.zero);
+      positions[item.key] = position;
     }
 
     notifyListeners();
