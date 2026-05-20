@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../data/reorderable_staggered_grid_item.dart';
 
-class ReorderPreviewController extends ChangeNotifier {
+class PreviewViewModel extends ChangeNotifier {
   List<ReorderableStaggeredGridItem> previewItems = [];
 
   int? _draggingIndex;
@@ -17,9 +17,7 @@ class ReorderPreviewController extends ChangeNotifier {
         () => GlobalKey(),
       );
 
-  void updateDraggingIndex(int? index) {
-    _draggingIndex = index;
-  }
+  void updateDraggingIndex(int? index) => _draggingIndex = index;
 
   /// Synchronize preview items with actual items
   void syncItems(List<ReorderableStaggeredGridItem> items) {

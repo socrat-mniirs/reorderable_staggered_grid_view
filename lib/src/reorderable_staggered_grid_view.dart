@@ -4,8 +4,8 @@ import 'package:reorderable_staggered_grid_view/src/widgets/animated_grid_item_w
 import 'package:staggered_grid_view/flutter_staggered_grid_view.dart';
 
 import 'provider/scroll_end_notifier.dart';
-import 'provider/reorder_preview_notifier.dart';
-import 'provider/reorder_preview_controller.dart';
+import 'provider/preview_positions_controller.dart';
+import 'provider/preview_view_model.dart';
 import 'data/reorderable_staggered_grid_mode.dart';
 import 'data/reorderable_staggered_grid_item.dart';
 import 'widgets/reorderable_staggered_grid_item_widget.dart';
@@ -236,9 +236,8 @@ class ReorderableStaggeredGridView extends StatefulWidget {
 
 class _ReorderableStaggeredGridViewState
     extends State<ReorderableStaggeredGridView> {
-  late final ReorderPreviewController _reorderPreviewController;
-
-  late final ReorderPreviewNotifier _reorderPreviewNotifier;
+  final _previewViewModel = PreviewViewModel();
+  final _previewPositionsController = PreviewPositionsController();
 
   late final ScrollController _scrollController;
 
@@ -265,10 +264,7 @@ class _ReorderableStaggeredGridViewState
     _scrollController = widget.controller ?? ScrollController();
 
     // Reordering items on will accept
-    _reorderPreviewController = ReorderPreviewController();
-    _reorderPreviewController.syncItems(_items);
-
-    _reorderPreviewNotifier = ReorderPreviewNotifier();
+    _previewViewModel.syncItems(_items);
   }
 
   // Update grid if items changed
@@ -346,9 +342,9 @@ class _ReorderableStaggeredGridViewState
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider.value(
-      value: _reorderPreviewController,
+      value: _previewViewModel,
       child: ChangeNotifierProvider.value(
-        value: _reorderPreviewNotifier,
+        value: _previewPositionsController,
         child: ChangeNotifierProvider.value(
           value: _scrollEndNotifier,
 
@@ -381,13 +377,10 @@ class _ReorderableStaggeredGridViewState
                   crossAxisSpacing: widget.crossAxisSpacing,
 
                   // Cell size
-                  staggeredTileBuilder: (index) {
-                    final item = _items[index];
-                    return StaggeredTile.count(
-                      item.crossAxisCellCount,
-                      item.mainAxisCellCount.toDouble(),
-                    );
-                  },
+                  staggeredTileBuilder: (index) => StaggeredTile.count(
+                    _items[index].crossAxisCellCount,
+                    _items[index].mainAxisCellCount.toDouble(),
+                  ),
 
                   // Items
                   itemCount: _items.length,
@@ -431,7 +424,7 @@ class _ReorderableStaggeredGridViewState
                       onDragStarted: () {
                         _draggingItem = item;
                         _lastDraggedItem = item;
-                        _reorderPreviewController.updateDraggingIndex(index);
+                        _previewViewModel.updateDraggingIndex(index);
 
                         widget.onDragStarted?.call();
                       },
@@ -452,7 +445,7 @@ class _ReorderableStaggeredGridViewState
                       onDragEnd: (details) {
                         _stopAutoScroll();
                         _draggingItem = null;
-                        _reorderPreviewController.updateDraggingIndex(null);
+                        _previewViewModel.updateDraggingIndex(null);
                         widget.onDragEnd?.call(details);
                       },
 
@@ -473,7 +466,10 @@ class _ReorderableStaggeredGridViewState
                         _items.remove(_draggingItem);
                         _items.insert(index, _draggingItem!);
 
-                        _reorderPreviewController.syncItems(_items);
+                        if (widget.mode ==
+                            ReorderableStaggeredGridMode.withReorderPreview) {
+                          _previewViewModel.syncItems(_items);
+                        }
 
                         setState(() => _draggingItem = null);
                         widget.onAcceptWithDetails?.call(details, index);
@@ -579,15 +575,15 @@ class _PreviewGridState extends State<_PreviewGrid> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ReorderPreviewController>(
-      builder: (context, reorderController, child) {
-        final items = reorderController.previewItems;
+    return Consumer<PreviewViewModel>(
+      builder: (context, state, child) {
+        final items = state.previewItems;
 
         // Update preview items positions
         WidgetsBinding.instance.addPostFrameCallback(
-          (_) => context.read<ReorderPreviewNotifier>().update(
+          (_) => context.read<PreviewPositionsController>().update(
                 items,
-                previewItemKey: reorderController.keyByItem,
+                previewItemKey: state.keyByItem,
               ),
         );
 
@@ -610,18 +606,14 @@ class _PreviewGridState extends State<_PreviewGrid> {
           crossAxisSpacing: widget.crossAxisSpacing,
 
           // Cell size
-          staggeredTileBuilder: (index) {
-            final item = items[index];
-
-            return StaggeredTile.count(
-              item.crossAxisCellCount,
-              item.mainAxisCellCount.toDouble(),
-            );
-          },
+          staggeredTileBuilder: (index) => StaggeredTile.count(
+            items[index].crossAxisCellCount,
+            items[index].mainAxisCellCount.toDouble(),
+          ),
 
           // Items
           itemCount: items.length,
-          itemBuilder: (context, index) => _PreviewItem(
+          itemBuilder: (_, index) => _PreviewItem(
             key: UniqueKey(),
             items[index],
           ),
@@ -642,18 +634,18 @@ class _PreviewItem extends StatefulWidget {
 }
 
 class __PreviewItemState extends State<_PreviewItem> {
-  late final ReorderPreviewController _previewReorderController;
-  late final ReorderPreviewNotifier _previewOffsetNotifier;
+  late final PreviewViewModel _previewViewModel;
+  late final PreviewPositionsController _previewPositionsController;
 
   late final GlobalKey _key;
 
   @override
   void initState() {
     super.initState();
-    _previewReorderController = context.read<ReorderPreviewController>();
-    _previewOffsetNotifier = context.read<ReorderPreviewNotifier>();
+    _previewViewModel = context.read<PreviewViewModel>();
+    _previewPositionsController = context.read<PreviewPositionsController>();
 
-    _key = _previewReorderController.keyByItem(widget.item);
+    _key = _previewViewModel.keyByItem(widget.item);
 
     // Capture position after initial build
     WidgetsBinding.instance.addPostFrameCallback(
@@ -674,10 +666,11 @@ class __PreviewItemState extends State<_PreviewItem> {
     final renderBox = _key.currentContext?.findRenderObject() as RenderBox?;
 
     if (renderBox != null) {
+      // TODO тоже интересное место, стремно так изменять основной список
       // Save item position without notifying listeners
       try {
         final position = renderBox.localToGlobal(Offset.zero);
-        _previewOffsetNotifier.positions[widget.item.key] = position;
+        _previewPositionsController.positions[widget.item.key] = position;
       } catch (e) {
         debugPrint(e.toString());
       }

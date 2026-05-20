@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../data/reorderable_staggered_grid_item.dart';
 
-class ReorderPreviewNotifier extends ChangeNotifier {
+class PreviewPositionsController extends ChangeNotifier {
   // Using global keys from original items
   final Map<GlobalKey, Offset> positions = {};
 

@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:reorderable_staggered_grid_view/src/data/reorderable_staggered_grid_mode.dart';
 import 'package:reorderable_staggered_grid_view/src/widgets/animated_offset.dart';
 
-import '../provider/reorder_preview_notifier.dart';
+import '../provider/preview_positions_controller.dart';
 import '../data/reorderable_staggered_grid_item.dart';
 import '../provider/scroll_end_notifier.dart';
 
@@ -32,8 +32,8 @@ class _AnimatedGridItemWidgetState extends State<AnimatedGridItemWidget>
   late Animation<Offset> _animation;
   late AnimationController _controller;
 
-  // Current position
-  Offset _position = Offset.zero;
+  // Current position relative to widget itself
+  Offset _currentRelativePosition = Offset.zero;
 
   // Scroll notifier
   late final ScrollEndNotifier _scrollEndNotifier;
@@ -64,9 +64,7 @@ class _AnimatedGridItemWidgetState extends State<AnimatedGridItemWidget>
 
     // Listen to scroll end to capture positions after scrolling
     _scrollEndNotifier = context.read<ScrollEndNotifier>();
-    _scrollEndNotifier.addListener(
-      () => _updatePosition(animate: false),
-    );
+    _scrollEndNotifier.addListener(_updatePosition);
   }
 
   @override
@@ -87,13 +85,13 @@ class _AnimatedGridItemWidgetState extends State<AnimatedGridItemWidget>
   }
 
   // Update current position of the item
-  void _updatePosition({bool animate = true}) async {
+  void _updatePosition({bool animate = false}) async {
     final renderBox = context.findRenderObject() as RenderBox?;
     if (renderBox == null || !mounted) return;
 
-    final oldPosition = _position;
+    final oldPosition = _currentRelativePosition;
     final newPosition = renderBox.localToGlobal(Offset.zero);
-    _position = newPosition;
+    _currentRelativePosition = newPosition;
 
     // Animate from old position to a new position
     if (animate) {
@@ -126,18 +124,19 @@ class _AnimatedGridItemWidgetState extends State<AnimatedGridItemWidget>
   }
 
   // Preview listener
-  void _previewListener() {
+  // TODO Вызывается второй раз из-за PreviewGrid после onAccept, хотя логика под это не подходит. Нужно задоджить логику функции при onAccept. Вызов происходит в консумере в PreviewGrid
+  void _previewListener() async {
     final item = widget.item;
     if (item == null) return;
 
     final renderBox = context.findRenderObject() as RenderBox?;
     if (renderBox == null) return;
 
-    // Find current position
     final currentPosition = renderBox.localToGlobal(Offset.zero);
+    _currentRelativePosition = currentPosition;
 
     // Find target position
-    final reorderPreviewNotifier = context.read<ReorderPreviewNotifier>();
+    final reorderPreviewNotifier = context.read<PreviewPositionsController>();
     final targetPosition = reorderPreviewNotifier.positions[item.key];
     if (targetPosition == null || !mounted) return;
 
@@ -159,12 +158,11 @@ class _AnimatedGridItemWidgetState extends State<AnimatedGridItemWidget>
         ),
       );
 
-      // TODO попроьовать обновлять позицию не в конце а во время анимации
       _controller.forward(from: 0).then((_) => _updatePosition());
     }
+
     // On leave
     else {
-      // TODO попроьовать обновлять позицию не в конце а во время анимации
       _controller.reverse().then((_) => _updatePosition());
     }
   }
@@ -220,12 +218,12 @@ class _ReorderPreviewListener extends StatefulWidget {
 }
 
 class _ReorderPreviewListenerState extends State<_ReorderPreviewListener> {
-  late final ReorderPreviewNotifier _reorderPreviewNotifier;
+  late final PreviewPositionsController _reorderPreviewNotifier;
 
   @override
   void initState() {
     super.initState();
-    _reorderPreviewNotifier = context.read<ReorderPreviewNotifier>();
+    _reorderPreviewNotifier = context.read<PreviewPositionsController>();
     _reorderPreviewNotifier.addListener(widget.listener);
   }
 

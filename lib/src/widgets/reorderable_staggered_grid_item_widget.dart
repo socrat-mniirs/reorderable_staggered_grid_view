@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../provider/reorder_preview_controller.dart';
+import '../provider/preview_view_model.dart';
 import '../provider/scroll_end_notifier.dart';
 import '../data/reorderable_staggered_grid_item.dart';
 import '../data/reorderable_staggered_grid_mode.dart';
@@ -106,7 +106,7 @@ class ReorderableStaggeredGridItemWidget extends StatefulWidget {
 
 class _ReorderableStaggeredGridItemWidgetState
     extends State<ReorderableStaggeredGridItemWidget> {
-  late final ReorderPreviewController _reorderController;
+  late final PreviewViewModel _reorderController;
 
   Offset _offset = Offset.zero;
 
@@ -117,7 +117,7 @@ class _ReorderableStaggeredGridItemWidgetState
   @override
   void initState() {
     super.initState();
-    _reorderController = context.read<ReorderPreviewController>();
+    _reorderController = context.read<PreviewViewModel>();
   }
 
   @override
