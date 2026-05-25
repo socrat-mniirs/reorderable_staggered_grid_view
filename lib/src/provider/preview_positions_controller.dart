@@ -9,6 +9,7 @@ class PreviewPositionsController extends ChangeNotifier {
   void update(
     List<ReorderableStaggeredGridItem> items, {
     required GlobalKey Function(ReorderableStaggeredGridItem item) keyByItem,
+    required bool animateItemsByNewPreviewPositions,
   }) {
     positions.clear();
 
@@ -21,6 +22,6 @@ class PreviewPositionsController extends ChangeNotifier {
       positions[item.key] = position;
     }
 
-    notifyListeners();
+    if (animateItemsByNewPreviewPositions) notifyListeners();
   }
 }

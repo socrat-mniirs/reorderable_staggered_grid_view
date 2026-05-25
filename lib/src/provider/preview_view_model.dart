@@ -10,6 +10,9 @@ class PreviewViewModel extends ChangeNotifier {
   int? _lastDraggingIndex;
   int? _lastTargetIndex;
 
+  bool _isOnAccept = false;
+  bool get isOnAccept => _isOnAccept;
+
   final Map<GlobalKey, GlobalKey> _previewActualKeys = {};
   GlobalKey keyByItem(ReorderableStaggeredGridItem item) =>
       _previewActualKeys.putIfAbsent(
@@ -20,8 +23,12 @@ class PreviewViewModel extends ChangeNotifier {
   void updateDraggingIndex(int? index) => _draggingIndex = index;
 
   /// Synchronize preview items with actual items
-  void syncItems(List<ReorderableStaggeredGridItem> items) {
+  void syncItems(
+    List<ReorderableStaggeredGridItem> items, {
+    required bool isOnAccept,
+  }) {
     previewItems = List.of(items);
+    _isOnAccept = isOnAccept;
     notifyListeners();
   }
 
@@ -30,6 +37,7 @@ class PreviewViewModel extends ChangeNotifier {
     if (_draggingIndex == null) return;
     if (_draggingIndex == targetIndex) return;
 
+    _isOnAccept = false;
     final item = previewItems[_draggingIndex!];
 
     previewItems.removeAt(_draggingIndex!);
@@ -46,6 +54,7 @@ class PreviewViewModel extends ChangeNotifier {
     if (_lastDraggingIndex == null) return;
     if (_lastTargetIndex == null) return;
 
+    _isOnAccept = false;
     final item = previewItems[_lastTargetIndex!];
 
     previewItems.removeAt(_lastTargetIndex!);

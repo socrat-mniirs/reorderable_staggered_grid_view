@@ -164,46 +164,47 @@ class ReorderableStaggeredGridView extends StatefulWidget {
         // Setting mode to normal
         mode = ReorderableStaggeredGridMode.build,
 
-        // TODO Commend
+        // Fill unused parameters
         items = const [],
         onWillAcceptDuration = null;
 
+  /// TODO Preview functionality is hidden
   /// Provides lazy rendering of widgets and preview of reorder operation.
-  const ReorderableStaggeredGridView.buildWithReorderPreview({
-    super.key,
-    this.enable = true,
-    required this.crossAxisCount,
-    this.isLongPressDraggable = false,
-    this.physics,
-    this.shrinkWrap = false,
-    this.scrollDirection = Axis.vertical,
-    this.reverse = false,
-    this.primary,
-    this.addAutomaticKeepAlives = true,
-    this.addRepaintBoundaries = true,
-    this.padding,
-    this.mainAxisSpacing = 0,
-    this.crossAxisSpacing = 0,
-    this.controller,
-    this.onDragStarted,
-    this.onDragUpdate,
-    this.onDragEnd,
-    this.onMove,
-    this.onLeave,
-    this.onWillAcceptWithDetails,
-    this.onAcceptWithDetails,
-    this.buildFeedbackWidget,
-    this.onWillAcceptDuration = Durations.long2,
-    this.itemCount,
-    required this.items,
-    required this.itemBuilder,
-  })  :
-        // Setting mode to withReorderPreview
-        mode = ReorderableStaggeredGridMode.buildWithReorderPreview,
+  // const ReorderableStaggeredGridView.buildWithReorderPreview({
+  //   super.key,
+  //   this.enable = true,
+  //   required this.crossAxisCount,
+  //   this.isLongPressDraggable = false,
+  //   this.physics,
+  //   this.shrinkWrap = false,
+  //   this.scrollDirection = Axis.vertical,
+  //   this.reverse = false,
+  //   this.primary,
+  //   this.addAutomaticKeepAlives = true,
+  //   this.addRepaintBoundaries = true,
+  //   this.padding,
+  //   this.mainAxisSpacing = 0,
+  //   this.crossAxisSpacing = 0,
+  //   this.controller,
+  //   this.onDragStarted,
+  //   this.onDragUpdate,
+  //   this.onDragEnd,
+  //   this.onMove,
+  //   this.onLeave,
+  //   this.onWillAcceptWithDetails,
+  //   this.onAcceptWithDetails,
+  //   this.buildFeedbackWidget,
+  //   this.onWillAcceptDuration = Durations.long2,
+  //   this.itemCount,
+  //   required this.items,
+  //   required this.itemBuilder,
+  // })  :
+  //       // Setting mode to withReorderPreview
+  //       mode = ReorderableStaggeredGridMode.buildWithReorderPreview,
 
-        // Unused params with reorder preview
-        willAcceptAnimationOffset = Offset.zero,
-        willAcceptOffsetDuration = Duration.zero;
+  //       // Unused params with reorder preview
+  //       willAcceptAnimationOffset = Offset.zero,
+  //       willAcceptOffsetDuration = Duration.zero;
 
   @override
   State<ReorderableStaggeredGridView> createState() =>
@@ -212,7 +213,7 @@ class ReorderableStaggeredGridView extends StatefulWidget {
 
 class _ReorderableStaggeredGridViewState
     extends State<ReorderableStaggeredGridView> {
-  late final PreviewViewModel _previewViewModel;
+  final _previewViewModel = PreviewViewModel();
   final _previewPositionsController = PreviewPositionsController();
 
   late final ScrollController _scrollController;
@@ -231,9 +232,6 @@ class _ReorderableStaggeredGridViewState
   void initState() {
     super.initState();
 
-    // TODO
-    _previewViewModel = PreviewViewModel();
-
     // Items
     _items = widget.items;
 
@@ -242,7 +240,10 @@ class _ReorderableStaggeredGridViewState
     _scrollController = widget.controller ?? ScrollController();
 
     // Reordering items on will accept
-    _previewViewModel.syncItems(_items);
+    _previewViewModel.syncItems(
+      _items,
+      isOnAccept: false,
+    );
   }
 
   @override
@@ -427,12 +428,16 @@ class _ReorderableStaggeredGridViewState
 
                       // Accept
                       onAcceptWithDetails: (details) {
-                        // TODO Commend
+                        // Sync preview items
                         if (widget.mode ==
                             ReorderableStaggeredGridMode
                                 .buildWithReorderPreview) {
-                          _previewViewModel.syncItems(_items);
+                          _previewViewModel.syncItems(
+                            _items,
+                            isOnAccept: true,
+                          );
                         }
+
                         widget.onAcceptWithDetails?.call(details, index);
                       },
                     );
@@ -548,6 +553,7 @@ class _PreviewGridState extends State<_PreviewGrid> {
           (_) => context.read<PreviewPositionsController>().update(
                 items,
                 keyByItem: state.keyByItem,
+                animateItemsByNewPreviewPositions: !state.isOnAccept,
               ),
         );
 
