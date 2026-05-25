@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class ReorderableStaggeredGridItem<T extends Object> {
   /// The [data] is a required value for the item.
-  final T? data;
+  final T data;
 
   /// The [key] is a required unique identifier for the animation during dragging.
   final GlobalKey key;

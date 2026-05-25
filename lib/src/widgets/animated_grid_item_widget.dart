@@ -90,14 +90,13 @@ class _AnimatedGridItemWidgetState extends State<AnimatedGridItemWidget>
     if (renderBox == null || !mounted) return;
 
     final oldPosition = _currentRelativePosition;
-    final newPosition = renderBox.localToGlobal(Offset.zero);
-    _currentRelativePosition = newPosition;
+    _currentRelativePosition = renderBox.localToGlobal(Offset.zero);
 
     // Animate from old position to a new position
     if (animate) {
       await _startAnimation(
         oldPosition: oldPosition,
-        newPosition: newPosition,
+        newPosition: _currentRelativePosition,
       );
     }
   }
@@ -182,22 +181,19 @@ class _AnimatedGridItemWidgetState extends State<AnimatedGridItemWidget>
 
     return switch (widget.mode) {
       // Listen to reorder preview changes
-      ReorderableStaggeredGridMode.withReorderPreview =>
+      ReorderableStaggeredGridMode.buildWithReorderPreview =>
         _ReorderPreviewListener(
           listener: _previewListener,
           child: child,
         ),
 
       // Offset animation
-      ReorderableStaggeredGridMode.withOffsetAnimations => AnimatedOffset(
+      ReorderableStaggeredGridMode.build => AnimatedOffset(
           offset: widget.offset ?? Offset.zero,
           // TODO make external
           duration: Durations.medium2,
           child: child,
         ),
-
-      // Default mode
-      _ => child,
     };
   }
 }

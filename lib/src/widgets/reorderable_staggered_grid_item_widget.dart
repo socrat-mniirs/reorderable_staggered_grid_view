@@ -26,7 +26,7 @@ class ReorderableStaggeredGridItemWidget extends StatefulWidget {
   final bool isLongPressDraggable;
 
   /// The [onWillAcceptDuration] is the delay before the animation which indicates that the rebuild will be accepted.
-  final Duration onWillAcceptDuration;
+  final Duration? onWillAcceptDuration;
 
   /// The [willAcceptOffsetDuration] is an animation duration of [willAcceptAnimationOffset].
   final Duration willAcceptOffsetDuration;
@@ -134,17 +134,17 @@ class _ReorderableStaggeredGridItemWidgetState
 
     switch (widget.mode) {
       // With offset animations
-      case ReorderableStaggeredGridMode.withOffsetAnimations:
+      case ReorderableStaggeredGridMode.build:
         setState(() => _offset += widget.willAcceptAnimationOffset);
         break;
 
       // With reorder preview
       // The animation starts after a delay when the draggable is hovered over the target
-      case ReorderableStaggeredGridMode.withReorderPreview:
+      case ReorderableStaggeredGridMode.buildWithReorderPreview:
         if (!_willAcceptDelayStarted) {
           _willAcceptDelayStarted = true;
           _willAcceptDelayTimer = Timer(
-            widget.onWillAcceptDuration,
+            widget.onWillAcceptDuration ?? Duration.zero,
             () {
               if (!mounted) return;
               _reorderController.reorderPreviewItemsOnWillAccept(
@@ -154,10 +154,6 @@ class _ReorderableStaggeredGridItemWidgetState
           );
         }
         break;
-
-      // Normal mode doesn't have any animation on will accept
-      default:
-        break;
     }
 
     return widget.onWillAcceptWithDetails(details);
@@ -165,7 +161,7 @@ class _ReorderableStaggeredGridItemWidgetState
 
   /// Calling the passed function
   void _onAcceptWithDetails(DragTargetDetails<Object?> details) {
-    if (widget.mode == ReorderableStaggeredGridMode.withOffsetAnimations) {
+    if (widget.mode == ReorderableStaggeredGridMode.build) {
       setState(() => _offset = Offset.zero);
     }
     widget.onAcceptWithDetails(details);
@@ -179,12 +175,12 @@ class _ReorderableStaggeredGridItemWidgetState
 
     switch (widget.mode) {
       // With offset animations
-      case ReorderableStaggeredGridMode.withOffsetAnimations:
+      case ReorderableStaggeredGridMode.build:
         setState(() => _offset -= widget.willAcceptAnimationOffset);
         break;
 
       // With reorder preview
-      case ReorderableStaggeredGridMode.withReorderPreview:
+      case ReorderableStaggeredGridMode.buildWithReorderPreview:
         {
           // Reset 'will accept' data
           _willAcceptDelayTimer?.cancel();
@@ -193,10 +189,6 @@ class _ReorderableStaggeredGridItemWidgetState
           if (!mounted) return;
           _reorderController.cancelPreviousReorderChangesOnLeave();
         }
-        break;
-
-      // Normal mode
-      default:
         break;
     }
 

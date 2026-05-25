@@ -152,7 +152,7 @@ class _ReorderableStaggeredGridViewExampleState
             }
 
             // Use [.withReorderPreview] named constructor to preview reorder operations
-            return ReorderableStaggeredGridView.withReorderPreview(
+            return ReorderableStaggeredGridView.build(
               key: _gridKey,
               padding: EdgeInsets.all(10),
               enable: enableDragging,
@@ -160,7 +160,26 @@ class _ReorderableStaggeredGridViewExampleState
               mainAxisSpacing: 10,
               crossAxisSpacing: 10,
               isLongPressDraggable: enableLongPress,
-              items: _items,
+              willAcceptAnimationOffset: Offset(50, 50),
+              itemCount: _items.length,
+              itemBuilder: (_, index) => _items[index],
+              onAcceptWithDetails: (details, newIndex) {
+                final draggingItem = _items.firstWhere(
+                  (e) => e.data == details.data,
+                );
+                final draggingIndex = _items.indexOf(draggingItem);
+
+                _items.removeAt(draggingIndex);
+                _items.insert(newIndex, draggingItem);
+
+                setState(() {});
+
+                /// TODO Preview Functionality
+                // if (widget.mode ==
+                //     ReorderableStaggeredGridMode.buildWithReorderPreview) {
+                //   _previewViewModel.syncItems(_items);
+                // }
+              },
             );
           },
         ),
