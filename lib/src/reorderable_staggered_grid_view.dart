@@ -117,7 +117,7 @@ class ReorderableStaggeredGridView extends StatefulWidget {
   final Offset willAcceptAnimationOffset;
 
   /// The [items] is a list of items which can be reordered or dragged
-  // final List<ReorderableStaggeredGridItem> items;
+  final List<ReorderableStaggeredGridItem> items;
 
   /// TODO Commend
   final ReorderableStaggeredGridItem Function(
@@ -165,6 +165,7 @@ class ReorderableStaggeredGridView extends StatefulWidget {
         mode = ReorderableStaggeredGridMode.build,
 
         // TODO Commend
+        items = const [],
         onWillAcceptDuration = null;
 
   /// Provides lazy rendering of widgets and preview of reorder operation.
@@ -194,6 +195,7 @@ class ReorderableStaggeredGridView extends StatefulWidget {
     this.buildFeedbackWidget,
     this.onWillAcceptDuration = Durations.long2,
     this.itemCount,
+    required this.items,
     required this.itemBuilder,
   })  :
         // Setting mode to withReorderPreview
@@ -210,12 +212,12 @@ class ReorderableStaggeredGridView extends StatefulWidget {
 
 class _ReorderableStaggeredGridViewState
     extends State<ReorderableStaggeredGridView> {
-  final _previewViewModel = PreviewViewModel();
+  late final PreviewViewModel _previewViewModel;
   final _previewPositionsController = PreviewPositionsController();
 
   late final ScrollController _scrollController;
 
-  // late List<ReorderableStaggeredGridItem> _items;
+  late List<ReorderableStaggeredGridItem> _items;
 
   // Autoscroll fields
   double _dragY = 0;
@@ -229,16 +231,18 @@ class _ReorderableStaggeredGridViewState
   void initState() {
     super.initState();
 
+    // TODO
+    _previewViewModel = PreviewViewModel();
+
     // Items
-    // _items = widget.items;
+    _items = widget.items;
 
     // Scroll
     _scrollEndNotifier = ScrollEndNotifier();
     _scrollController = widget.controller ?? ScrollController();
 
-    // TODO Preview Functionality
     // Reordering items on will accept
-    // _previewViewModel.syncItems(_items);
+    _previewViewModel.syncItems(_items);
   }
 
   @override
@@ -423,11 +427,12 @@ class _ReorderableStaggeredGridViewState
 
                       // Accept
                       onAcceptWithDetails: (details) {
-                        // TODO Preview Functionality
-                        // if (widget.mode ==
-                        //     ReorderableStaggeredGridMode.withReorderPreview) {
-                        //   _previewViewModel.syncItems(_items);
-                        // }
+                        // TODO Commend
+                        if (widget.mode ==
+                            ReorderableStaggeredGridMode
+                                .buildWithReorderPreview) {
+                          _previewViewModel.syncItems(_items);
+                        }
                         widget.onAcceptWithDetails?.call(details, index);
                       },
                     );
@@ -452,6 +457,7 @@ class _ReorderableStaggeredGridViewState
                         crossAxisCount: widget.crossAxisCount,
                         mainAxisSpacing: widget.mainAxisSpacing,
                         crossAxisSpacing: widget.crossAxisSpacing,
+                        itemCount: widget.itemCount,
                       ),
                     ),
                   ),
@@ -478,6 +484,7 @@ class _PreviewGrid extends StatefulWidget {
   final bool? primary;
   final bool addAutomaticKeepAlives;
   final bool addRepaintBoundaries;
+  final int? itemCount;
 
   const _PreviewGrid({
     this.padding,
@@ -492,6 +499,7 @@ class _PreviewGrid extends StatefulWidget {
     required this.addAutomaticKeepAlives,
     required this.addRepaintBoundaries,
     required this.mainGridScrollController,
+    required this.itemCount,
   });
 
   @override
@@ -568,8 +576,8 @@ class _PreviewGridState extends State<_PreviewGrid> {
           ),
 
           // Items
-          itemCount: items.length,
-          itemBuilder: (_, index) => _PreviewItem(
+          itemCount: widget.itemCount,
+          itemBuilder: (context, index) => _PreviewItem(
             key: UniqueKey(),
             items[index],
           ),

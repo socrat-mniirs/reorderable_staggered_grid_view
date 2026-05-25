@@ -173,12 +173,6 @@ class _ReorderableStaggeredGridViewExampleState
                 _items.insert(newIndex, draggingItem);
 
                 setState(() {});
-
-                /// TODO Preview Functionality
-                // if (widget.mode ==
-                //     ReorderableStaggeredGridMode.buildWithReorderPreview) {
-                //   _previewViewModel.syncItems(_items);
-                // }
               },
             );
           },
