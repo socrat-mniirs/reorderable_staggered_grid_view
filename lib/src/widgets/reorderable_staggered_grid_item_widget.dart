@@ -201,6 +201,11 @@ class _ReorderableStaggeredGridItemWidgetState
 
   @override
   Widget build(BuildContext context) {
+    final childWhenDragging =
+        widget.mode == ReorderableStaggeredGridMode.buildWithReorderPreview
+            ? const SizedBox.shrink()
+            : widget.item.childWhenDragging ?? const SizedBox.shrink();
+
     return Stack(
       children: [
         // Draggable
@@ -219,15 +224,14 @@ class _ReorderableStaggeredGridItemWidgetState
             buildFeedbackWidget: widget.buildFeedbackWidget,
           ),
 
-          // TODO create as an external param
           // Child when dragging
           childWhenDragging: TickerMode(
             enabled: false,
-            child: AnimatedGridItemWidget(
+            child: AnimatedGridItemWidget.customChild(
               key: widget.item.key,
-              item: null,
-              mode: widget.mode,
               isLastDraggedItem: widget.isLastDraggedItem,
+              mode: widget.mode,
+              child: childWhenDragging,
             ),
           ),
 

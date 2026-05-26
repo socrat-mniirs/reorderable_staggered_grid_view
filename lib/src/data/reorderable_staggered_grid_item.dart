@@ -22,19 +22,29 @@ class ReorderableStaggeredGridItem<T extends Object> {
   /// The [curve] is a parametric animation easing curve, i.e. a mapping of the unit interval to the unit interval.
   final Curve curve;
 
+  /// A widget that is displayed instead of the original child while it is being dragged.
+  /// Note: [childWhenDragging] is ignored when the grid mode is [ReorderableStaggeredGridMode.buildWithReorderPreview].
+  final Widget? childWhenDragging;
+
   /// The [child] is the widget content of the item.
   final Widget child;
 
   /// The [ReorderableStaggeredGridItem] is an object which describe its [child] constraints and behavior
   /// in grid view.
   ReorderableStaggeredGridItem({
-    required this.data,
     GlobalKey? key,
+    required this.data,
     required this.mainAxisCellCount,
     required this.crossAxisCellCount,
+    required this.child,
+    this.childWhenDragging,
     this.isDraggable = true,
     this.duration = Durations.medium2,
     this.curve = Curves.easeOut,
-    required this.child,
-  }) : key = key ?? GlobalKey();
+  }) : key = key ?? GlobalKey(),
+
+       // Use different keys to avoid duplication
+       assert(
+         childWhenDragging?.key != child.key && childWhenDragging?.key != key,
+       );
 }

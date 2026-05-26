@@ -624,7 +624,7 @@ class __PreviewItemState extends State<_PreviewItem> {
     final renderBox = _key.currentContext?.findRenderObject() as RenderBox?;
 
     if (renderBox != null) {
-      // TODO тоже интересное место, стремно так изменять основной список
+      // TODO Тоже интересное место, стремно так изменять основной список
       // Save item position without notifying listeners
       final position = renderBox.localToGlobal(Offset.zero);
       _previewPositionsController.positions[widget.item.key] = position;

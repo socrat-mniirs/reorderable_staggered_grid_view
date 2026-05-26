@@ -7,20 +7,29 @@ import '../provider/preview_positions_controller.dart';
 import '../data/reorderable_staggered_grid_item.dart';
 import '../provider/scroll_end_notifier.dart';
 
-// TODO make private
+// TODO Make private
 class AnimatedGridItemWidget extends StatefulWidget {
   final Offset? offset;
   final ReorderableStaggeredGridItem? item;
   final ReorderableStaggeredGridMode mode;
   final bool isLastDraggedItem;
+  final Widget child;
 
-  const AnimatedGridItemWidget({
-    super.key,
-    required this.item,
+  AnimatedGridItemWidget({
+    required super.key,
+    required ReorderableStaggeredGridItem this.item,
     required this.mode,
     required this.isLastDraggedItem,
     this.offset,
-  });
+  }) : child = item.child;
+
+  const AnimatedGridItemWidget.customChild({
+    required super.key,
+    required this.isLastDraggedItem,
+    required this.mode,
+    required this.child,
+  }) : item = null,
+       offset = null;
 
   @override
   State<AnimatedGridItemWidget> createState() => _AnimatedGridItemWidgetState();
@@ -71,7 +80,7 @@ class _AnimatedGridItemWidgetState extends State<AnimatedGridItemWidget>
   void didUpdateWidget(covariant AnimatedGridItemWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    // TODO sometimes blinking occurs
+    // TODO Sometimes blinking occurs
     WidgetsBinding.instance.addPostFrameCallback(
       (_) => _updatePosition(animate: !widget.isLastDraggedItem),
     );
@@ -167,15 +176,13 @@ class _AnimatedGridItemWidgetState extends State<AnimatedGridItemWidget>
 
   @override
   Widget build(BuildContext context) {
-    if (widget.item == null) return const SizedBox.shrink();
-
     // Build UI
     final child = AnimatedBuilder(
       animation: _animation,
       builder:
           (_, _) => Transform.translate(
             offset: _animation.value,
-            child: widget.item?.child,
+            child: widget.child,
           ),
     );
 
@@ -190,7 +197,7 @@ class _AnimatedGridItemWidgetState extends State<AnimatedGridItemWidget>
       // Offset animation
       ReorderableStaggeredGridMode.builder => AnimatedOffset(
         offset: widget.offset ?? Offset.zero,
-        // TODO make external
+        // TODO Make external
         duration: Durations.medium2,
         child: child,
       ),

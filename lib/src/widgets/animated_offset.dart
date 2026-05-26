@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-// TODO add latency before animating
+// TODO Add latency before animating
 /// The [AnimatedOffset] is an [ImplicitlyAnimatedWidget] that can be shifted relating to [offset].
 class AnimatedOffset extends ImplicitlyAnimatedWidget {
   /// The [offset] when there is a draggable widget above this drag target.

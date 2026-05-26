@@ -56,9 +56,9 @@ class _ReorderableStaggeredGridViewExampleState
         mainAxisCellCount: Random().nextInt(2) + 1,
         crossAxisCellCount: Random().nextInt(2) + 1,
 
-        // Widget
+        // Child
         child: _ItemWidget(
-          // Assign a global key to save the internal state
+          // Personal recommendation: to save the child's internal state, specify the global key
           key: GlobalKey(),
           index: index,
         ),
