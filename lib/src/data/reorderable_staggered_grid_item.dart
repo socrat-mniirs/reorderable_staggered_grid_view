@@ -44,7 +44,5 @@ class ReorderableStaggeredGridItem<T extends Object> {
   }) : key = key ?? GlobalKey(),
 
        // Use different keys to avoid duplication
-       assert(
-         childWhenDragging?.key != child.key && childWhenDragging?.key != key,
-       );
+       assert(childWhenDragging?.key != child.key);
 }

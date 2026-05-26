@@ -241,6 +241,7 @@ class _ReorderableStaggeredGridItemWidgetState
             item: widget.item,
             mode: widget.mode,
             offset: _offset,
+            duration: widget.willAcceptOffsetDuration,
             isLastDraggedItem: widget.isLastDraggedItem,
           ),
         ),

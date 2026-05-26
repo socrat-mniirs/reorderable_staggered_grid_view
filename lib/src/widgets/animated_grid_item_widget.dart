@@ -7,9 +7,9 @@ import '../provider/preview_positions_controller.dart';
 import '../data/reorderable_staggered_grid_item.dart';
 import '../provider/scroll_end_notifier.dart';
 
-// TODO Make private
 class AnimatedGridItemWidget extends StatefulWidget {
   final Offset? offset;
+  final Duration? duration;
   final ReorderableStaggeredGridItem? item;
   final ReorderableStaggeredGridMode mode;
   final bool isLastDraggedItem;
@@ -20,7 +20,8 @@ class AnimatedGridItemWidget extends StatefulWidget {
     required ReorderableStaggeredGridItem this.item,
     required this.mode,
     required this.isLastDraggedItem,
-    this.offset,
+    required this.offset,
+    required this.duration,
   }) : child = item.child;
 
   const AnimatedGridItemWidget.customChild({
@@ -29,7 +30,8 @@ class AnimatedGridItemWidget extends StatefulWidget {
     required this.mode,
     required this.child,
   }) : item = null,
-       offset = null;
+       offset = null,
+       duration = null;
 
   @override
   State<AnimatedGridItemWidget> createState() => _AnimatedGridItemWidgetState();
@@ -197,8 +199,7 @@ class _AnimatedGridItemWidgetState extends State<AnimatedGridItemWidget>
       // Offset animation
       ReorderableStaggeredGridMode.builder => AnimatedOffset(
         offset: widget.offset ?? Offset.zero,
-        // TODO Make external
-        duration: Durations.medium2,
+        duration: widget.duration ?? Durations.medium2,
         child: child,
       ),
     };

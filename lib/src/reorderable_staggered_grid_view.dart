@@ -358,6 +358,8 @@ class _ReorderableStaggeredGridViewState
                         item: item,
                         mode: widget.mode,
                         isLastDraggedItem: isLastDraggedItem,
+                        offset: null,
+                        duration: null,
                       );
                     }
 

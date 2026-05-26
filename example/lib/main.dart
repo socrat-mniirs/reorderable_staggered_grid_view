@@ -46,23 +46,28 @@ class _ReorderableStaggeredGridViewExampleState
   }
 
   // Generate item
-  ReorderableStaggeredGridItem _generateItem(int index) =>
-      ReorderableStaggeredGridItem(
-        // Data
-        data: index,
-        isDraggable: index != 0, // Make the first item not draggable
+  ReorderableStaggeredGridItem _generateItem(int index) {
+    // Make the first item non-draggable
+    final isDraggable = index != 0;
 
-        // Grid size
-        mainAxisCellCount: Random().nextInt(2) + 1,
-        crossAxisCellCount: Random().nextInt(2) + 1,
+    return ReorderableStaggeredGridItem(
+      // Data
+      data: index,
+      isDraggable: isDraggable,
 
-        // Child
-        child: _ItemWidget(
-          // Personal recommendation: to save the child's internal state, specify the global key
-          key: GlobalKey(),
-          index: index,
-        ),
-      );
+      // Grid size
+      mainAxisCellCount: Random().nextInt(2) + 1,
+      crossAxisCellCount: Random().nextInt(2) + 1,
+
+      // Child
+      child: _ItemWidget(
+        // Personal recommendation: to save the child's internal state, specify the global key
+        key: GlobalKey(),
+        index: index,
+        isDraggable: isDraggable,
+      ),
+    );
+  }
 
   // Calculate crossAxisCount by maxWidth
   int _calculateCrossAxisCount(double maxWidth) {
@@ -180,11 +185,13 @@ class _ReorderableStaggeredGridViewExampleState
 // Item widget
 class _ItemWidget extends StatelessWidget {
   final int index;
+  final bool isDraggable;
   final Color color;
 
   _ItemWidget({
     super.key,
     required this.index,
+    required this.isDraggable,
   }) : color = Color.fromRGBO(
           Random().nextInt(255),
           Random().nextInt(255),
@@ -201,7 +208,7 @@ class _ItemWidget extends StatelessWidget {
       ),
       child: Center(
         child: Text(
-          index == 0 ? 'Not dragged' : index.toString(),
+          isDraggable ? index.toString() : 'Not dragged',
         ),
       ),
     );
