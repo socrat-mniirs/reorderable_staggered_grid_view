@@ -20,7 +20,7 @@ class _ReorderableStaggeredGridViewExampleState
   // Items
   late final List<ReorderableStaggeredGridItem> _items;
 
-  // Configurations
+  // Grid configuration
   bool enableDragging = true;
   bool enableLongPress = false;
 
@@ -32,10 +32,7 @@ class _ReorderableStaggeredGridViewExampleState
     super.initState();
 
     // Generate items
-    _items = List<ReorderableStaggeredGridItem>.generate(
-      20,
-      _generateItem,
-    );
+    _items = List<ReorderableStaggeredGridItem>.generate(20, _generateItem);
   }
 
   // Add new item to the end of the list
@@ -82,8 +79,6 @@ class _ReorderableStaggeredGridViewExampleState
 
   @override
   Widget build(BuildContext context) {
-    final actionsInAppBar = MediaQuery.of(context).size.width > 800;
-
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
@@ -94,7 +89,7 @@ class _ReorderableStaggeredGridViewExampleState
 
           // Actions with grid items
           actions: [
-            if (actionsInAppBar) ...[
+            if (MediaQuery.of(context).size.width > 800) ...[
               // Long press
               _LongPressConfig(
                 enableLongPress: enableLongPress,
@@ -102,18 +97,15 @@ class _ReorderableStaggeredGridViewExampleState
                   () => enableLongPress = value,
                 ),
               ),
-
               const SizedBox(width: 10),
 
               // Enable/Disable dragging config
-
               _DraggingConfig(
                 enable: enableDragging,
                 onChanged: (value) => setState(
                   () => enableDragging = value,
                 ),
               ),
-
               const SizedBox(width: 10),
             ],
 

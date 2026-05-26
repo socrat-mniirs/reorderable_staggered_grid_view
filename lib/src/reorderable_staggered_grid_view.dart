@@ -118,11 +118,13 @@ class ReorderableStaggeredGridView extends StatefulWidget {
   /// The [items] is a list of items which can be reordered or dragged
   final List<ReorderableStaggeredGridItem> items;
 
-  /// TODO Commend
+  /// The [itemBuilder] builds and returns a [ReorderableStaggeredGridItem] for the given index.
+  /// This callback is used to lazily create grid items during layout building.
   final ReorderableStaggeredGridItem Function(BuildContext context, int index)
   itemBuilder;
 
-  /// TODO Commend
+  /// The total number of items that can be built by [itemBuilder].
+  /// If null, the length of [items] will be used instead.
   final int? itemCount;
 
   /// The [mode] of the reorderable staggered grid view.
@@ -164,7 +166,7 @@ class ReorderableStaggeredGridView extends StatefulWidget {
        items = const [],
        onWillAcceptDuration = null;
 
-  /// TODO Preview functionality is hidden yet
+  // TODO Preview functionality is hidden yet
   /// Provides lazy rendering of widgets and preview of reorder operation.
   // const ReorderableStaggeredGridView.buildWithReorderPreview({
   //   super.key,
@@ -344,7 +346,7 @@ class _ReorderableStaggeredGridViewState
                   },
 
                   // Items
-                  itemCount: widget.itemCount,
+                  itemCount: widget.itemCount ?? _items.length,
                   itemBuilder: (context, index) {
                     final item = widget.itemBuilder(context, index);
                     final isLastDraggedItem = item == _lastDraggedItem;
