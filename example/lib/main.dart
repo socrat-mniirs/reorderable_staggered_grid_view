@@ -151,9 +151,10 @@ class _ReorderableStaggeredGridViewExampleState
               _gridKey = UniqueKey();
             }
 
-            // Use [.withReorderPreview] named constructor to preview reorder operations
-            return ReorderableStaggeredGridView.build(
+            return ReorderableStaggeredGridView.builder(
               key: _gridKey,
+
+              // Config
               padding: EdgeInsets.all(10),
               enable: enableDragging,
               crossAxisCount: crossAxisCount,
@@ -161,6 +162,8 @@ class _ReorderableStaggeredGridViewExampleState
               crossAxisSpacing: 10,
               isLongPressDraggable: enableLongPress,
               willAcceptAnimationOffset: Offset(50, 50),
+
+              // Items & reordering
               itemCount: _items.length,
               itemBuilder: (_, index) => _items[index],
               onAcceptWithDetails: (details, newIndex) {

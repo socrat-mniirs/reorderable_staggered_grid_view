@@ -159,7 +159,6 @@ class _AnimatedGridItemWidgetState extends State<AnimatedGridItemWidget>
 
       _controller.forward(from: 0).then((_) => _updatePosition());
     }
-
     // On leave
     else {
       _controller.reverse().then((_) => _updatePosition());
@@ -173,10 +172,11 @@ class _AnimatedGridItemWidgetState extends State<AnimatedGridItemWidget>
     // Build UI
     final child = AnimatedBuilder(
       animation: _animation,
-      builder: (_, __) => Transform.translate(
-        offset: _animation.value,
-        child: widget.item?.child,
-      ),
+      builder:
+          (_, _) => Transform.translate(
+            offset: _animation.value,
+            child: widget.item?.child,
+          ),
     );
 
     return switch (widget.mode) {
@@ -188,12 +188,12 @@ class _AnimatedGridItemWidgetState extends State<AnimatedGridItemWidget>
         ),
 
       // Offset animation
-      ReorderableStaggeredGridMode.build => AnimatedOffset(
-          offset: widget.offset ?? Offset.zero,
-          // TODO make external
-          duration: Durations.medium2,
-          child: child,
-        ),
+      ReorderableStaggeredGridMode.builder => AnimatedOffset(
+        offset: widget.offset ?? Offset.zero,
+        // TODO make external
+        duration: Durations.medium2,
+        child: child,
+      ),
     };
   }
 }

@@ -73,7 +73,8 @@ class ReorderableStaggeredGridItemWidget extends StatefulWidget {
     BuildContext context,
     Widget child,
     Size originalWidgetSize,
-  )? buildFeedbackWidget;
+  )?
+  buildFeedbackWidget;
 
   /// The [scrollEndNotifier] notify animated grid items about end of scroll to recalculate their positions on the screen.
   final ScrollEndNotifier scrollEndNotifier;
@@ -134,7 +135,7 @@ class _ReorderableStaggeredGridItemWidgetState
 
     switch (widget.mode) {
       // With offset animations
-      case ReorderableStaggeredGridMode.build:
+      case ReorderableStaggeredGridMode.builder:
         setState(() => _offset += widget.willAcceptAnimationOffset);
         break;
 
@@ -161,7 +162,7 @@ class _ReorderableStaggeredGridItemWidgetState
 
   /// Calling the passed function
   void _onAcceptWithDetails(DragTargetDetails<Object?> details) {
-    if (widget.mode == ReorderableStaggeredGridMode.build) {
+    if (widget.mode == ReorderableStaggeredGridMode.builder) {
       setState(() => _offset = Offset.zero);
     }
     widget.onAcceptWithDetails(details);
@@ -175,7 +176,7 @@ class _ReorderableStaggeredGridItemWidgetState
 
     switch (widget.mode) {
       // With offset animations
-      case ReorderableStaggeredGridMode.build:
+      case ReorderableStaggeredGridMode.builder:
         setState(() => _offset -= widget.willAcceptAnimationOffset);
         break;
 
@@ -247,7 +248,7 @@ class _ReorderableStaggeredGridItemWidgetState
             onLeave: _onLeave,
             onAcceptWithDetails: _onAcceptWithDetails,
             onWillAcceptWithDetails: _onWillAcceptWithDetails,
-            builder: (_, __, ___) => const SizedBox.shrink(),
+            builder: (_, _, _) => const SizedBox.shrink(),
           ),
         ),
       ],
@@ -280,32 +281,30 @@ class _GridItemDraggable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return isLongPressDraggable
-
         // Long press draggable
         ? LongPressDraggable(
-            data: data,
-            onDragStarted: onDragStarted,
-            onDragUpdate: onDragUpdate,
-            onDragEnd: onDragEnd,
+          data: data,
+          onDragStarted: onDragStarted,
+          onDragUpdate: onDragUpdate,
+          onDragEnd: onDragEnd,
 
-            // Widgets
-            feedback: feedback,
-            childWhenDragging: childWhenDragging,
-            child: child,
-          )
-
+          // Widgets
+          feedback: feedback,
+          childWhenDragging: childWhenDragging,
+          child: child,
+        )
         // Default draggable
         : Draggable(
-            data: data,
-            onDragStarted: onDragStarted,
-            onDragUpdate: onDragUpdate,
-            onDragEnd: onDragEnd,
+          data: data,
+          onDragStarted: onDragStarted,
+          onDragUpdate: onDragUpdate,
+          onDragEnd: onDragEnd,
 
-            // Widgets
-            feedback: feedback,
-            childWhenDragging: childWhenDragging,
-            child: child,
-          );
+          // Widgets
+          feedback: feedback,
+          childWhenDragging: childWhenDragging,
+          child: child,
+        );
   }
 }
 
@@ -316,7 +315,8 @@ class _Feedback extends StatelessWidget {
     BuildContext context,
     Widget child,
     Size originalWidgetSize,
-  )? buildFeedbackWidget;
+  )?
+  buildFeedbackWidget;
 
   const _Feedback({
     required this.item,
@@ -336,7 +336,6 @@ class _Feedback extends StatelessWidget {
     final size = itemWidget.size;
 
     return buildFeedbackWidget?.call(context, item.child, size) ??
-
         // Default feedback widget
         Material(
           elevation: 15,
