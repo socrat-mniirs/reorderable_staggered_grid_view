@@ -44,7 +44,7 @@ class _AnimatedGridItemWidgetState extends State<AnimatedGridItemWidget>
   late AnimationController _controller;
 
   // Current position relative to widget itself
-  Offset _currentRelativePosition = Offset.zero;
+  Offset _position = Offset.zero;
 
   // Scroll notifier
   late final ScrollEndNotifier _scrollEndNotifier;
@@ -100,28 +100,21 @@ class _AnimatedGridItemWidgetState extends State<AnimatedGridItemWidget>
     final renderBox = context.findRenderObject() as RenderBox?;
     if (renderBox == null || !mounted) return;
 
-    final oldPosition = _currentRelativePosition;
-    _currentRelativePosition = renderBox.localToGlobal(Offset.zero);
+    final oldPosition = _position;
+    _position = renderBox.localToGlobal(Offset.zero);
+
+    final delta = oldPosition - _position;
 
     // Animate from old position to a new position
-    if (animate) {
-      await _startAnimation(
-        oldPosition: oldPosition,
-        newPosition: _currentRelativePosition,
-      );
+    if (animate && delta != Offset.zero) {
+      await _animate(delta);
     }
   }
 
   // Animating the grid element to a new position
-  Future<void> _startAnimation({
-    required Offset oldPosition,
-    required Offset newPosition,
-  }) async {
-    final delta = oldPosition - newPosition;
-    if (delta == Offset.zero) return;
-
+  Future<void> _animate(Offset delta) async {
     _animation = Tween<Offset>(
-      begin: Offset(delta.dx, delta.dy),
+      begin: delta,
       end: Offset.zero,
     ).animate(
       CurvedAnimation(
@@ -143,7 +136,7 @@ class _AnimatedGridItemWidgetState extends State<AnimatedGridItemWidget>
     if (renderBox == null) return;
 
     final currentPosition = renderBox.localToGlobal(Offset.zero);
-    _currentRelativePosition = currentPosition;
+    _position = currentPosition;
 
     // Find target position
     final reorderPreviewNotifier = context.read<PreviewPositionsController>();
@@ -181,10 +174,11 @@ class _AnimatedGridItemWidgetState extends State<AnimatedGridItemWidget>
     // Build UI
     final child = AnimatedBuilder(
       animation: _animation,
+      child: widget.child,
       builder:
-          (_, _) => Transform.translate(
+          (_, child) => Transform.translate(
             offset: _animation.value,
-            child: widget.child,
+            child: child,
           ),
     );
 
