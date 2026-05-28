@@ -45,6 +45,10 @@ class _AnimatedGridItemWidgetState extends State<AnimatedGridItemWidget>
 
   // Current position relative to widget itself
   Offset _position = Offset.zero;
+  Offset _oldPosition = Offset.zero;
+
+  // Delta
+  Offset get _delta => _oldPosition - _position;
 
   // Scroll notifier
   late final ScrollEndNotifier _scrollEndNotifier;
@@ -83,8 +87,12 @@ class _AnimatedGridItemWidgetState extends State<AnimatedGridItemWidget>
     super.didUpdateWidget(oldWidget);
 
     // TODO Sometimes blinking occurs
+    // After changing state capture positions and animate reordering
     WidgetsBinding.instance.addPostFrameCallback(
-      (_) => _updatePosition(animate: !widget.isLastDraggedItem),
+      (_) {
+        _updatePosition();
+        if (!widget.isLastDraggedItem) _animateReordering();
+      },
     );
   }
 
@@ -96,25 +104,19 @@ class _AnimatedGridItemWidgetState extends State<AnimatedGridItemWidget>
   }
 
   // Update current position of the item
-  void _updatePosition({bool animate = false}) async {
+  void _updatePosition({bool animate = false}) {
     final renderBox = context.findRenderObject() as RenderBox?;
     if (renderBox == null || !mounted) return;
 
-    final oldPosition = _position;
+    // Capture a new couple of positions
+    _oldPosition = _position;
     _position = renderBox.localToGlobal(Offset.zero);
-
-    final delta = oldPosition - _position;
-
-    // Animate from old position to a new position
-    if (animate && delta != Offset.zero) {
-      await _animate(delta);
-    }
   }
 
-  // Animating the grid element to a new position
-  Future<void> _animate(Offset delta) async {
+  // Animating element to a new position in the grid
+  void _animateReordering() {
     _animation = Tween<Offset>(
-      begin: delta,
+      begin: _delta,
       end: Offset.zero,
     ).animate(
       CurvedAnimation(
@@ -123,7 +125,7 @@ class _AnimatedGridItemWidgetState extends State<AnimatedGridItemWidget>
       ),
     );
 
-    await _controller.forward(from: 0);
+    _controller.forward(from: 0);
   }
 
   // Preview listener
