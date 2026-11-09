@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../provider/preview_view_model.dart';
-import '../provider/scroll_end_notifier.dart';
 import '../data/reorderable_staggered_grid_item.dart';
 import '../data/reorderable_staggered_grid_mode.dart';
 import 'animated_grid_item_widget.dart';
@@ -76,9 +75,6 @@ class ReorderableStaggeredGridItemWidget extends StatefulWidget {
   )?
   buildFeedbackWidget;
 
-  /// The [scrollEndNotifier] notify animated grid items about end of scroll to recalculate their positions on the screen.
-  final ScrollEndNotifier scrollEndNotifier;
-
   const ReorderableStaggeredGridItemWidget({
     super.key,
     required this.item,
@@ -94,7 +90,6 @@ class ReorderableStaggeredGridItemWidget extends StatefulWidget {
     required this.onWillAcceptWithDetails,
     required this.onAcceptWithDetails,
     required this.buildFeedbackWidget,
-    required this.scrollEndNotifier,
     required this.index,
     required this.onMove,
     required this.onLeave,
