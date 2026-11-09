@@ -4,7 +4,10 @@ class ReorderableStaggeredGridItem<T extends Object> {
   /// The [data] is a required value for the item.
   final T data;
 
-  /// The [key] is a required unique identifier for the animation during dragging.
+  /// The [key] is a unique identifier of the item used for animations and dragging.
+  /// If it is not passed, a new [GlobalKey] is created, so the item object must be stored
+  /// and reused between builds (not created inside [ReorderableStaggeredGridView.builder]'s
+  /// `itemBuilder`), otherwise pass a stable key.
   final GlobalKey key;
 
   /// The [isDraggable] determines whether the item can be dragged.
