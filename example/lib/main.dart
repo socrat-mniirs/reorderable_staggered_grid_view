@@ -21,8 +21,8 @@ class _ReorderableStaggeredGridViewExampleState
   late final List<ReorderableStaggeredGridItem> _items;
 
   // Grid configuration
-  bool enableDragging = true;
-  bool enableLongPress = false;
+  bool _enableDragging = true;
+  bool _enableLongPress = false;
 
   UniqueKey? _gridKey;
   int? _lastCrossAxisCount;
@@ -32,7 +32,7 @@ class _ReorderableStaggeredGridViewExampleState
     super.initState();
 
     // Generate items
-    _items = List<ReorderableStaggeredGridItem>.generate(20, _generateItem);
+    _items = List<ReorderableStaggeredGridItem>.generate(50, _generateItem);
   }
 
   // Add new item to the end of the list
@@ -72,7 +72,7 @@ class _ReorderableStaggeredGridViewExampleState
   // Calculate crossAxisCount by maxWidth
   int _calculateCrossAxisCount(double maxWidth) {
     if (maxWidth < 500) {
-      return 2;
+      return 6;
     } else if (maxWidth < 1000) {
       return 4;
     } else if (maxWidth < 1500) {
@@ -84,6 +84,8 @@ class _ReorderableStaggeredGridViewExampleState
 
   @override
   Widget build(BuildContext context) {
+    final isPhoneScreen = !(MediaQuery.of(context).size.width > 800);
+    _enableLongPress = isPhoneScreen;
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
@@ -94,21 +96,21 @@ class _ReorderableStaggeredGridViewExampleState
 
           // Actions with grid items
           actions: [
-            if (MediaQuery.of(context).size.width > 800) ...[
+            if (!isPhoneScreen) ...[
               // Long press
               _LongPressConfig(
-                enableLongPress: enableLongPress,
+                enableLongPress: _enableLongPress,
                 onChanged: (value) => setState(
-                  () => enableLongPress = value,
+                  () => _enableLongPress = value,
                 ),
               ),
               const SizedBox(width: 10),
 
               // Enable/Disable dragging config
               _DraggingConfig(
-                enable: enableDragging,
+                enable: _enableDragging,
                 onChanged: (value) => setState(
-                  () => enableDragging = value,
+                  () => _enableDragging = value,
                 ),
               ),
               const SizedBox(width: 10),
@@ -152,13 +154,13 @@ class _ReorderableStaggeredGridViewExampleState
               key: _gridKey,
 
               // Config
-              padding: EdgeInsets.all(10),
-              enable: enableDragging,
+              padding: EdgeInsets.all(5),
+              enable: _enableDragging,
               crossAxisCount: crossAxisCount,
-              mainAxisSpacing: 10,
-              crossAxisSpacing: 10,
-              isLongPressDraggable: enableLongPress,
-              willAcceptAnimationOffset: Offset(50, 50),
+              mainAxisSpacing: 5,
+              crossAxisSpacing: 5,
+              isLongPressDraggable: _enableLongPress,
+              willAcceptAnimationOffset: Offset(15, 15),
 
               // Items & reordering
               itemCount: _items.length,
