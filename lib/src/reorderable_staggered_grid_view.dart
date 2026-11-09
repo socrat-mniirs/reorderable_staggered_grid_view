@@ -222,8 +222,8 @@ class _ReorderableStaggeredGridViewState
   late List<ReorderableStaggeredGridItem> _items;
 
   // Autoscroll fields
-  double _dragY = 0;
   bool _isAutoScrolling = false;
+  int _autoScrollGeneration = 0;
 
   ReorderableStaggeredGridItem? _lastDraggedItem;
 
@@ -246,31 +246,37 @@ class _ReorderableStaggeredGridViewState
 
   @override
   void dispose() {
-    _scrollController.dispose();
+    _stopAutoScroll();
+
+    // Dispose only own controller, the external one is disposed by its owner
+    if (widget.controller == null) _scrollController.dispose();
+
     _scrollEndNotifier.dispose();
+    _previewViewModel.dispose();
+    _previewPositionsController.dispose();
     super.dispose();
   }
 
   // ========== AUTO-SCROLL METHODS ==========
 
-  /// Refresh the Y-position relative to scroll
+  /// Start/stop auto-scroll depending on the drag position relative to the grid edges
   void _autoScrollOnDragUpdate(DragUpdateDetails details) {
-    _dragY = details.globalPosition.dy;
-    _checkAutoScroll();
-  }
+    final box = context.findRenderObject() as RenderBox?;
+    if (box == null || !box.hasSize) return;
 
-  /// Start/stop auto-scroll and selecting the auth-scroll direction
-  void _checkAutoScroll() {
-    final gridHeight = (context.findRenderObject() as RenderBox).size.height;
+    final localPosition = box.globalToLocal(details.globalPosition);
+    final isVertical = widget.scrollDirection == Axis.vertical;
+    final position = isVertical ? localPosition.dy : localPosition.dx;
+    final extent = isVertical ? box.size.height : box.size.width;
     const scrollThreshold = 25.0;
 
-    // Up
-    if (_dragY < scrollThreshold) {
-      _startAutoScroll(up: true);
+    // To the leading edge (top or left)
+    if (position < scrollThreshold) {
+      _startAutoScroll(towardsLeadingEdge: true);
     }
-    // Down
-    else if (_dragY > gridHeight - scrollThreshold) {
-      _startAutoScroll(up: false);
+    // To the trailing edge (bottom or right)
+    else if (position > extent - scrollThreshold) {
+      _startAutoScroll(towardsLeadingEdge: false);
     }
     // Stop
     else {
@@ -279,26 +285,43 @@ class _ReorderableStaggeredGridViewState
   }
 
   /// Start auto-scroll
-  void _startAutoScroll({required bool up}) {
+  void _startAutoScroll({required bool towardsLeadingEdge}) {
     if (_isAutoScrolling) return;
     _isAutoScrolling = true;
 
+    // The leading edge of the reversed scroll view is the end of its content
+    final step = towardsLeadingEdge != widget.reverse ? -50.0 : 50.0;
+    final generation = ++_autoScrollGeneration;
+    bool isActual() => mounted && generation == _autoScrollGeneration;
+
     Future.doWhile(() async {
-      if (!_isAutoScrolling) return false;
-      if (_scrollController.position.outOfRange) return false;
+      if (!isActual() || !_scrollController.hasClients) return false;
+
+      final position = _scrollController.position;
+      final target = (position.pixels + step).clamp(
+        position.minScrollExtent,
+        position.maxScrollExtent,
+      );
+      if (target == position.pixels) return false;
 
       await _scrollController.animateTo(
-        _scrollController.offset + (up ? -50 : 50),
+        target,
         duration: const Duration(milliseconds: 100),
         curve: Curves.linear,
       );
 
-      return _isAutoScrolling;
+      return isActual();
+    }).whenComplete(() {
+      // The edge of the content is reached
+      if (generation == _autoScrollGeneration) _isAutoScrolling = false;
     });
   }
 
   /// Stop auto-scroll
-  void _stopAutoScroll() => _isAutoScrolling = false;
+  void _stopAutoScroll() {
+    _isAutoScrolling = false;
+    _autoScrollGeneration++;
+  }
 
   /// ========================================
 
