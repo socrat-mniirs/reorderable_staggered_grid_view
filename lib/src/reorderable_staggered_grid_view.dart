@@ -118,14 +118,17 @@ class ReorderableStaggeredGridView extends StatefulWidget {
   /// The [willAcceptAnimationOffset] is the animation offset value when dragging widget over another drag target.
   final Offset willAcceptAnimationOffset;
 
-  /// The [itemBuilder] builds and returns a [ReorderableStaggeredGridItem] for the given index.
+  /// The [itemBuilder] returns a [ReorderableStaggeredGridItem] for the given index.
   /// This callback is used to lazily create grid items during layout building.
+  ///
+  /// It may be called several times for the same index, so it must return the same item
+  /// (or at least an item with the same [ReorderableStaggeredGridItem.key]) for the same element.
+  /// Usually items are stored in a list and returned by index.
   final ReorderableStaggeredGridItem Function(BuildContext context, int index)
   itemBuilder;
 
   /// The total number of items that can be built by [itemBuilder].
-  /// If null, the length of [_items] will be used instead.
-  final int? itemCount;
+  final int itemCount;
 
   /// The [mode] of the reorderable staggered grid view.
   final ReorderableStaggeredGridMode mode;
@@ -135,7 +138,7 @@ class ReorderableStaggeredGridView extends StatefulWidget {
     super.key,
     required this.crossAxisCount,
     required this.itemBuilder,
-    this.itemCount,
+    required this.itemCount,
     this.enable = true,
     this.isLongPressDraggable = false,
     this.physics,
@@ -193,7 +196,7 @@ class ReorderableStaggeredGridView extends StatefulWidget {
   //   this.onAcceptWithDetails,
   //   this.buildFeedbackWidget,
   //   this.onWillAcceptDuration = Durations.long2,
-  //   this.itemCount,
+  //   required this.itemCount,
   //   required this.items,
   //   required this.itemBuilder,
   // })  :
@@ -346,7 +349,7 @@ class _ReorderableStaggeredGridViewState
                   },
 
                   // Items
-                  itemCount: widget.itemCount ?? _items.length,
+                  itemCount: widget.itemCount,
                   itemBuilder: (context, index) {
                     final item = widget.itemBuilder(context, index);
                     final isLastDraggedItem = item == _lastDraggedItem;
@@ -481,7 +484,7 @@ class _PreviewGrid extends StatefulWidget {
   final bool? primary;
   final bool addAutomaticKeepAlives;
   final bool addRepaintBoundaries;
-  final int? itemCount;
+  final int itemCount;
 
   const _PreviewGrid({
     this.padding,
