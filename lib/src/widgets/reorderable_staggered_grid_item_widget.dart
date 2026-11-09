@@ -133,10 +133,15 @@ class _ReorderableStaggeredGridItemWidgetState
       return false;
     }
 
+    // Do not show any animation if the drop will be rejected
+    if (!widget.onWillAcceptWithDetails(details)) {
+      return false;
+    }
+
     switch (widget.mode) {
       // With offset animations
       case ReorderableStaggeredGridMode.builder:
-        setState(() => _offset += widget.willAcceptAnimationOffset);
+        setState(() => _offset = widget.willAcceptAnimationOffset);
         break;
 
       // With reorder preview
@@ -157,7 +162,7 @@ class _ReorderableStaggeredGridItemWidgetState
         break;
     }
 
-    return widget.onWillAcceptWithDetails(details);
+    return true;
   }
 
   /// Calling the passed function
@@ -177,7 +182,7 @@ class _ReorderableStaggeredGridItemWidgetState
     switch (widget.mode) {
       // With offset animations
       case ReorderableStaggeredGridMode.builder:
-        setState(() => _offset -= widget.willAcceptAnimationOffset);
+        if (_offset != Offset.zero) setState(() => _offset = Offset.zero);
         break;
 
       // With reorder preview
