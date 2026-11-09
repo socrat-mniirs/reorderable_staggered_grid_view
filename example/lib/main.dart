@@ -85,7 +85,7 @@ class _ReorderableStaggeredGridViewExampleState
   @override
   Widget build(BuildContext context) {
     final isPhoneScreen = !(MediaQuery.of(context).size.width > 800);
-    _enableLongPress = isPhoneScreen;
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
@@ -159,7 +159,8 @@ class _ReorderableStaggeredGridViewExampleState
               crossAxisCount: crossAxisCount,
               mainAxisSpacing: 5,
               crossAxisSpacing: 5,
-              isLongPressDraggable: _enableLongPress,
+              // Phones always use long press, otherwise dragging conflicts with scrolling
+              isLongPressDraggable: isPhoneScreen || _enableLongPress,
               willAcceptAnimationOffset: Offset(15, 15),
 
               // Items & reordering
