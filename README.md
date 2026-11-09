@@ -37,72 +37,65 @@ import 'package:reorderable_staggered_grid_view/reorderable_staggered_grid_view.
 
 ## Usage
 
-The developer has two classes available - ```ReorderableStaggeredGridView``` and ```ReorderableStaggeredGridViewItem```. Both classes have a large number of parameters for customizing scrolling, animations, sizes, and so on.
+The package provides two classes: ```ReorderableStaggeredGridView``` and ```ReorderableStaggeredGridItem```. Both have many parameters for customizing scrolling, animations, sizes, and so on.
 
 ### Create items
 
-Generate ```List<ReorderableStaggeredGridViewItem>```.
+Create a ```List<ReorderableStaggeredGridItem>``` and store it in the state of your widget. Items must be reused between builds: each item has a ```GlobalKey``` that is used for animations and dragging.
 
 ```dart
-/// Items
-static final List<ReorderableStaggeredGridViewItem> items = List.generate(
-    10,
-    _generateItem,
+late final List<ReorderableStaggeredGridItem<int>> _items = List.generate(
+  10,
+  _generateItem,
 );
 
-static ReorderableStaggeredGridViewItem _generateItem(int index) {
-    final key = widgetKeyById(index);
-    final animationKey = animationKeyById(index);
-
-    return ReorderableStaggeredGridViewItem(
-            animationKey: animationKey,
-            data: index,
-            mainAxisCellCount: Random().nextInt(2) + 1,
-            crossAxisCellCount: Random().nextInt(2) + 1,
-            child: TileWidget(
-            key: key,
-            title: Text(index == 0 ? 'Not dragged' : index.toString()),
-            color: Color.fromRGBO(
-                Random().nextInt(255),
-                Random().nextInt(255),
-                Random().nextInt(255),
-                0.5,
-            ),
-        ),
-    );
+ReorderableStaggeredGridItem<int> _generateItem(int index) {
+  return ReorderableStaggeredGridItem(
+    data: index,
+    // The first item can't be dragged
+    isDraggable: index != 0,
+    mainAxisCellCount: Random().nextInt(2) + 1,
+    crossAxisCellCount: Random().nextInt(2) + 1,
+    child: TileWidget(
+      // A global key preserves the internal state of the child while dragging
+      key: GlobalKey(),
+      title: Text(index == 0 ? 'Not dragged' : index.toString()),
+    ),
+  );
 }
 ```
 
 ### Build grid
 
-To create the grid, the standard constructor ```ReorderableStaggeredGridView()``` is used, to which an array of elements ```List<ReorderableStaggeredGridViewItem>``` is passed. By default, this grid layout already supports lazy drawing of elements.
+Use the ```ReorderableStaggeredGridView.builder()``` constructor, which builds the elements lazily. The grid doesn't change the order of your items by itself: move the dropped item in ```onAcceptWithDetails``` and rebuild the widget. Other items smoothly animate to their new positions.
 
 ```dart
-return ReorderableStaggeredGridView(
-    padding: EdgeInsets.all(20),
-    enable: enableDragging,
-    crossAxisCount: Constants.calculateCrossAxisCount(
-        constraints.maxWidth,
-    ),
-    mainAxisSpacing: Constants.spacing,
-    crossAxisSpacing: Constants.spacing,
-    isLongPressDraggable: enableLongPress,
-    nonDraggableWidgetsKeys: [Constants._widgetKeys[0]!],
-    items: items,
+return ReorderableStaggeredGridView.builder(
+  padding: const EdgeInsets.all(10),
+  enable: enableDragging,
+  crossAxisCount: 4,
+  mainAxisSpacing: 10,
+  crossAxisSpacing: 10,
+  isLongPressDraggable: enableLongPress,
+
+  // Items
+  itemCount: _items.length,
+  itemBuilder: (context, index) => _items[index],
+
+  // Reordering
+  onAcceptWithDetails: (details, newIndex) {
+    final item = _items.firstWhere((e) => e.data == details.data);
+    setState(() {
+      _items.remove(item);
+      _items.insert(newIndex, item);
+    });
+  },
 );
 ```
 
 ### Saving states
 
-To preserve the internal state of the elements, it is recommended to assign them to the GlobalKey widgets. In this case, when dragging or changing the network mode, you ensure that you do not lose the internal states of the elements.
-
-```dart
-static final Map<int, GlobalKey> _widgetKeys = {};
-static GlobalKey widgetKeyById(int id) => _widgetKeys.putIfAbsent(
-    id,
-    () => GlobalKey(),
-);
-```
+To preserve the internal state of the elements, assign a ```GlobalKey``` to the child widgets. Then the elements don't lose their internal state when they are dragged or when the grid layout changes.
 
 Check the example to see all the subtleties of the package implementation that was originally conceived.
 

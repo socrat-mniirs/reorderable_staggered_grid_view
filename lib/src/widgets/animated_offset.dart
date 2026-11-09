@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+// TODO Add latency before animating
 /// The [AnimatedOffset] is an [ImplicitlyAnimatedWidget] that can be shifted relating to [offset].
 class AnimatedOffset extends ImplicitlyAnimatedWidget {
   /// The [offset] when there is a draggable widget above this drag target.
@@ -25,11 +26,13 @@ class AnimatedOffsetState extends AnimatedWidgetBaseState<AnimatedOffset> {
 
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
-    _offsetTween = visitor(
-      _offsetTween,
-      widget.offset,
-      (dynamic value) => Tween<Offset>(begin: value as Offset),
-    ) as Tween<Offset>?;
+    _offsetTween =
+        visitor(
+              _offsetTween,
+              widget.offset,
+              (dynamic value) => Tween<Offset>(begin: value as Offset),
+            )
+            as Tween<Offset>?;
   }
 
   @override
