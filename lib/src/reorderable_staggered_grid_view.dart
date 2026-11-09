@@ -11,6 +11,9 @@ import 'data/reorderable_staggered_grid_item.dart';
 import 'widgets/reorderable_staggered_grid_item_widget.dart';
 
 class ReorderableStaggeredGridView extends StatefulWidget {
+  /// The [_items] is a list of items which can be reordered or dragged
+  final List<ReorderableStaggeredGridItem> _items;
+
   /// The scroll [controller] for the scroll view.
   final ScrollController? controller;
 
@@ -115,16 +118,13 @@ class ReorderableStaggeredGridView extends StatefulWidget {
   /// The [willAcceptAnimationOffset] is the animation offset value when dragging widget over another drag target.
   final Offset willAcceptAnimationOffset;
 
-  /// The [items] is a list of items which can be reordered or dragged
-  final List<ReorderableStaggeredGridItem> items;
-
   /// The [itemBuilder] builds and returns a [ReorderableStaggeredGridItem] for the given index.
   /// This callback is used to lazily create grid items during layout building.
   final ReorderableStaggeredGridItem Function(BuildContext context, int index)
   itemBuilder;
 
   /// The total number of items that can be built by [itemBuilder].
-  /// If null, the length of [items] will be used instead.
+  /// If null, the length of [_items] will be used instead.
   final int? itemCount;
 
   /// The [mode] of the reorderable staggered grid view.
@@ -163,7 +163,7 @@ class ReorderableStaggeredGridView extends StatefulWidget {
        mode = ReorderableStaggeredGridMode.builder,
 
        // Fill unused parameters
-       items = const [],
+       _items = const [],
        onWillAcceptDuration = null;
 
   // TODO Preview functionality is hidden yet
@@ -231,7 +231,7 @@ class _ReorderableStaggeredGridViewState
     super.initState();
 
     // Items
-    _items = widget.items;
+    _items = widget._items;
 
     // Scroll
     _scrollEndNotifier = ScrollEndNotifier();
