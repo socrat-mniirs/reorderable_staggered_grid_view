@@ -1,3 +1,8 @@
+## 0.2.1
+
+* FIX: Items were laid out beyond the grid after ```crossAxisCount``` was changed. Now the grid is recreated on ```crossAxisCount``` change, so the scroll position is reset and only children with a ```GlobalKey``` keep their internal state.
+* The example shows all the settings in a bottom sheet, including the number of columns.
+
 ## 0.2.0
 
 * BREAKING: The grid is created with ```ReorderableStaggeredGridView.builder(itemBuilder, itemCount)``` instead of the default constructor with ```items```. The grid no longer reorders items by itself, so move the dropped item in ```onAcceptWithDetails```.
