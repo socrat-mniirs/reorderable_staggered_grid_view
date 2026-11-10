@@ -97,6 +97,10 @@ return ReorderableStaggeredGridView.builder(
 
 To preserve the internal state of the elements, assign a ```GlobalKey``` to the child widgets. Then the elements don't lose their internal state when they are dragged or when the grid layout changes.
 
+### Changing the number of columns
+
+The ```crossAxisCount``` can be changed at any time, e.g. depending on the screen width. Keep in mind that the grid is recreated when it changes, so the scroll position is reset to the start and only children with a ```GlobalKey``` keep their internal state.
+
 Check the example to see all the subtleties of the package implementation that was originally conceived.
 
 ## Future

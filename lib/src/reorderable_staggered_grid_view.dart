@@ -23,6 +23,9 @@ class ReorderableStaggeredGridView extends StatefulWidget {
   final EdgeInsets? padding;
 
   /// The [crossAxisCount] is a number of items in the cross-axis of the grid.
+  ///
+  /// When it changes, the grid is recreated: the scroll position is reset to the start
+  /// and only children with a [GlobalKey] keep their internal state.
   final int crossAxisCount;
 
   /// The [mainAxisSpacing] is a spacing between elements in the main-axis.
@@ -338,6 +341,10 @@ class _ReorderableStaggeredGridViewState
         children: [
           // Main grid
           StaggeredGridView.countBuilder(
+            // Staggered_grid_view caches column offsets per viewport size and doesn't reset
+            // them when crossAxisCount changes, so recreate the grid to drop the cache
+            key: ValueKey(widget.crossAxisCount),
+
             // Scroll behavior
             controller: _scrollController,
             primary: widget.primary,
