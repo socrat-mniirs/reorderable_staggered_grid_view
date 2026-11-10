@@ -338,6 +338,10 @@ class _ReorderableStaggeredGridViewState
         children: [
           // Main grid
           StaggeredGridView.countBuilder(
+            // Staggered_grid_view caches column offsets per viewport size and doesn't reset
+            // them when crossAxisCount changes, so recreate the grid to drop the cache
+            key: ValueKey(widget.crossAxisCount),
+
             // Scroll behavior
             controller: _scrollController,
             primary: widget.primary,
